@@ -1,0 +1,123 @@
+name: immonot
+description: Immonot developed within Nexton Company.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.7.0 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # Smart project structure with dependency injection and route management
+  flutter_modular: ^2.0.0+1
+
+  # Adds support for google fonts
+  google_fonts: ^2.0.0
+
+  # Package to handle dynamic String & Json interpolation.
+  interpolation: ^1.0.1
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^0.1.3
+
+  # Provides internationalization and localization facilities
+  intl: ^0.17.0
+
+  # A package for fontAwesome Icons.
+  font_awesome_flutter: ^8.10.0
+
+  # http package for connection.
+  http: ^0.13.1
+
+  # Powerful Http client for Dart
+  dio: ^4.0.0
+  pretty_dio_logger: ^1.1.1
+
+  # Allow acces to streamBuilder
+  rxdart: ^0.24.1
+
+  # flutter tags package
+  flutter_tags: ^0.4.9+1
+
+  # Providing a persistent store for simple data.
+  shared_preferences: ^2.0.5
+
+  # user geolocator package.
+  geolocator: ^7.0.3
+
+  # package to get address from position lat and long.
+  geocoding: ^2.0.0
+
+  # toast for flutter.
+  fluttertoast: ^8.0.6
+
+  # loader library for flutter.
+  awesome_loader: ^0.0.3
+
+  # package for bottom sheets.
+  modal_bottom_sheet: ^2.0.0
+
+  # package for radio buttons.
+  group_radio_button: ^1.0.1
+
+  # package for slider.
+  syncfusion_flutter_sliders: ^19.1.58-beta
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter.
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - assets/images/
+    - assets/lang/
+    - assets/fonts/
+    - assets/icons/
+
+fonts:
+  - family: AirStrikeHalf
+    fonts:
+      - asset: assets/fonts/airstrikehalf.ttf
+
+  - family: openSans
+    fonts:
+      - asset: assets/fonts/OpenSans-Bold.ttf
+        weight: 700
+      - asset: assets/fonts/OpenSans-ExtraBold.ttf
+        weight: 900
+      - asset: assets/fonts/OpenSans-Light.ttf
+        weight: 300
+      - asset: assets/fonts/OpenSans-Regular.ttf
+        weight: 500
+      - asset: assets/fonts/OpenSans-SemiBold.ttf
+        weight: 600
