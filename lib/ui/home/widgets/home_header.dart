@@ -25,14 +25,14 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   final List<String> typeDeBiensStrings = [
     "Maisons",
     "Appartements",
-    "Terrains à bâtir",
+    "Terrains à batir",
     "Propriétés",
-    "Garages/Parkings",
-    "Bien agricoles",
+    "Garages / Parkings",
+    "Biens agricoles",
     "Immeubles",
     "Propriétés viticoles",
-    "Fonds/murs commerciaux",
-    "Terrains de loisirs/Bois/Etangs",
+    "Fonds / Murs commerciaux",
+    "Terrins de loisirs / Bois / Étangs",
     "Divers"
   ];
 
@@ -337,6 +337,16 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   }
 
   _launchSearch() {
+    bloc.currentFilter.clear();
+    bloc.currentFilter.listPlaces.addAll(bloc.tagsList);
+    selectionType == 0
+        ? bloc.currentFilter.listTransactions.add("Achat")
+        : selectionType == 1
+            ? bloc.currentFilter.listTransactions.add("Location")
+            : null;
+    selectionTypeDeBienListe.forEach((element) {
+      bloc.currentFilter.listtypeDeBien.add(typeDeBiensStrings[element]);
+    });
     Modular.to.pushNamed(Routes.searchResults);
   }
 }

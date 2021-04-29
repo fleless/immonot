@@ -30,53 +30,103 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   double _value = 0.0;
   List<String> listTransactions = <String>[];
   List<String> listTypeDeBiens = <String>[];
+  SfRangeValues _priceValues = SfRangeValues(0.0, 0.0);
+  SfRangeValues _surfInterieurValues = SfRangeValues(0.0, 0.0);
+  SfRangeValues _surfExterieureValues = SfRangeValues(0.0, 0.0);
+  SfRangeValues _piecesValues = SfRangeValues(0.0, 0.0);
+  SfRangeValues _chambresValues = SfRangeValues(0.0, 0.0);
+  TextEditingController _referenceController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     bloc.filterTagsList.clear();
     bloc.filterTagsList.addAll(homeBloc.tagsList);
-    _rayonController.text = "0";
+    initData();
+  }
+
+  initData() {
+    setState(() {
+      _referenceController.text = homeBloc.currentFilter.reference != null
+          ? homeBloc.currentFilter.reference
+          : "";
+      listTransactions.addAll(homeBloc.currentFilter.listTransactions);
+      listTypeDeBiens.addAll(homeBloc.currentFilter.listtypeDeBien);
+      _rayonController.text = homeBloc.currentFilter.rayon.toStringAsFixed(0);
+      _value = homeBloc.currentFilter.rayon;
+      _referenceController.text = homeBloc.currentFilter.reference;
+      _priceValues = SfRangeValues(homeBloc.currentFilter.priceMin, homeBloc.currentFilter.priceMax);
+      _surfInterieurValues = SfRangeValues(homeBloc.currentFilter.surInterieurMin, homeBloc.currentFilter.surInterieurMax);
+      _surfExterieureValues = SfRangeValues(homeBloc.currentFilter.surExterieurMin, homeBloc.currentFilter.surExterieurMax);
+      _piecesValues = SfRangeValues(homeBloc.currentFilter.piecesMin, homeBloc.currentFilter.piecesMax);
+      _chambresValues = SfRangeValues(homeBloc.currentFilter.chambresMin, homeBloc.currentFilter.chambresMax);
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.92,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        children: [
-          Container(
-            color: AppColors.white,
-            child: _buildTitle(),
-          ),
-          Divider(color: AppColors.hint),
-          Expanded(
+    return Scaffold(
+      resizeToAvoidBottomInset: true,
+      body: Container(
+        height: MediaQuery.of(context).size.height * 0.92,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Container(
+              color: AppColors.white,
+              child: _buildTitle(),
+            ),
+            Divider(color: AppColors.hint),
+            Expanded(
               child: SingleChildScrollView(
-            scrollDirection: Axis.vertical,
-            primary: true,
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-              child: Container(
-                width: double.infinity,
+                scrollDirection: Axis.vertical,
+                primary: true,
                 child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildLocalisation(),
-                    SizedBox(height: 40),
-                    _buildRayon(),
-                    SizedBox(height: 40),
-                    _buildTransaction(),
-                    SizedBox(height: 40),
-                    _buildTypeDeBien(),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                      child: Container(
+                        width: double.infinity,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.max,
+                          mainAxisAlignment: MainAxisAlignment.start,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLocalisation(),
+                            SizedBox(height: 40),
+                            _buildRayon(),
+                            SizedBox(height: 40),
+                            _buildTransaction(),
+                            SizedBox(height: 40),
+                            _buildTypeDeBien(),
+                            SizedBox(height: 40),
+                            _buildPrice(),
+                            SizedBox(height: 40),
+                            _buildSurfaceInterieur(),
+                            SizedBox(height: 40),
+                            _buildSurfaceExterieure(),
+                            SizedBox(height: 40),
+                            _buildPieces(),
+                            SizedBox(height: 40),
+                            _buildChambres(),
+                            SizedBox(height: 40),
+                            _buildReference(),
+                            SizedBox(height: 40),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Divider(color: AppColors.hint),
+                    SizedBox(height: 10),
+                    _buildSubmitButton(),
+                    SizedBox(height: 10),
                   ],
                 ),
               ),
             ),
-          )),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -375,7 +425,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: _buildCheckBoxTypeDeBien("Appartements")),
-                Expanded(child: _buildCheckBoxTypeDeBien("Propriétés viticoles")),
+                Expanded(
+                    child: _buildCheckBoxTypeDeBien("Propriétés viticoles")),
               ],
             ),
           ),
@@ -388,7 +439,9 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: _buildCheckBoxTypeDeBien("Terrains à batir")),
-                Expanded(child: _buildCheckBoxTypeDeBien("Fonds / Murs commerciaux")),
+                Expanded(
+                    child:
+                        _buildCheckBoxTypeDeBien("Fonds / Murs commerciaux")),
               ],
             ),
           ),
@@ -401,7 +454,9 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Expanded(child: _buildCheckBoxTypeDeBien("Propriétés")),
-                Expanded(child: _buildCheckBoxTypeDeBien("Terrins de loisirs / Bois / Étangs")),
+                Expanded(
+                    child: _buildCheckBoxTypeDeBien(
+                        "Terrins de loisirs / Bois / Étangs")),
               ],
             ),
           ),
@@ -461,5 +516,320 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
         ),
       ),
     );
+  }
+
+  Widget _buildPrice() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Prix (€)",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_priceValues.start.toStringAsFixed(0),
+                  style: AppStyles.textNormal, textAlign: TextAlign.left),
+              Text(
+                  _priceValues.end != 1000000.0
+                      ? _priceValues.end.toStringAsFixed(0)
+                      : "1000000 +",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.right),
+            ],
+          ),
+          SfRangeSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 1000000.0,
+            values: _priceValues,
+            interval: 3200000,
+            //stepSize: 5,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (SfRangeValues value) {
+              setState(() {
+                _priceValues = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSurfaceInterieur() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Surface intérieure (m²)",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_surfInterieurValues.start.toStringAsFixed(0),
+                  style: AppStyles.textNormal, textAlign: TextAlign.left),
+              Text(
+                  _surfInterieurValues.end != 2000.0
+                      ? _surfInterieurValues.end.toStringAsFixed(0)
+                      : "2000 +",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.right),
+            ],
+          ),
+          SfRangeSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 2000.0,
+            values: _surfInterieurValues,
+            interval: 100,
+            //stepSize: 5,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (SfRangeValues value) {
+              setState(() {
+                _surfInterieurValues = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSurfaceExterieure() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Surface extérieure (m²)",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_surfExterieureValues.start.toStringAsFixed(0),
+                  style: AppStyles.textNormal, textAlign: TextAlign.left),
+              Text(
+                  _surfExterieureValues.end != 100000.0
+                      ? _surfExterieureValues.end.toStringAsFixed(0)
+                      : "100000 +",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.right),
+            ],
+          ),
+          SfRangeSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 100000.0,
+            values: _surfExterieureValues,
+            interval: 100,
+            //stepSize: 5,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (SfRangeValues value) {
+              setState(() {
+                _surfExterieureValues = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPieces() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Pièces",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_piecesValues.start.toStringAsFixed(0),
+                  style: AppStyles.textNormal, textAlign: TextAlign.left),
+              Text(
+                  _piecesValues.end != 6.0
+                      ? _piecesValues.end.toStringAsFixed(0)
+                      : "6 +",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.right),
+            ],
+          ),
+          SfRangeSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 6.0,
+            values: _piecesValues,
+            interval: 1,
+            stepSize: 1,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (SfRangeValues value) {
+              setState(() {
+                _piecesValues = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildChambres() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Chambres",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(_chambresValues.start.toStringAsFixed(0),
+                  style: AppStyles.textNormal, textAlign: TextAlign.left),
+              Text(
+                  _chambresValues.end != 6.0
+                      ? _chambresValues.end.toStringAsFixed(0)
+                      : "6 +",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.right),
+            ],
+          ),
+          SfRangeSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 6.0,
+            values: _chambresValues,
+            interval: 1,
+            stepSize: 1,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (SfRangeValues value) {
+              setState(() {
+                _chambresValues = value;
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReference() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Référence",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Card(
+            shape: RoundedRectangleBorder(
+                side: new BorderSide(color: AppColors.hint, width: 0.2),
+                borderRadius: BorderRadius.circular(4.0)),
+            elevation: 2,
+            shadowColor: AppColors.hint,
+            color: AppColors.white,
+            child: Center(
+              child: TextFormField(
+                controller: _referenceController,
+                cursorColor: AppColors.defaultColor,
+                decoration: const InputDecoration(
+                  border: InputBorder.none,
+                  contentPadding: EdgeInsets.only(
+                      bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                  hintText: "Référence",
+                  hintStyle: AppStyles.hintSearch,
+                ),
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubmitButton() {
+    return Container(
+      decoration: new BoxDecoration(
+        color: AppColors.defaultColor,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            submitNewFilter();
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.35,
+            height: 45,
+            child: Center(
+              child: (Text("MODIFIER",
+                  style: AppStyles.buttonTextWhite,
+                  overflow: TextOverflow.clip,
+                  maxLines: 1)),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  void submitNewFilter() {
+    homeBloc.currentFilter.listPlaces.clear();
+    homeBloc.currentFilter.listPlaces.addAll(bloc.filterTagsList);
+    homeBloc.currentFilter.listTransactions.clear();
+    homeBloc.currentFilter.listTransactions.addAll(listTransactions);
+    homeBloc.currentFilter.listtypeDeBien.clear();
+    homeBloc.currentFilter.listtypeDeBien.addAll(listTypeDeBiens);
+    homeBloc.currentFilter.rayon = _value;
+    homeBloc.currentFilter.priceMin = _priceValues.start;
+    homeBloc.currentFilter.priceMax = _priceValues.end;
+    homeBloc.currentFilter.surInterieurMin = _surfInterieurValues.start;
+    homeBloc.currentFilter.surInterieurMax = _surfInterieurValues.end;
+    homeBloc.currentFilter.surExterieurMin = _surfExterieureValues.start;
+    homeBloc.currentFilter.surExterieurMax = _surfExterieureValues.end;
+    homeBloc.currentFilter.piecesMin = _piecesValues.start;
+    homeBloc.currentFilter.piecesMax = _piecesValues.end;
+    homeBloc.currentFilter.chambresMin = _chambresValues.start;
+    homeBloc.currentFilter.chambresMax = _chambresValues.end;
+    homeBloc.currentFilter.reference = _referenceController.text;
+    Modular.to.pop();
   }
 }
