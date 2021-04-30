@@ -11,6 +11,7 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_screen.dart';
+import 'package:immonot/ui/home/search_results/honoraires/honoraire_bottom_sheet.dart';
 import 'package:immonot/ui/home/search_results/tri_bottom_sheet.dart';
 import 'package:immonot/ui/home/widgets/home_annuaire_notaires.dart';
 import 'package:immonot/ui/home/widgets/home_header.dart';
@@ -413,10 +414,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       )
                     : SizedBox.shrink(),
                 SizedBox(width: 5),
-                Image(
-                  image: AssetImage(AppIcons.info),
-                  color: AppColors.defaultColor,
-                  alignment: Alignment.center,
+                InkWell(
+                  onTap: () {
+                    _showHonoraire(fake);
+                  },
+                  child: Image(
+                    image: AssetImage(AppIcons.info),
+                    color: AppColors.defaultColor,
+                    alignment: Alignment.center,
+                  ),
                 ),
               ],
             ),
@@ -609,6 +615,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
+  _showHonoraire(FakeResults item) {
+    showBarModalBottomSheet(
+        context: context,
+        expand: false,
+        enableDrag: true,
+        builder: (context) => HonorairesBottomSheetWidget(item));
+  }
+
   void _fillFakeList() {
     setState(() {
       fakeList.add(
@@ -625,6 +639,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             2,
             null,
             false,
+            null,
+            null,
+            "660 000 €",
+            "30 000 €",
+            "4,81%",
+            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
             null,
             null),
       );
@@ -643,7 +663,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             null,
             false,
             null,
-            null),
+            null,
+            null,
+            null,
+            null,
+            "SCP Bruno et Laurent LUTHIER",
+            "550 €",
+            "393 €"),
       );
       fakeList.add(
         FakeResults(
@@ -659,6 +685,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             3,
             "Sélection",
             true,
+            null,
+            null,
+            "650 000 €",
+            "30 000 €",
+            "4,61%",
+            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
             null,
             null),
       );
@@ -677,7 +709,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             "Exclusif 36h immo",
             false,
             "Prochainement",
-            "Début : 06/05/2021 09:00"),
+            "Début : 06/05/2021 09:00",
+            null,
+            null,
+            null,
+            "SELAS NOTAIRES 82",
+            null,
+            null),
       );
       fakeList.add(
         FakeResults(
@@ -693,6 +731,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             null,
             "Sélection",
             false,
+            null,
+            null,
+            "68 320 €",
+            "7 480 €",
+            "10%",
+            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
             null,
             null),
       );
@@ -711,6 +755,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             null,
             false,
             null,
+            null,
+            null,
+            null,
+            null,
+            "SELAS NOTAIRES 82",
+            null,
             null),
       );
       fakeList.add(
@@ -728,7 +778,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             "Exclusif e-vente",
             false,
             "En cours",
-            "e-vente en cours"),
+            "e-vente en cours",
+            null,
+            null,
+            null,
+            "SELAS NOTAIRES 82",
+            null,
+            null),
       );
       fakeList.add(
         FakeResults(
@@ -744,6 +800,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             1,
             null,
             true,
+            null,
+            null,
+            "650 000 €",
+            "30 000 €",
+            "4,61%",
+            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
             null,
             null),
       );

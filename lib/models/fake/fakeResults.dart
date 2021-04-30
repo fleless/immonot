@@ -13,6 +13,12 @@ class FakeResults {
   bool down;
   String etatEnchere;
   String debutEnchere;
+  String prixHonoraire;
+  String honoraireNegociation;
+  String chargeHonoraire;
+  String notaire;
+  String garantie;
+  String honoraireChargeLocataire;
 
   FakeResults(
       this.genre,
@@ -28,5 +34,11 @@ class FakeResults {
       this.offre,
       this.down,
       this.etatEnchere,
-      this.debutEnchere);
+      this.debutEnchere,
+      this.prixHonoraire,
+      this.honoraireNegociation,
+      this.chargeHonoraire,
+      this.notaire,
+      this.garantie,
+      this.honoraireChargeLocataire);
 }

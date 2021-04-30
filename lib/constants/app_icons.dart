@@ -10,5 +10,5 @@ class AppIcons {
   static String get selectAll => 'assets/icons/selectAll.png';
   static String get lit => 'assets/icons/lit.png';
   static String get door => 'assets/icons/door.png';
-
+  static String get trending => 'assets/icons/trending_up.png';
 }

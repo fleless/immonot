@@ -5,4 +5,5 @@ class AppImages {
 
   static String get logo => 'assets/images/immonotlogo.png';
   static String get printemps => 'assets/images/printemps.jpeg';
+  static String get notaire => 'assets/images/notaire.png';
 }

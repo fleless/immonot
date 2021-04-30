@@ -4,7 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/home_screen.dart';
-import 'package:immonot/ui/home/search/search_screen.dart';
+import 'package:immonot/ui/home/search_place/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';

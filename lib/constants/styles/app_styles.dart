@@ -194,4 +194,26 @@ class AppStyles {
     fontWeight: FontWeight.w400,
     fontSize: 14,
   );
+
+  static const underlinedNotaireText = TextStyle(
+    shadows: [Shadow(color: AppColors.white, offset: Offset(0, -5))],
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
+    decoration: TextDecoration.underline,
+    decorationColor: AppColors.default_black,
+    decorationThickness: 2,
+  );
+
+  static const underlinedBaremeHonoraireStyle = TextStyle(
+    shadows: [Shadow(color: AppColors.white, offset: Offset(0, -5))],
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w400,
+    fontSize: 13,
+    decoration: TextDecoration.underline,
+    decorationColor: AppColors.defaultColor,
+    decorationThickness: 2,
+  );
 }
