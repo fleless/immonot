@@ -9,9 +9,12 @@ class Routes {
 
   // Add your routes below
   static const String home = '/home';
+  static const String favoris = '/favoris';
   static const String search = '/search';
   static const String filterSearch = '/filterSearch';
   static const String searchResults = '/searchResults';
+  static const String detailsAnnonce = '/detailsAnnonce';
+  static const String photoView = '/photoView';
 
   // Utility method used to build a dynamic route with params.
   // Example: Routes.buildRouteWithParams('/users/{id}, {'id': 1}); would generate '/users/1'

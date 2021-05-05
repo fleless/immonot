@@ -20,7 +20,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
 
   void _navigateTo(String route, [Object args]) {
     if (ModalRoute.of(context).settings.name != route) {
-      Modular.to.pushReplacementNamed(route, arguments: args);
+      Modular.to.pushNamed(route, arguments: args);
     }
   }
 
@@ -61,10 +61,10 @@ class _BottomNavbarState extends State<BottomNavbar> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                _buildBookmarkIcon(widget.route == "fav"),
+                _buildBookmarkIcon(widget.route == Routes.favoris),
                 Text(
                   'Favoris',
-                  style: widget.route == "d" ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
+                  style: widget.route == Routes.favoris ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -138,7 +138,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home),
+        onPressed: () => _navigateTo(Routes.favoris),
       );
 
   Widget _builCalculatriceIcon(bool selected) => IconButton(

@@ -10,11 +10,22 @@ class AppColors {
   static const Color white = Color(0xFFFFFFFF);
   static const Color default_black = Color(0xFF110c11);
   static const Color hint = Color(0xFF808080);
+  static const Color grey = Color(0xFFE2DFDF);
   static const Color dividerColor = Color(0xFFC9B7C0);
   static const Color greenColor = Color(0xFF34A853);
   static const Color orangeColor = Color(0xFFF1705E);
   static const Color viagerColor = Color(0xFF6C6260);
   static const Color blueTypeColor = Color(0xFF4BA2FE);
+
+  static const Color dpeA = Color(0xFF00FF02);
+  static const Color dpeB = Color(0xFF4EFF00);
+  static const Color dpeC = Color(0xFFAFFF02);
+  static const Color dpeD = Color(0xFFFEFF02);
+  static const Color dpeE = Color(0xFFFDB402);
+  static const Color dpeF = Color(0xFFFE4D00);
+  static const Color dpeG = Color(0xFFFE0000);
+  static const Color gesColor = Color(0xFF8A18DF);
+
 
   static Map<int, Color> colorCodes = {
     50: const Color.fromRGBO(0, 51, 153, .1),

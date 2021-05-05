@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/routes.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
+import 'package:immonot/ui/favoris/favoris_screen.dart';
+import 'package:immonot/ui/home/details_annonce/details_annonce_screen.dart';
+import 'package:immonot/ui/home/details_annonce/photo_view_screen.dart';
 import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/home_screen.dart';
 import 'package:immonot/ui/home/search_place/search_screen.dart';
@@ -19,6 +23,7 @@ class AppModule extends MainModule {
         Bind((_) => HomeBloc()), // Injecting a BLoC
         Bind((_) => FilterBloc()), // Injecting a BLoC
         Bind((_) => UserLocation()), // Injecting userLocation
+        Bind((_) => FavorisBloc()), // Injecting a BLoC
       ];
 
   // Provide all the routes for your module
@@ -37,6 +42,8 @@ class AppModule extends MainModule {
                 child: (_, args) => SearchScreen(args.data['address'])),
             ModularRouter(Routes.filterSearch,
                 child: (_, args) => SearchFilterScreen(args.data['address'])),
+            ModularRouter(Routes.photoView,
+                child: (_, args) => PhotoViewScreenWidget(args.data['image'])),
           ],
         ),
         ...ModularRouter.group(
@@ -44,11 +51,15 @@ class AppModule extends MainModule {
           routes: [
             ModularRouter(Routes.searchResults,
                 child: (_, args) => SearchResultsScreen()),
+            ModularRouter(Routes.detailsAnnonce,
+                child: (_, args) => DetailAnnonceWidget(args.data['id'])),
           ],
         ),
         ...ModularRouter.group(
           transition: TransitionType.fadeIn,
-          routes: [],
+          routes: [
+            ModularRouter(Routes.favoris, child: (_, args) => FavorisScreen()),
+          ],
         ),
       ];
 

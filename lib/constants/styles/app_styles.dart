@@ -55,6 +55,13 @@ class AppStyles {
     fontSize: 16,
   );
 
+  static const titleNormal = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w400,
+    fontSize: 18,
+  );
+
   static const buttonTextWhite = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.white,
@@ -74,6 +81,27 @@ class AppStyles {
     color: AppColors.default_black,
     fontWeight: FontWeight.w700,
     fontSize: 18,
+  );
+
+  static const titleStyleWhite = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.white,
+    fontWeight: FontWeight.w700,
+    fontSize: 20,
+  );
+
+  static const titleStylePink = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w700,
+    fontSize: 20,
+  );
+
+  static const mediumTitleStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
   );
 
   static const smallTitleStyleBlack = TextStyle(
@@ -109,6 +137,13 @@ class AppStyles {
     color: AppColors.defaultColor,
     fontWeight: FontWeight.w400,
     fontSize: 10,
+  );
+
+  static const pinkTwelveNormalStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w400,
+    fontSize: 12,
   );
 
   static const bottomNavTextNotSelectedStyle = TextStyle(
@@ -188,6 +223,13 @@ class AppStyles {
     fontSize: 13,
   );
 
+  static const pinkTitleStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w700,
+    fontSize: 13,
+  );
+
   static const filterSubStyle = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.default_black,
@@ -207,7 +249,7 @@ class AppStyles {
   );
 
   static const underlinedBaremeHonoraireStyle = TextStyle(
-    shadows: [Shadow(color: AppColors.white, offset: Offset(0, -5))],
+    shadows: [Shadow(color: Colors.transparent, offset: Offset(0, -5))],
     fontFamily: 'openSans',
     color: AppColors.defaultColor,
     fontWeight: FontWeight.w400,
@@ -216,4 +258,37 @@ class AppStyles {
     decorationColor: AppColors.defaultColor,
     decorationThickness: 2,
   );
+
+  static const detailsBottomStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.white,
+    fontWeight: FontWeight.w300,
+    fontSize: 12,
+  );
+
+  static const textDescriptionStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w400,
+    fontSize: 15,
+  );
+
+  static const normalTextWhite = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.white,
+    fontWeight: FontWeight.w300,
+    fontSize: 14,
+  );
+
+  static const underlinedButtonWhiteStyle = TextStyle(
+    shadows: [Shadow(color: Colors.white, offset: Offset(0, -3))],
+    fontFamily: 'openSans',
+    color: Colors.transparent,
+    fontWeight: FontWeight.w600,
+    fontSize: 16,
+    decoration: TextDecoration.underline,
+    decorationColor: AppColors.white,
+    decorationThickness: 1,
+  );
+
 }

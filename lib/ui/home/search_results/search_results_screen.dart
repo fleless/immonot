@@ -253,6 +253,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         itemBuilder: (context, index) {
           final item = fakeList[index];
           return InkWell(
+            onTap: () => Modular.to.pushNamed(Routes.detailsAnnonce, arguments: {'id': item}),
             child: Container(
                 //height: 222,
                 child: Padding(

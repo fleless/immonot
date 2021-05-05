@@ -11,4 +11,6 @@ class AppIcons {
   static String get lit => 'assets/icons/lit.png';
   static String get door => 'assets/icons/door.png';
   static String get trending => 'assets/icons/trending_up.png';
+  static String get share => 'assets/icons/share.png';
+  static String get send => 'assets/icons/send.png';
 }
