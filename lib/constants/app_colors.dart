@@ -9,6 +9,7 @@ class AppColors {
   static const Color appBackground = Color(0xFFF5F6F8);
   static const Color white = Color(0xFFFFFFFF);
   static const Color default_black = Color(0xFF110c11);
+  static const Color desactivatedBell = Color(0xFF333333);
   static const Color hint = Color(0xFF808080);
   static const Color grey = Color(0xFFE2DFDF);
   static const Color dividerColor = Color(0xFFC9B7C0);

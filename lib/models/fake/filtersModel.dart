@@ -1,6 +1,8 @@
 import 'package:immonot/models/responses/places_response.dart';
 
 class FilterModels {
+  String nom;
+  String commentaire;
   List<PlacesResponse> listPlaces;
   double rayon;
   List<String> listTransactions;
@@ -16,8 +18,13 @@ class FilterModels {
   double chambresMin;
   double chambresMax;
   String reference;
+  bool notificationsOn;
+  bool emailOn;
+  bool vendeur;
 
   FilterModels() {
+    this.nom = "";
+    this.commentaire = "";
     this.listPlaces = <PlacesResponse>[];
     this.rayon = 0;
     this.listTransactions = <String>[];
@@ -33,9 +40,14 @@ class FilterModels {
     this.chambresMax = 0;
     this.chambresMin = 0;
     this.reference = "";
+    this.notificationsOn = true;
+    this.emailOn = true;
+    this.vendeur = false;
   }
 
   clear(){
+    this.nom = "";
+    this.commentaire = "";
     this.listPlaces = <PlacesResponse>[];
     this.rayon = 0;
     this.listTransactions = <String>[];
@@ -51,5 +63,8 @@ class FilterModels {
     this.chambresMax = 0;
     this.chambresMin = 0;
     this.reference = "";
+    this.notificationsOn = true;
+    this.emailOn = true;
+    this.vendeur = false;
   }
 }

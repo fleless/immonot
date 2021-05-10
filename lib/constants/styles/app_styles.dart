@@ -230,6 +230,13 @@ class AppStyles {
     fontSize: 13,
   );
 
+  static const pinkButtonStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w700,
+    fontSize: 16,
+  );
+
   static const filterSubStyle = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.default_black,
