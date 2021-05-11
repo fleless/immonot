@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/routes.dart';
+import 'package:immonot/ui/calculatrice/calculatrice_bloc.dart';
+import 'package:immonot/ui/calculatrice/calculatrice_screen.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/favoris/favoris_screen.dart';
 import 'package:immonot/ui/home/details_annonce/details_annonce_screen.dart';
@@ -24,6 +26,7 @@ class AppModule extends MainModule {
         Bind((_) => FilterBloc()), // Injecting a BLoC
         Bind((_) => UserLocation()), // Injecting userLocation
         Bind((_) => FavorisBloc()), // Injecting a BLoC
+        Bind((_) => CalculatriceBloc()), // Injecting a BLoC
       ];
 
   // Provide all the routes for your module
@@ -59,6 +62,8 @@ class AppModule extends MainModule {
           transition: TransitionType.fadeIn,
           routes: [
             ModularRouter(Routes.favoris, child: (_, args) => FavorisScreen()),
+            ModularRouter(Routes.calculatrice,
+                child: (_, args) => CalculatriceScreen(args.data['index'])),
           ],
         ),
       ];

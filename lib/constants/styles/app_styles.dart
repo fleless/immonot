@@ -55,6 +55,12 @@ class AppStyles {
     fontSize: 16,
   );
 
+  static const textNormalTitleStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w400,
+    fontSize: 18,
+  );
   static const titleNormal = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.default_black,
@@ -256,9 +262,9 @@ class AppStyles {
   );
 
   static const underlinedBaremeHonoraireStyle = TextStyle(
-    shadows: [Shadow(color: Colors.transparent, offset: Offset(0, -5))],
+    shadows: [Shadow(color: AppColors.defaultColor, offset: Offset(0, -5))],
     fontFamily: 'openSans',
-    color: AppColors.defaultColor,
+    color: Colors.transparent,
     fontWeight: FontWeight.w400,
     fontSize: 13,
     decoration: TextDecoration.underline,
@@ -277,6 +283,15 @@ class AppStyles {
     fontFamily: 'openSans',
     color: AppColors.default_black,
     fontWeight: FontWeight.w400,
+    height: 1.3,
+    fontSize: 15,
+  );
+
+  static const pinkTextDescriptionStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w400,
+    height: 1.3,
     fontSize: 15,
   );
 
@@ -298,4 +313,10 @@ class AppStyles {
     decorationThickness: 1,
   );
 
+  static const errorText = TextStyle(
+    fontFamily: 'openSans',
+    color: Colors.red,
+    fontWeight: FontWeight.w300,
+    fontSize: 12,
+  );
 }

@@ -97,6 +97,15 @@ dependencies:
   # package listview with sliding items.
   flutter_slidable: ^0.6.0
 
+  # package dropdown.
+  dropdown_search: ^0.6.1
+
+  # package swipe detector.
+  swipedetector: ^1.2.0
+
+  # package for pieChart.
+  pie_chart: ^5.0.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

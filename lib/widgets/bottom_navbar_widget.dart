@@ -5,6 +5,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/widgets/show_calculatrice_modal_widget.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'dart:ui' as ui;
 
 class BottomNavbar extends StatefulWidget {
   final String route;
@@ -28,84 +31,96 @@ class _BottomNavbarState extends State<BottomNavbar> {
   Widget build(BuildContext context) {
     return BottomAppBar(
       color: Colors.transparent,
-      child: Container(
-        height: 70,
-        padding: const EdgeInsets.only(bottom: 10),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(10), topRight: Radius.circular(10)),
-          boxShadow: [
-            BoxShadow(
-              blurRadius: 15.0,
-              offset: Offset(0, 10),
-            )
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: <Widget>[
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildHomeIcon(widget.route == Routes.home),
-                Text(
-                  'Accueil',
-                  style: widget.route == Routes.home ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildBookmarkIcon(widget.route == Routes.favoris),
-                Text(
-                  'Favoris',
-                  style: widget.route == Routes.favoris ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _builCalculatriceIcon(widget.route == "cal"),
-                Text(
-                  'Calculatrices',
-                  style: widget.route == "d" ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildNotifIcon(widget.route == "not"),
-                Text(
-                  'Notifications',
-                  style: widget.route == "d" ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                _buildProfileIcon(widget.route == "pro"),
-                Text(
-                  'Mon compte',
-                  style: widget.route == "d" ? AppStyles.bottomNavTextStyle : AppStyles.bottomNavTextNotSelectedStyle,
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ],
+      child: Material(
+        child: Container(
+          height: 70,
+          padding: const EdgeInsets.only(bottom: 10),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(10), topRight: Radius.circular(10)),
+            boxShadow: [
+              BoxShadow(
+                blurRadius: 15.0,
+                offset: Offset(0, 10),
+              )
+            ],
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: <Widget>[
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildHomeIcon(widget.route == Routes.home),
+                  Text(
+                    'Accueil',
+                    style: widget.route == Routes.home
+                        ? AppStyles.bottomNavTextStyle
+                        : AppStyles.bottomNavTextNotSelectedStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildBookmarkIcon(widget.route == Routes.favoris),
+                  Text(
+                    'Favoris',
+                    style: widget.route == Routes.favoris
+                        ? AppStyles.bottomNavTextStyle
+                        : AppStyles.bottomNavTextNotSelectedStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _builCalculatriceIcon(widget.route == Routes.calculatrice),
+                  Text(
+                    'Calculatrices',
+                    style: widget.route == Routes.calculatrice
+                        ? AppStyles.bottomNavTextStyle
+                        : AppStyles.bottomNavTextNotSelectedStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildNotifIcon(widget.route == "not"),
+                  Text(
+                    'Notifications',
+                    style: widget.route == "d"
+                        ? AppStyles.bottomNavTextStyle
+                        : AppStyles.bottomNavTextNotSelectedStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  _buildProfileIcon(widget.route == "pro"),
+                  Text(
+                    'Mon compte',
+                    style: widget.route == "d"
+                        ? AppStyles.bottomNavTextStyle
+                        : AppStyles.bottomNavTextNotSelectedStyle,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -153,8 +168,18 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home),
+        onPressed: () => _navigateToCalculatrice(),
       );
+
+  _navigateToCalculatrice() {
+    showModalBottomSheet(
+      context: context,
+      enableDrag: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => ShowCalculatriceModalWidget(),
+    );
+  }
+
 
   Widget _buildNotifIcon(bool selected) => IconButton(
         iconSize: iconSize,

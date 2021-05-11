@@ -17,6 +17,10 @@ class AppColors {
   static const Color orangeColor = Color(0xFFF1705E);
   static const Color viagerColor = Color(0xFF6C6260);
   static const Color blueTypeColor = Color(0xFF4BA2FE);
+  static const Color infoBlocColor = Color(0xFFC3D8EA);
+  static const Color firstChartColor = Color(0xFFD8D8D8);
+  static const Color secondChartColor = Color(0xFFA4C342);
+  static const Color thirdChartColor = Color(0xFF0073CB);
 
   static const Color dpeA = Color(0xFF00FF02);
   static const Color dpeB = Color(0xFF4EFF00);
