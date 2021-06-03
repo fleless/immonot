@@ -21,6 +21,8 @@ class AppColors {
   static const Color firstChartColor = Color(0xFFD8D8D8);
   static const Color secondChartColor = Color(0xFFA4C342);
   static const Color thirdChartColor = Color(0xFF0073CB);
+  static Color headerTableColor = Color(0xFF0D0C0C).withOpacity(0.35);
+  static Color rowTableColor = Color(0xFF999999).withOpacity(0.15);
 
   static const Color dpeA = Color(0xFF00FF02);
   static const Color dpeB = Color(0xFF4EFF00);
@@ -31,17 +33,18 @@ class AppColors {
   static const Color dpeG = Color(0xFFFE0000);
   static const Color gesColor = Color(0xFF8A18DF);
 
-
   static Map<int, Color> colorCodes = {
-    50: const Color.fromRGBO(0, 51, 153, .1),
-    100: const Color.fromRGBO(0, 51, 153, .2),
-    200: const Color.fromRGBO(0, 51, 153, .3),
-    300: const Color.fromRGBO(0, 51, 153, .4),
-    400: const Color.fromRGBO(0, 51, 153, .5),
-    500: const Color.fromRGBO(0, 51, 153, .6),
-    600: const Color.fromRGBO(0, 51, 153, .7),
-    700: const Color.fromRGBO(0, 51, 153, .8),
-    800: const Color.fromRGBO(0, 51, 153, .9),
-    900: const Color.fromRGBO(0, 51, 153, 1),
-  };// Opacity 20%
+    50: const Color.fromRGBO(201, 23, 115, .1),
+    100: const Color.fromRGBO(201, 23, 115, .2),
+    200: const Color.fromRGBO(201, 23, 115, .3),
+    300: const Color.fromRGBO(201, 23, 115, .4),
+    400: const Color.fromRGBO(201, 23, 115, .5),
+    500: const Color.fromRGBO(201, 23, 115, .6),
+    600: const Color.fromRGBO(201, 23, 115, .7),
+    700: const Color.fromRGBO(201, 23, 115, .8),
+    800: const Color.fromRGBO(201, 23, 115, .9),
+    900: const Color.fromRGBO(201, 23, 115, 1),
+  }; // Opacity 20%
+
+  static MaterialColor defaultColorMaterial = MaterialColor(0xFFC91773, colorCodes);
 }

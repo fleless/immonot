@@ -1,10 +1,14 @@
-import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import '../calculatrice_bloc.dart';
+import 'echeancierCapaciteEmpruntDialog.dart';
 
 class CapaciteEmpruntScreenWidget extends StatefulWidget {
   @override
@@ -13,15 +17,19 @@ class CapaciteEmpruntScreenWidget extends StatefulWidget {
 
 class _CapaciteEmpruntScreenWidgetState
     extends State<CapaciteEmpruntScreenWidget> {
+  final bloc = Modular.get<CalculatriceBloc>();
   TextEditingController _mensualiteController = TextEditingController();
   bool _mensualiteError = false;
   TextEditingController _tauxController = TextEditingController();
   bool _tauxError = false;
   bool _visibleResults = false;
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
-    return _buildContent();
+    return SingleChildScrollView(
+      child: _buildContent(),
+    );
   }
 
   Widget _buildContent() {
@@ -85,6 +93,13 @@ class _CapaciteEmpruntScreenWidgetState
             SizedBox(height: 40),
             _buildForms(),
             SizedBox(height: 40),
+            _loading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.defaultColor,
+                    ),
+                  )
+                : SizedBox.shrink(),
             _visibleResults ? _showResults() : SizedBox.shrink(),
           ],
         ),
@@ -131,11 +146,12 @@ class _CapaciteEmpruntScreenWidgetState
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d*\.?\d*)')),
+                                    RegExp(r'(^\d+\.?\d?\d?)')),
                               ],
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 setState(() {
+                                  _visibleResults = false;
                                   _tauxError = false;
                                 });
                               },
@@ -200,10 +216,11 @@ class _CapaciteEmpruntScreenWidgetState
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d*\.?\d*)')),
+                                    RegExp(r'(^\d+)')),
                               ],
                               onChanged: (value) {
                                 setState(() {
+                                  _visibleResults = false;
                                   _mensualiteError = false;
                                 });
                               },
@@ -288,7 +305,14 @@ class _CapaciteEmpruntScreenWidgetState
                 TextSpan(
                     text: "Capital sur 10 ans : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: "135 432" + " €", style: AppStyles.textNormal),
+                TextSpan(
+                    text: bloc.capaciteEmpruntResponse.montantsPret
+                            .where((element) => element.dureeEnAnnee == 10)
+                            .first
+                            .montant
+                            .toStringAsFixed(2) +
+                        " €",
+                    style: AppStyles.textNormal),
               ],
             ),
           ),
@@ -302,7 +326,11 @@ class _CapaciteEmpruntScreenWidgetState
                 TextSpan(
                     text: "Capital sur 15 ans : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: "265 432" + " €", style: AppStyles.textNormal),
+                TextSpan(text: bloc.capaciteEmpruntResponse.montantsPret
+                    .where((element) => element.dureeEnAnnee == 15)
+                    .first
+                    .montant
+                    .toStringAsFixed(2) + " €", style: AppStyles.textNormal),
               ],
             ),
           ),
@@ -316,7 +344,11 @@ class _CapaciteEmpruntScreenWidgetState
                 TextSpan(
                     text: "Capital sur 25 ans : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: "313 432" + " €", style: AppStyles.textNormal),
+                TextSpan(text: bloc.capaciteEmpruntResponse.montantsPret
+                    .where((element) => element.dureeEnAnnee == 25)
+                    .first
+                    .montant
+                    .toStringAsFixed(2) + " €", style: AppStyles.textNormal),
               ],
             ),
           ),
@@ -331,7 +363,7 @@ class _CapaciteEmpruntScreenWidgetState
                     ),
                   ),
                   onPressed: () {
-                    print;
+                    _showEcheancierDialog();
                   },
                   child: Text(
                     "Voir toutes les annualités",
@@ -344,7 +376,8 @@ class _CapaciteEmpruntScreenWidgetState
     );
   }
 
-  _goCalcul() {
+  _goCalcul() async {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _visibleResults = false;
       _tauxError = false;
@@ -352,7 +385,7 @@ class _CapaciteEmpruntScreenWidgetState
     });
     int mens = int.tryParse(_mensualiteController.text) ?? 0;
     double taux = double.tryParse(_tauxController.text) ?? 0.0;
-    if ((taux < 0.1) || (taux > 100)) {
+    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith("."))) {
       setState(() {
         _tauxError = true;
       });
@@ -364,8 +397,23 @@ class _CapaciteEmpruntScreenWidgetState
     }
     if ((!_mensualiteError) && (!_tauxError)) {
       setState(() {
+        _loading = true;
+      });
+      await bloc.calculCapaciteEmprunt(taux, mens);
+      setState(() {
+        _loading = false;
         _visibleResults = true;
       });
     }
+  }
+
+  _showEcheancierDialog() {
+    showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => EcheancierCapaciteEmpruntDialog(
+          bloc.capaciteEmpruntResponse.montantsPret),
+    );
   }
 }

@@ -8,6 +8,7 @@ class Routes {
   final Interpolation interpolation = Interpolation();
 
   // Add your routes below
+  static const String splash = '/splash';
   static const String home = '/home';
   static const String favoris = '/favoris';
   static const String search = '/search';

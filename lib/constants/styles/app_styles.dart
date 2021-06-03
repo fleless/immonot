@@ -72,7 +72,7 @@ class AppStyles {
     fontFamily: 'openSans',
     color: AppColors.white,
     fontWeight: FontWeight.w600,
-    fontSize: 16,
+    fontSize: 15,
   );
 
   static const titleStyle = TextStyle(
@@ -282,6 +282,22 @@ class AppStyles {
   static const textDescriptionStyle = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.default_black,
+    fontWeight: FontWeight.w400,
+    height: 1.3,
+    fontSize: 15,
+  );
+
+  static const textDescriptionBoldStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+    fontSize: 15,
+  );
+
+  static const textDescriptionDefaultColorStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
     fontWeight: FontWeight.w400,
     height: 1.3,
     fontSize: 15,

@@ -14,17 +14,27 @@ import 'widgets/home_annonces.dart';
 import 'home_bloc.dart';
 
 class HomeScreen extends StatefulWidget {
+  bool scrollToAnnuaire = false;
+
   @override
   State<StatefulWidget> createState() => _HomeScreenState();
+
+  HomeScreen(bool scroll) {
+    this.scrollToAnnuaire = scroll;
+  }
 }
 
 class _HomeScreenState extends State<HomeScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final bloc = Modular.get<HomeBloc>();
+  ScrollController _scrollController = ScrollController();
 
   @override
   Future<void> initState() {
     super.initState();
+    widget.scrollToAnnuaire
+        ? _scrollController = ScrollController(initialScrollOffset: 15000.0)
+        : null;
   }
 
   @override
@@ -46,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Container(
             child: SingleChildScrollView(
+              controller: _scrollController,
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

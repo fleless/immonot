@@ -37,7 +37,7 @@ class _AppWidgetState extends State<AppWidget> {
         GlobalCupertinoLocalizations.delegate,
       ],
       onGenerateRoute: Modular.generateRoute,
-      initialRoute: Routes.home,
+      initialRoute: Routes.splash,
     );
   }
 

@@ -1,12 +1,17 @@
 import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/calculatrice/widgets/pie_chart.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../calculatrice_bloc.dart';
 
 class FraisNotairesScreenWidget extends StatefulWidget {
   @override
@@ -14,10 +19,13 @@ class FraisNotairesScreenWidget extends StatefulWidget {
 }
 
 class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
+  final bloc = Modular.get<CalculatriceBloc>();
   TextEditingController _amountController = TextEditingController();
   bool _amountError = false;
   String _departement;
   bool _visibleResults = false;
+  bool _loading = false;
+  int _openedQuestion = 0;
   final List<String> listDepartements = [
     '01 Ain',
     '02 Aisne',
@@ -134,7 +142,9 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
       onTap: () {
         FocusScope.of(context).requestFocus(new FocusNode());
       },
-      child: _buildContent(),
+      child: SingleChildScrollView(
+        child: _buildContent(),
+      ),
     );
   }
 
@@ -168,6 +178,13 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
             SizedBox(height: 40),
             _buildForms(),
             SizedBox(height: 40),
+            _loading
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.defaultColor,
+                    ),
+                  )
+                : SizedBox.shrink(),
             _visibleResults ? _showResults() : SizedBox.shrink(),
             SizedBox(height: 40),
             Text(
@@ -185,6 +202,15 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
             ),
             SizedBox(height: 15),
             Container(
+              alignment: Alignment.centerLeft,
+              width: double.infinity,
+              padding: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                  color: AppColors.rowTableColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(10),
+                      topRight: Radius.circular(10)),
+                  border: Border.all(color: AppColors.hint.withOpacity(0.2))),
               child: TextButton(
                 style: ButtonStyle(
                   overlayColor: MaterialStateColor.resolveWith(
@@ -192,7 +218,11 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                   ),
                 ),
                 onPressed: () {
-                  print;
+                  setState(() {
+                    _openedQuestion == 1
+                        ? _openedQuestion = 0
+                        : _openedQuestion = 1;
+                  });
                 },
                 child: Text(
                   "Comment calculer les frais de notaire ?",
@@ -200,8 +230,16 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            _openedQuestion == 1
+                ? _buildFirstQuestionText()
+                : SizedBox.shrink(),
             Container(
+              alignment: Alignment.centerLeft,
+              width: double.infinity,
+              padding: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                  color: AppColors.rowTableColor.withOpacity(0.1),
+                  border: Border.all(color: AppColors.hint.withOpacity(0.2))),
               child: TextButton(
                 style: ButtonStyle(
                   overlayColor: MaterialStateColor.resolveWith(
@@ -209,7 +247,11 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                   ),
                 ),
                 onPressed: () {
-                  print;
+                  setState(() {
+                    _openedQuestion == 2
+                        ? _openedQuestion = 0
+                        : _openedQuestion = 2;
+                  });
                 },
                 child: Text(
                   "Qui paie les frais de notaire ?",
@@ -217,8 +259,21 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                 ),
               ),
             ),
-            SizedBox(height: 15),
+            _openedQuestion == 2
+                ? _buildSecondQuestionText()
+                : SizedBox.shrink(),
             Container(
+              alignment: Alignment.centerLeft,
+              width: double.infinity,
+              padding: EdgeInsets.all(6),
+              decoration: BoxDecoration(
+                  color: AppColors.rowTableColor.withOpacity(0.1),
+                  borderRadius: _openedQuestion != 3
+                      ? BorderRadius.only(
+                          bottomLeft: Radius.circular(10),
+                          bottomRight: Radius.circular(10))
+                      : null,
+                  border: Border.all(color: AppColors.hint.withOpacity(0.2))),
               child: TextButton(
                 style: ButtonStyle(
                   overlayColor: MaterialStateColor.resolveWith(
@@ -226,7 +281,11 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                   ),
                 ),
                 onPressed: () {
-                  print;
+                  setState(() {
+                    _openedQuestion == 3
+                        ? _openedQuestion = 0
+                        : _openedQuestion = 3;
+                  });
                 },
                 child: Text(
                   "Comment faire baisser les frais de notaire ?",
@@ -234,6 +293,9 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                 ),
               ),
             ),
+            _openedQuestion == 3
+                ? _buildThirdQuestionText()
+                : SizedBox.shrink(),
           ],
         ),
       ),
@@ -279,11 +341,12 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d*\.?\d*)')),
+                                    RegExp(r'(^\d+\.?\d?\d?)')),
                               ],
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 setState(() {
+                                  _visibleResults = false;
                                   _amountError = false;
                                 });
                               },
@@ -345,20 +408,27 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                           shadowColor: AppColors.hint,
                           color: AppColors.appBackground,
                           child: Center(
-                            child: DropdownSearch<String>(
-                                searchBoxDecoration: null,
-                                dropdownSearchDecoration: null,
-                                mode: Mode.MENU,
-                                showSelectedItem: true,
-                                items: listDepartements,
-                                label: "",
-                                hint: "Département du bien",
-                                onChanged: (value) {
-                                  setState(() {
-                                    _departement = value;
-                                  });
-                                },
-                                selectedItem: _departement),
+                            child: Theme(
+                              // Create a unique theme with "ThemeData"
+                              data: ThemeData(
+                                primarySwatch: AppColors.defaultColorMaterial,
+                              ),
+                              child: DropdownSearch<String>(
+                                  searchBoxDecoration: null,
+                                  dropdownSearchDecoration: null,
+                                  mode: Mode.MENU,
+                                  showSelectedItem: true,
+                                  items: listDepartements,
+                                  label: "",
+                                  hint: "Département du bien",
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _visibleResults = false;
+                                      _departement = value;
+                                    });
+                                  },
+                                  selectedItem: _departement),
+                            ),
                           ),
                         ),
                       ),
@@ -438,7 +508,11 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                 TextSpan(
                     text: "Évaluation des frais d'acte : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: "18 432" + " €", style: AppStyles.textNormal),
+                TextSpan(
+                    text: bloc.fraisNotairesResponse.fraisActe
+                            .toStringAsFixed(2) +
+                        " €",
+                    style: AppStyles.textNormal),
               ],
             ),
           ),
@@ -458,7 +532,8 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                       context: context,
                       expand: false,
                       enableDrag: true,
-                      builder: (context) => PieChartWidget(),
+                      builder: (context) =>
+                          PieChartWidget(bloc.fraisNotairesResponse),
                     );
                   },
                   child: Text(
@@ -472,21 +547,372 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
     );
   }
 
-  _goCalcul() {
+  _goCalcul() async {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _visibleResults = false;
       _amountError = false;
     });
     double amount = double.tryParse(_amountController.text) ?? 0.0;
-    if ((amount < 1000) || (amount > 2000000)) {
+    if ((amount < 1000) ||
+        (amount > 2000000) ||
+        (_amountController.text.endsWith("."))) {
       setState(() {
         _amountError = true;
       });
     }
+    String departement = _departement.substring(0, _departement.indexOf(' '));
     if (!_amountError) {
       setState(() {
+        _loading = true;
+      });
+      await bloc.calculFraisNotaires(amount, departement);
+      setState(() {
+        _loading = false;
         _visibleResults = true;
       });
     }
+  }
+
+  Widget _buildFirstQuestionText() {
+    return Container(
+      constraints: BoxConstraints(
+          minHeight: 0, minWidth: double.infinity, maxHeight: 400),
+      padding: EdgeInsets.all(15),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          right: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+          left: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            RichText(
+              textAlign: TextAlign.left,
+              maxLines: 1000,
+              overflow: TextOverflow.clip,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                      text:
+                          "Les frais de notaire ou frais d’acquisition correspondent à l’ensemble des sommes réglées au notaire pour ses prestations et celles de tiers, ses démarches, la rédaction d’acte ainsi que pour les taxes et impôts dus à l’État.\n\nLes frais de notaire dépendent d’un barème régit par ",
+                      style: AppStyles.textDescriptionStyle),
+                  TextSpan(
+                      text: "le décret du 8 mars 1978",
+                      style: AppStyles.textDescriptionDefaultColorStyle,
+                      recognizer: TapGestureRecognizer()
+                        ..onTap = () {
+                          _launchUrl(
+                              "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000702304/");
+                        }),
+                  TextSpan(
+                      text:
+                          ". Les taux sont proportionnels au prix de la transaction et dégressif.\n\nLes frais d’acquisition dits « frais de notaire » se décomposent en quatre parties :\n\n",
+                      style: AppStyles.textDescriptionStyle),
+                  /*WidgetSpan(
+                alignment: PlaceholderAlignment.middle,
+                child: FaIcon(FontAwesomeIcons.solidCircle, size: 10),
+              ),
+              TextSpan(
+                  text: "    - Les droits de mutation : ",
+                  style: AppStyles.textDescriptionBoldStyle),
+              TextSpan(
+                  text:
+                      "il s’agit de droits perçus par le fisc qui s’établissent à 5, 80 % du prix de vente dans la plupart des départements.\n\n",
+                  style: AppStyles.textDescriptionStyle),*/
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25),
+              child: RichText(
+                textAlign: TextAlign.left,
+                maxLines: 1000,
+                overflow: TextOverflow.clip,
+                text: TextSpan(children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: FaIcon(FontAwesomeIcons.solidCircle, size: 8),
+                  ),
+                  TextSpan(
+                      text: "    - Les droits de mutation : ",
+                      style: AppStyles.textDescriptionBoldStyle),
+                  TextSpan(
+                      text:
+                          "il s’agit de droits perçus par le fisc qui s’établissent à 5, 80 % du prix de vente dans la plupart des départements.\n\n",
+                      style: AppStyles.textDescriptionStyle),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: FaIcon(FontAwesomeIcons.solidCircle, size: 8),
+                  ),
+                  TextSpan(
+                      text: "    - La rémunération du notaire : ",
+                      style: AppStyles.textDescriptionBoldStyle),
+                  TextSpan(
+                      text:
+                          "les émoluments qui reviennent au notaire pour une vente immobilière sont calculés à l’aide d’un tarif qui est proportionnel au prix de vente du bien (de 0,814 % au-dessus d’un prix de vente de 60 000 €).\n\n",
+                      style: AppStyles.textDescriptionStyle),
+                ]),
+              ),
+            ),
+            Text(
+                "Taux par tranches applicables à partir du 1er mai 2020 jusqu’au 28 février 2022 :\n",
+                style: AppStyles.textDescriptionStyle),
+            Container(color: AppColors.grey, height: 2),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "Prix",
+                          style: AppStyles.textDescriptionBoldStyle,
+                          textAlign: TextAlign.start,
+                        )),
+                    SizedBox(width: 15),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "Pourcentage",
+                          style: AppStyles.textDescriptionBoldStyle,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            Container(color: AppColors.grey, height: 2),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "De 0 à 6.500 euros	",
+                          style: AppStyles.textDescriptionStyle,
+                          textAlign: TextAlign.start,
+                        )),
+                    SizedBox(width: 15),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "3,870%",
+                          style: AppStyles.textDescriptionStyle,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            Container(color: AppColors.grey, height: 2),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "De 6.501 à 17.000 euros",
+                          style: AppStyles.textDescriptionStyle,
+                          textAlign: TextAlign.start,
+                        )),
+                    SizedBox(width: 15),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "1,596%",
+                          style: AppStyles.textDescriptionStyle,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            Container(color: AppColors.grey, height: 2),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "De 17.001 à 60.000 euros	",
+                          style: AppStyles.textDescriptionStyle,
+                          textAlign: TextAlign.start,
+                        )),
+                    SizedBox(width: 15),
+                    Expanded(
+                      flex: 1,
+                      child: Text(
+                        "1,064%",
+                        style: AppStyles.textDescriptionStyle,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Container(color: AppColors.grey, height: 2),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 10),
+              child: IntrinsicHeight(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "60.001 euros et plus	",
+                          style: AppStyles.textDescriptionStyle,
+                          textAlign: TextAlign.start,
+                        )),
+                    SizedBox(width: 15),
+                    Expanded(
+                        flex: 1,
+                        child: Text(
+                          "0,799%",
+                          style: AppStyles.textDescriptionStyle,
+                        )),
+                  ],
+                ),
+              ),
+            ),
+            SizedBox(height: 15),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 25),
+              child: RichText(
+                textAlign: TextAlign.left,
+                maxLines: 1000,
+                overflow: TextOverflow.clip,
+                text: TextSpan(children: [
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: FaIcon(FontAwesomeIcons.solidCircle, size: 8),
+                  ),
+                  TextSpan(
+                      text:
+                          "    - Les émoluments de formalités et frais divers : ",
+                      style: AppStyles.textDescriptionBoldStyle),
+                  TextSpan(
+                      text:
+                          "cela correspond aux démarches de formalités que le notaire effectue en vue de la transaction.\n\n",
+                      style: AppStyles.textDescriptionStyle),
+                  WidgetSpan(
+                    alignment: PlaceholderAlignment.middle,
+                    child: FaIcon(FontAwesomeIcons.solidCircle, size: 8),
+                  ),
+                  TextSpan(
+                      text: "    - La contribution de sécurité immobilière : ",
+                      style: AppStyles.textDescriptionBoldStyle),
+                  TextSpan(
+                      text:
+                          "cette contribution est due à l’État pour l’accomplissement des formalités d’enregistrement et de publicité foncière.",
+                      style: AppStyles.textDescriptionStyle),
+                ]),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSecondQuestionText() {
+    return Container(
+      padding: EdgeInsets.all(15),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(
+          right: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+          left: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+        ),
+      ),
+      child: Text(
+          'Sauf mention contraire, les frais de notaire sont à la charge de l’acquéreur.',
+          style: AppStyles.textDescriptionStyle),
+    );
+  }
+
+  Widget _buildThirdQuestionText() {
+    return Container(
+      constraints: BoxConstraints(
+          minHeight: 0, minWidth: double.infinity, maxHeight: 400),
+      padding: EdgeInsets.all(15),
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.only(
+            bottomLeft: Radius.circular(10), bottomRight: Radius.circular(10)),
+        border: Border(
+          right: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+          left: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+          bottom:
+              BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+          top: BorderSide(width: 1.0, color: AppColors.hint.withOpacity(0.2)),
+        ),
+      ),
+      child: SingleChildScrollView(
+        child: RichText(
+          textAlign: TextAlign.left,
+          maxLines: 1000,
+          overflow: TextOverflow.clip,
+          text: TextSpan(
+            children: [
+              TextSpan(
+                  text:
+                      "Pour les biens dont le prix de vente dépasse 150 000 €, le notaire peut accorder une remise sur ses émoluments dans la limite de 10 %.\n\nExemple : pour un bien de 250 000 €, les émoluments du notaire s’élèvent à : 250 000 € x 0,814 % = 2 035 € auxquels il faut ajouter 405,41 € soit 2 440,41 €.\n\nLes émoluments du notaire s’élèvent donc à 2 928,50 € TTC\n\nLe notaire peut accorder une remise sur ses émoluments calculés sur la part de prix comprise au-delà de 150 000 €, soit sur 100 000 € (250 000 – 150 000 €).\n\nLe calcul de ses émoluments sur cette tranche est le suivant : 100 000 X 0.814% = 814 €, soit 976,80 € TTC. Le notaire peut donc accorder une remise maximale de 976,80 € x 10 %, soit de 98 € TTC.\n\n",
+                  style: AppStyles.textDescriptionStyle),
+              TextSpan(
+                  text:
+                      "L’application de cette réduction est strictement encadrée par l'",
+                  style: AppStyles.textDescriptionStyle),
+              TextSpan(
+                  text: "article A444-174 du Code de commerce ",
+                  style: AppStyles.textDescriptionDefaultColorStyle,
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _launchUrl(
+                          "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041684677/");
+                    }),
+              TextSpan(
+                  text: "créé par l'", style: AppStyles.textDescriptionStyle),
+              TextSpan(
+                  text: "article 2 de l’arrêté du 26 février 2016",
+                  style: AppStyles.textDescriptionDefaultColorStyle,
+                  recognizer: TapGestureRecognizer()
+                    ..onTap = () {
+                      _launchUrl(
+                          "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000032115547/");
+                    }),
+              TextSpan(text: ".", style: AppStyles.textDescriptionStyle),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  _launchUrl(String url) async {
+    if (await canLaunch(url))
+      await launch(url);
+    else
+      // can't launch url, there is some error
+      throw "Could not launch $url";
   }
 }

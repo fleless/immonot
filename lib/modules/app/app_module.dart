@@ -12,9 +12,9 @@ import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/home_screen.dart';
 import 'package:immonot/ui/home/search_place/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
-import 'package:immonot/ui/home/search_results/filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_results_screen.dart';
+import 'package:immonot/ui/splash/splash_screen.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'app_widget.dart';
 
@@ -35,7 +35,6 @@ class AppModule extends MainModule {
         ...ModularRouter.group(
           transition: TransitionType.defaultTransition,
           routes: [
-            ModularRouter(Routes.home, child: (_, args) => HomeScreen()),
           ],
         ),
         ...ModularRouter.group(
@@ -61,6 +60,8 @@ class AppModule extends MainModule {
         ...ModularRouter.group(
           transition: TransitionType.fadeIn,
           routes: [
+            ModularRouter(Routes.splash, child: (_, args) => SplashScreenWidget()),
+            ModularRouter(Routes.home, child: (_, args) => HomeScreen(args.data['scroll'])),
             ModularRouter(Routes.favoris, child: (_, args) => FavorisScreen()),
             ModularRouter(Routes.calculatrice,
                 child: (_, args) => CalculatriceScreen(args.data['index'])),

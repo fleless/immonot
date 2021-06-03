@@ -2,9 +2,15 @@ import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/ui/calculatrice/widgets/echeancierMontantMensualit%C3%A9Dialog.dart';
+import 'package:immonot/ui/home/search_results/filter_screen.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import '../calculatrice_bloc.dart';
 
 class MensualiteScreenWidget extends StatefulWidget {
   @override
@@ -12,12 +18,14 @@ class MensualiteScreenWidget extends StatefulWidget {
 }
 
 class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
+  final bloc = Modular.get<CalculatriceBloc>();
   String _dureePret = "15";
   TextEditingController _capitalController = TextEditingController();
   bool _capitalError = false;
   TextEditingController _tauxController = TextEditingController();
   bool _tauxError = false;
   bool _visibleResults = false;
+  bool _loading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -25,41 +33,50 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
   }
 
   Widget _buildContent() {
-    return Container(
-      width: double.infinity,
-      child: Padding(
-        padding: EdgeInsets.only(right: 15, top: 0, bottom: 40, left: 15),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              alignment: Alignment.center,
-              child: Text('Montant des mensualités',
-                  style: AppStyles.textNormalTitleStyle,
-                  textAlign: TextAlign.center),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
-              child: Divider(
-                color: AppColors.hint,
+    return SingleChildScrollView(
+      child: Container(
+        width: double.infinity,
+        child: Padding(
+          padding: EdgeInsets.only(right: 15, top: 0, bottom: 40, left: 15),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                alignment: Alignment.center,
+                child: Text('Montant des mensualités',
+                    style: AppStyles.textNormalTitleStyle,
+                    textAlign: TextAlign.center),
               ),
-            ),
-            Text(
-              "Calculer vos mensualités",
-              style: AppStyles.titleStyleH2,
-            ),
-            SizedBox(height: 5),
-            Text(
-              "Avant de prendre un crédit, mieux vaut vérifier si vos finances le permettent en calculant le montant d'emprunt possible en fonction des mensualités adaptées à votre capacité. (Tous les champs sont obligatoires)",
-              style: AppStyles.textDescriptionStyle,
-              maxLines: 20,
-            ),
-            SizedBox(height: 40),
-            _buildForms(),
-            SizedBox(height: 40),
-            _visibleResults ? _showResults() : SizedBox.shrink(),
-          ],
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+                child: Divider(
+                  color: AppColors.hint,
+                ),
+              ),
+              Text(
+                "Calculer vos mensualités",
+                style: AppStyles.titleStyleH2,
+              ),
+              SizedBox(height: 5),
+              Text(
+                "Avant de prendre un crédit, mieux vaut vérifier si vos finances le permettent en calculant le montant d'emprunt possible en fonction des mensualités adaptées à votre capacité. (Tous les champs sont obligatoires)",
+                style: AppStyles.textDescriptionStyle,
+                maxLines: 20,
+              ),
+              SizedBox(height: 40),
+              _buildForms(),
+              SizedBox(height: 40),
+              _loading
+                  ? Center(
+                      child: CircularProgressIndicator(
+                        color: AppColors.defaultColor,
+                      ),
+                    )
+                  : SizedBox.shrink(),
+              _visibleResults ? _showResults() : SizedBox.shrink(),
+            ],
+          ),
         ),
       ),
     );
@@ -103,11 +120,13 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                           child: Center(
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'(^\d+\.?\d?\d?)')),
                               ],
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 setState(() {
+                                  _visibleResults = false;
                                   _capitalError = false;
                                 });
                               },
@@ -171,11 +190,13 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                           child: Center(
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
-                                FilteringTextInputFormatter.allow(RegExp(r'(^\d*\.?\d*)')),
+                                FilteringTextInputFormatter.allow(
+                                    RegExp(r'(^\d+\.?\d?\d?)')),
                               ],
                               keyboardType: TextInputType.number,
                               onChanged: (value) {
                                 setState(() {
+                                  _visibleResults = false;
                                   _tauxError = false;
                                 });
                               },
@@ -238,20 +259,58 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                           shadowColor: AppColors.hint,
                           color: AppColors.appBackground,
                           child: Center(
-                            child: DropdownSearch<String>(
-                                searchBoxDecoration: null,
-                                dropdownSearchDecoration: null,
-                                mode: Mode.MENU,
-                                showSelectedItem: true,
-                                items: ["2", "3", "5", "10", "15", "25"],
-                                label: "",
-                                hint: "Durée du prêt",
-                                onChanged: (value) {
-                                  setState(() {
-                                    _dureePret = value;
-                                  });
-                                },
-                                selectedItem: _dureePret),
+                            child: Theme(
+                              // Create a unique theme with "ThemeData"
+                              data: ThemeData(
+                                primarySwatch: AppColors.defaultColorMaterial,
+                              ),
+                              child: DropdownSearch<String>(
+                                  searchBoxDecoration: null,
+                                  dropdownSearchDecoration: null,
+                                  mode: Mode.MENU,
+                                  showSelectedItem: true,
+                                  items: [
+                                    "1",
+                                    "2",
+                                    "3",
+                                    "4",
+                                    "5",
+                                    "6",
+                                    "7",
+                                    "8",
+                                    "9",
+                                    "10",
+                                    "11",
+                                    "12",
+                                    "13",
+                                    "14",
+                                    "15",
+                                    "16",
+                                    "17",
+                                    "18",
+                                    "19",
+                                    "20",
+                                    "21",
+                                    "22",
+                                    "23",
+                                    "24",
+                                    "25",
+                                    "26",
+                                    "27",
+                                    "28",
+                                    "29",
+                                    "30"
+                                  ],
+                                  label: "",
+                                  hint: "Durée du prêt",
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _visibleResults = false;
+                                      _dureePret = value;
+                                    });
+                                  },
+                                  selectedItem: _dureePret),
+                            ),
                           ),
                         ),
                       ),
@@ -270,26 +329,24 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
 
   Widget _buildButton() {
     return Container(
+      width: MediaQuery.of(context).size.width * 0.35,
       decoration: new BoxDecoration(
         color: AppColors.defaultColor,
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            _goCalcul();
-          },
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.35,
-            height: 45,
-            child: Center(
-                child: Text("CACULER",
-                    style: AppStyles.buttonTextWhite,
-                    overflow: TextOverflow.clip,
-                    maxLines: 1)),
-          ),
-        ),
+      child: ElevatedButton(
+        child: Text("CACULER",
+            style: AppStyles.buttonTextWhite,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1),
+        onPressed: () {
+          _goCalcul();
+        },
+        style: ElevatedButton.styleFrom(
+            elevation: 3,
+            primary: AppColors.defaultColor,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -343,7 +400,9 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                     text: "Votre remboursement mensuel sera de : \n",
                     style: AppStyles.textNormal),
                 TextSpan(
-                    text: "969,4" + " € (Mensualité hors assurance)",
+                    text: bloc.montantMensualiteResponse.remboursementMensuel
+                            .toStringAsFixed(2) +
+                        " € (Mensualité hors assurance)",
                     style: AppStyles.mediumTitleStyle),
               ],
             ),
@@ -373,7 +432,10 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                     text: "Intérêt totaux si le prêt est mené à terme :  \n",
                     style: AppStyles.textNormal),
                 TextSpan(
-                    text: "38 841,32 €", style: AppStyles.mediumTitleStyle),
+                    text: bloc.montantMensualiteResponse.coutTotalEmprunt
+                            .toStringAsFixed(2) +
+                        " €",
+                    style: AppStyles.mediumTitleStyle),
               ],
             ),
           ),
@@ -388,7 +450,7 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                     ),
                   ),
                   onPressed: () {
-                    print;
+                    _showEcheancierDialog();
                   },
                   child: Text(
                     "Voir l'échéancier",
@@ -401,28 +463,46 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
     );
   }
 
-  _goCalcul() {
+  _goCalcul() async {
+    FocusScope.of(context).requestFocus(new FocusNode());
     setState(() {
       _visibleResults = false;
       _capitalError = false;
       _tauxError = false;
     });
-    int cap = int.tryParse(_capitalController.text) ?? 0;
+    double cap = double.tryParse(_capitalController.text) ?? 0;
     double taux = double.tryParse(_tauxController.text) ?? 0.0;
-    if ((cap < 1000) || (cap > 2000000)) {
+    if ((cap < 1000) ||
+        (cap > 2000000) ||
+        (_capitalController.text.endsWith("."))) {
       setState(() {
         _capitalError = true;
       });
     }
-    if ((taux < 0.1) || (taux > 100)) {
+    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith("."))) {
       setState(() {
         _tauxError = true;
       });
     }
     if ((!_capitalError) && (!_tauxError)) {
       setState(() {
+        _loading = true;
+      });
+      await bloc.calculMontantMensualite(cap, taux, int.parse(_dureePret));
+      setState(() {
+        _loading = false;
         _visibleResults = true;
       });
     }
+  }
+
+  _showEcheancierDialog() {
+    showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => EcheancierMontantMensualiteDialog(
+          bloc.montantMensualiteResponse.tableauAmortissement),
+    );
   }
 }

@@ -2,18 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
-import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/calculatrice/calculatrice_bloc.dart';
 import 'package:immonot/ui/calculatrice/widgets/capacite_emprunt_screen.dart';
 import 'package:immonot/ui/calculatrice/widgets/frais_notaires_screen.dart';
 import 'package:immonot/ui/calculatrice/widgets/mensualit%C3%A9_screen.dart';
-import 'package:immonot/ui/home/widgets/home_annuaire_notaires.dart';
-import 'package:immonot/ui/home/widgets/home_header.dart';
-import 'package:immonot/ui/home/widgets/home_info_conseils.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
-import 'package:swipedetector/swipedetector.dart';
 
 class CalculatriceScreen extends StatefulWidget {
   int index;
@@ -65,9 +59,8 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                   _buildHeader(),
                   SizedBox(height: 15),
                   Expanded(
-                    child: SingleChildScrollView(
-                      child: Container(
-                        height: 1200,
+                    child: Container(
+                        height: double.infinity,
                         child: PageView(
                           controller: _pageController,
                           onPageChanged: (val) {
@@ -82,7 +75,6 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                           ],
                         ),
                       ),
-                    ),
                   ),
                 ],
               ),
@@ -116,8 +108,8 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      widget.index = 0;
-                      _pageController.jumpToPage(0);
+                      _pageController.animateToPage(0,
+                          curve: Curves.easeIn, duration: Duration(milliseconds: 250)).then((value) => widget.index = 0);
                     });
                   },
                   child: Container(
@@ -141,8 +133,8 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      widget.index = 1;
-                      _pageController.jumpToPage(1);
+                      _pageController.animateToPage(1,
+                          curve: Curves.easeIn, duration: Duration(milliseconds: 125)).then((value) => widget.index = 1);
                     });
                   },
                   child: Container(
@@ -164,8 +156,11 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      widget.index = 2;
-                      _pageController.jumpToPage(2);
+                      _pageController
+                          .animateToPage(2,
+                              curve: Curves.easeIn,
+                              duration: Duration(milliseconds: 250))
+                          .then((value) => widget.index = 2);
                     });
                   },
                   child: Container(

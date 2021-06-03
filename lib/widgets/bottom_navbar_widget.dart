@@ -138,7 +138,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home),
+        onPressed: () => _navigateTo(Routes.home, {'scroll': false}),
       );
 
   Widget _buildBookmarkIcon(bool selected) => IconButton(
@@ -180,7 +180,6 @@ class _BottomNavbarState extends State<BottomNavbar> {
     );
   }
 
-
   Widget _buildNotifIcon(bool selected) => IconButton(
         iconSize: iconSize,
         icon: ConstrainedBox(
@@ -193,7 +192,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home),
+        onPressed: () => _navigateTo(Routes.home, {'scroll': false}),
       );
 
   Widget _buildProfileIcon(bool selected) => IconButton(
@@ -208,6 +207,6 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home),
+        onPressed: () => _navigateTo(Routes.home, {'scroll': false}),
       );
 }
