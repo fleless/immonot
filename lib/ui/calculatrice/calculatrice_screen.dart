@@ -60,21 +60,21 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                   SizedBox(height: 15),
                   Expanded(
                     child: Container(
-                        height: double.infinity,
-                        child: PageView(
-                          controller: _pageController,
-                          onPageChanged: (val) {
-                            setState(() {
-                              widget.index = val;
-                            });
-                          },
-                          children: [
-                            MensualiteScreenWidget(),
-                            CapaciteEmpruntScreenWidget(),
-                            FraisNotairesScreenWidget(),
-                          ],
-                        ),
+                      height: double.infinity,
+                      child: PageView(
+                        controller: _pageController,
+                        onPageChanged: (val) {
+                          setState(() {
+                            widget.index = val;
+                          });
+                        },
+                        children: [
+                          MensualiteScreenWidget(),
+                          CapaciteEmpruntScreenWidget(),
+                          FraisNotairesScreenWidget(),
+                        ],
                       ),
+                    ),
                   ),
                 ],
               ),
@@ -108,8 +108,11 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      _pageController.animateToPage(0,
-                          curve: Curves.easeIn, duration: Duration(milliseconds: 250)).then((value) => widget.index = 0);
+                      _pageController
+                          .animateToPage(0,
+                              curve: Curves.easeIn,
+                              duration: Duration(milliseconds: 250))
+                          .then((value) => widget.index = 0);
                     });
                   },
                   child: Container(
@@ -133,8 +136,11 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                 child: InkWell(
                   onTap: () {
                     setState(() {
-                      _pageController.animateToPage(1,
-                          curve: Curves.easeIn, duration: Duration(milliseconds: 125)).then((value) => widget.index = 1);
+                      _pageController
+                          .animateToPage(1,
+                              curve: Curves.easeIn,
+                              duration: Duration(milliseconds: 125))
+                          .then((value) => widget.index = 1);
                     });
                   },
                   child: Container(
@@ -169,7 +175,7 @@ class _CalculatriceScreenState extends State<CalculatriceScreen> {
                         : AppColors.white,
                     alignment: Alignment.center,
                     padding: EdgeInsets.all(10),
-                    child: FaIcon(FontAwesomeIcons.ticketAlt,
+                    child: Icon(Icons.payments_outlined,
                         color: widget.index == 2
                             ? AppColors.white
                             : AppColors.defaultColor,

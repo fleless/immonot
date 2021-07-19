@@ -1,8 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:group_radio_button/group_radio_button.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+
+import '../home_bloc.dart';
 
 class TriBottomSheetWidget extends StatefulWidget {
   @override
@@ -26,6 +29,12 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
       900: const Color(0xFFC91773),
     },
   );
+  final bloc = Modular.get<HomeBloc>();
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,10 +61,10 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                         style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "date",
+                      value: "dateAnn,ASC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
-                        () => _singleValue = value,
+                        () => _goChange(value),
                       ),
                       textPosition: RadioButtonTextPosition.left,
                     ),
@@ -64,13 +73,13 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Prix(croissant)", style: AppStyles.filterSubStyle),
+                    Text("Prix croissant", style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "prix croissant",
+                      value: "prix,ASC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
-                        () => _singleValue = value,
+                        () => _goChange(value),
                       ),
                       textPosition: RadioButtonTextPosition.left,
                     ),
@@ -79,13 +88,13 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("Prix(décroissant)", style: AppStyles.filterSubStyle),
+                    Text("Prix décroissant", style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "prix décroissant",
+                      value: "prix,DESC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
-                        () => _singleValue = value,
+                        () => _goChange(value),
                       ),
                       textPosition: RadioButtonTextPosition.left,
                     ),
@@ -97,42 +106,10 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                     Text("Commune", style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "commune",
+                      value: "commune,ASC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
-                        () => _singleValue = value,
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Code Postal(croissant)",
-                        style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "code postal croissant",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _singleValue = value,
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Code Postal(décroissant)",
-                        style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "code postal décroissant",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _singleValue = value,
+                        () => _goChange(value),
                       ),
                       textPosition: RadioButtonTextPosition.left,
                     ),
@@ -144,10 +121,41 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                     Text("Type de bien", style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "type de bien",
+                      value: "typeBien,ASC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
-                        () => _singleValue = value,
+                        () => _goChange(value),
+                      ),
+                      textPosition: RadioButtonTextPosition.left,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Surface croissant", style: AppStyles.filterSubStyle),
+                    RadioButton(
+                      description: "",
+                      value: "surfaceHabitable,ASC",
+                      groupValue: _singleValue,
+                      onChanged: (value) => setState(
+                        () => _goChange(value),
+                      ),
+                      textPosition: RadioButtonTextPosition.left,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("surfaceHabitable,DESC",
+                        style: AppStyles.filterSubStyle),
+                    RadioButton(
+                      description: "",
+                      value: "surface décroissant",
+                      groupValue: _singleValue,
+                      onChanged: (value) => setState(
+                        () => _goChange(value),
                       ),
                       textPosition: RadioButtonTextPosition.left,
                     ),
@@ -160,5 +168,14 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
         ),
       ),
     );
+  }
+
+  _goChange(String value) {
+    setState(() {
+      _singleValue = value;
+    });
+    bloc.tri = _singleValue;
+    bloc.notifTri(_singleValue);
+    Modular.to.pop();
   }
 }

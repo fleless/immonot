@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
@@ -30,14 +31,13 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
     addFakeFilters();
   }
 
-  addFakeFilters() {
+ addFakeFilters() {
     FilterModels filter1 = new FilterModels();
     FilterModels filter2 = new FilterModels();
     filter1.nom = "Filter 1";
-    filter1.listTransactions.add("Achat");
     filter2.nom = "Filter 2";
-    filter1.listTransactions.add("Viager");
-    filter1.listTransactions.add("Location");
+    filter1.listTypeVente.add(typeVentes[0]);
+    filter1.listTypeVente.add(typeVentes[3]);
     listSavedFilters.add(filter1);
     listSavedFilters.add(filter2);
   }

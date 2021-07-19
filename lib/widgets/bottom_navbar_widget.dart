@@ -97,7 +97,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
                 children: [
                   _buildNotifIcon(widget.route == "not"),
                   Text(
-                    'Notifications',
+                    'Alertes',
                     style: widget.route == "d"
                         ? AppStyles.bottomNavTextStyle
                         : AppStyles.bottomNavTextNotSelectedStyle,
@@ -109,10 +109,10 @@ class _BottomNavbarState extends State<BottomNavbar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildProfileIcon(widget.route == "pro"),
+                  _buildProfileIcon(widget.route == Routes.auth),
                   Text(
                     'Mon compte',
-                    style: widget.route == "d"
+                    style: widget.route == Routes.auth
                         ? AppStyles.bottomNavTextStyle
                         : AppStyles.bottomNavTextNotSelectedStyle,
                     textAlign: TextAlign.center,
@@ -207,6 +207,6 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home, {'scroll': false}),
+        onPressed: () => _navigateTo(Routes.auth),
       );
 }

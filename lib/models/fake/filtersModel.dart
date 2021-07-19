@@ -1,3 +1,5 @@
+import 'package:immonot/models/enum/type_biens.dart';
+import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/models/responses/places_response.dart';
 
 class FilterModels {
@@ -5,8 +7,8 @@ class FilterModels {
   String commentaire;
   List<PlacesResponse> listPlaces;
   double rayon;
-  List<String> listTransactions;
-  List<String> listtypeDeBien;
+  List<TypeVentesEnumeration> listTypeVente;
+  List<TypeBienEnumeration> listtypeDeBien;
   double priceMin;
   double priceMax;
   double surInterieurMin;
@@ -27,8 +29,8 @@ class FilterModels {
     this.commentaire = "";
     this.listPlaces = <PlacesResponse>[];
     this.rayon = 0;
-    this.listTransactions = <String>[];
-    this.listtypeDeBien = <String>[];
+    this.listTypeVente = <TypeVentesEnumeration>[];
+    this.listtypeDeBien = <TypeBienEnumeration>[];
     this.priceMax = 0;
     this.priceMin = 0;
     this.surExterieurMax = 0;
@@ -50,8 +52,8 @@ class FilterModels {
     this.commentaire = "";
     this.listPlaces = <PlacesResponse>[];
     this.rayon = 0;
-    this.listTransactions = <String>[];
-    this.listtypeDeBien = <String>[];
+    this.listTypeVente = <TypeVentesEnumeration>[];
+    this.listtypeDeBien = <TypeBienEnumeration>[];
     this.priceMax = 0;
     this.priceMin = 0;
     this.surExterieurMax = 0;

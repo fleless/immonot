@@ -13,4 +13,5 @@ class AppIcons {
   static String get trending => 'assets/icons/trending_up.png';
   static String get share => 'assets/icons/share.png';
   static String get send => 'assets/icons/send.png';
+  static String get fb => 'assets/icons/facebook_icon.png';
 }

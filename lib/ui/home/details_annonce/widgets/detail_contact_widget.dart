@@ -8,14 +8,18 @@ import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
+import 'package:immonot/utils/launchUrl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_indicator/page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import "dart:ui" as ui;
 
 class DetailContactWidget extends StatefulWidget {
-  FakeResults fake;
+  DetailAnnonceResponse fake;
 
-  DetailContactWidget(FakeResults item) {
+  DetailContactWidget(DetailAnnonceResponse item) {
     this.fake = item;
   }
 
@@ -25,7 +29,7 @@ class DetailContactWidget extends StatefulWidget {
 
 class _DetailContactWidgetState extends State<DetailContactWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
   double widthLeftBox = 100;
 
   @override
@@ -63,13 +67,22 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
             ],
           ),
           _buildButton(),
+          _buildContact(),
           SizedBox(height: 10),
-          Center(
-            child: Text(
-              "Voir le site web",
-              style: AppStyles.underlinedBaremeHonoraireStyle,
-            ),
-          )
+          (_fakeItem.contact.website != null) &&
+                  (_fakeItem.contact.website.length > 7)
+              ? Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      launchUrl(_fakeItem.contact.website);
+                    },
+                    child: Text(
+                      "Voir le site web",
+                      style: AppStyles.underlinedBaremeHonoraireStyle,
+                    ),
+                  ),
+                )
+              : SizedBox.shrink()
         ],
       ),
     );
@@ -120,35 +133,50 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                        "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
+                    _fakeItem.contact.nom != null
+                        ? Text(_fakeItem.contact.nom,
+                            style: AppStyles.filterSubStyle,
+                            maxLines: 10,
+                            overflow: TextOverflow.ellipsis)
+                        : SizedBox.shrink(),
+                    _fakeItem.contact.nom != null
+                        ? Divider(
+                            color: AppColors.hint.withOpacity(0.6),
+                          )
+                        : SizedBox.shrink(),
+                    _fakeItem.contact.adresse != null
+                        ? Text(_fakeItem.contact.adresse,
+                            style: AppStyles.filterSubStyle,
+                            maxLines: 10,
+                            overflow: TextOverflow.ellipsis)
+                        : SizedBox.shrink(),
+                    Text(_getPostalCodeAndVille(),
                         style: AppStyles.filterSubStyle,
                         maxLines: 10,
                         overflow: TextOverflow.ellipsis),
                     Divider(
                       color: AppColors.hint.withOpacity(0.6),
                     ),
-                    Text("20 rue Ferrère - CS 12037\n33001 BORDEAUX CEDEX",
-                        style: AppStyles.filterSubStyle,
-                        maxLines: 10,
-                        overflow: TextOverflow.ellipsis),
-                    Divider(
-                      color: AppColors.hint.withOpacity(0.6),
-                    ),
-                    Container(
-                      width: double.infinity,
-                      child: ListTile(
-                        minLeadingWidth : 10,
-                        leading: Container(
-                          width: 10,
-                            child: Center(
-                              child: FaIcon(FontAwesomeIcons.user, size: 15,),
-                            )
-                        ),
-                        title: Text("Votre contact :", style: AppStyles.filterSubStyle),
-                        subtitle: Text("Caroline Bouchereau", style: AppStyles.filterSubStyle),
-                      ),
-                    ),
+                    _fakeItem.contact.nom != null
+                        ? Container(
+                            width: double.infinity,
+                            child: ListTile(
+                              minLeadingWidth: 10,
+                              leading: Container(
+                                  width: 10,
+                                  child: Center(
+                                    child: FaIcon(
+                                      FontAwesomeIcons.user,
+                                      size: 15,
+                                    ),
+                                  )),
+                              title: Text("Votre contact :",
+                                  style: AppStyles.filterSubStyle),
+                              subtitle: Text(_fakeItem.contact.nom,
+                                  style: AppStyles.filterSubStyle),
+                            ),
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -157,6 +185,17 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
         ),
       ),
     );
+  }
+
+  String _getPostalCodeAndVille() {
+    String adresse2 = "";
+    _fakeItem.contact.codePostal != null
+        ? adresse2 += _fakeItem.contact.codePostal + " "
+        : adresse2 += "";
+    _fakeItem.contact.ville != null
+        ? adresse2 += " " + _fakeItem.contact.ville
+        : adresse2 += "";
+    return adresse2;
   }
 
   Widget _buildButton() {
@@ -205,4 +244,56 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
     );
   }
 
+  Widget _buildContact() {
+    return Column(
+      children: [
+        SizedBox(height: 15),
+        Container(
+          width: MediaQuery.of(context).size.width * 0.7,
+          decoration: BoxDecoration(
+              color: AppColors.appBackground,
+              borderRadius: BorderRadius.all(Radius.circular(8))),
+          child: ElevatedButton(
+            child: RichText(
+              textAlign: TextAlign.left,
+              maxLines: 10,
+              overflow: TextOverflow.clip,
+              text: TextSpan(
+                children: [
+                  WidgetSpan(
+                    alignment: ui.PlaceholderAlignment.middle,
+                    child: Icon(
+                      Icons.send,
+                      color: AppColors.defaultColor,
+                    ),
+                  ),
+                  TextSpan(
+                      text: "   CONTACTER L'OFFICE NOTARIAL",
+                      style: AppStyles.smallTitleStylePink),
+                ],
+              ),
+            ),
+            onPressed: () {
+              showCupertinoModalBottomSheet(
+                context: context,
+                expand: false,
+                enableDrag: true,
+                builder: (context) =>
+                    SendContactMessageDialog(_fakeItem.oidAnnonce),
+              );
+            },
+            style: ElevatedButton.styleFrom(
+                elevation: 3,
+                onPrimary: AppColors.defaultColor,
+                primary: AppColors.white,
+                side: BorderSide(color: AppColors.defaultColor),
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                textStyle:
+                    TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+          ),
+        ),
+        SizedBox(height: 15),
+      ],
+    );
+  }
 }

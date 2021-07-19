@@ -8,15 +8,17 @@ import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:page_indicator/page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import "dart:ui" as ui;
 
 class DetailSiretWidget extends StatefulWidget {
-  FakeResults fake;
+  DetailAnnonceResponse fake;
   double heightPadding;
 
-  DetailSiretWidget(FakeResults item, double heightPadding) {
+  DetailSiretWidget(DetailAnnonceResponse item, double heightPadding) {
     this.fake = item;
     this.heightPadding = heightPadding;
   }
@@ -27,7 +29,7 @@ class DetailSiretWidget extends StatefulWidget {
 
 class _DetailSiretWidgetState extends State<DetailSiretWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
 
   @override
   void initState() {
@@ -51,16 +53,19 @@ class _DetailSiretWidgetState extends State<DetailSiretWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text("SIRET \n"+"327 234 076 00021"),
-              Text("TVA intra-communautaire : \n"+"FR63 327 234 076"),
+              Text("SIRET \n" +
+                  (_fakeItem.contact.siret == null
+                      ? "Non communiqué"
+                      : _fakeItem.contact.siret)),
+              Text("TVA intra-communautaire : \n" +
+                  (_fakeItem.contact.tvaIntraCommunautaire == null
+                      ? "Non communiqué"
+                      : _fakeItem.contact.tvaIntraCommunautaire)),
             ],
           ),
-          SizedBox(height: widget.heightPadding),
-          Divider(color: AppColors.hint),
           SizedBox(height: widget.heightPadding),
         ],
       ),
     );
   }
-
 }

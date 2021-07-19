@@ -5,12 +5,13 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 
 class DetailGesWidget extends StatefulWidget {
   //For now wee pass type to static values until we get endpoint and change this with int id
-  FakeResults idAnnonce;
+  DetailAnnonceResponse idAnnonce;
 
-  DetailGesWidget(FakeResults id) {
+  DetailGesWidget(DetailAnnonceResponse id) {
     this.idAnnonce = id;
   }
 
@@ -20,9 +21,9 @@ class DetailGesWidget extends StatefulWidget {
 
 class _DetailGesWidgetState extends State<DetailGesWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
   bool expanded = false;
-  int ges;
+  double ges;
   String gesPosition;
   Color gesColor;
 
@@ -31,7 +32,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
   void initState() {
     super.initState();
     _fakeItem = widget.idAnnonce;
-    ges = 170;
+    ges = _fakeItem.energie.ges;
     getDpePosition();
   }
 
@@ -43,7 +44,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
   void getDpePosition() {
     if (ges == null) {
       gesPosition = "null";
-      gesColor = AppColors.hint;
+      gesColor = AppColors.nullEnergy;
     } else if (ges < 51) {
       gesPosition = "A";
       gesColor = AppColors.gesColor.withOpacity(0.1);
@@ -130,7 +131,9 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
                           ),
                           Center(
                             child: Text(
-                              gesPosition + " (" + ges.toString() + ")",
+                              ges == null
+                                  ? 'VIERGE'
+                                  : gesPosition + " (" + ges.toString() + ")",
                               style: AppStyles.smallTitleStyleBlack,
                               overflow: TextOverflow.clip,
                               maxLines: 1,
@@ -173,7 +176,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.2,
-            color: AppColors.gesColor.withOpacity(0.1),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.1),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -212,7 +215,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.3,
-            color: AppColors.gesColor.withOpacity(0.2),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.2),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -251,7 +254,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.4,
-            color: AppColors.gesColor.withOpacity(0.3),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.3),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -290,7 +293,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.5,
-            color: AppColors.gesColor.withOpacity(0.4),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.4),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -329,7 +332,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.6,
-            color: AppColors.gesColor.withOpacity(0.5),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.5),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -368,7 +371,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.7,
-            color: AppColors.gesColor.withOpacity(0.8),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(0.8),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -407,7 +410,7 @@ class _DetailGesWidgetState extends State<DetailGesWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.8,
-            color: AppColors.gesColor.withOpacity(1),
+            color: ges == null ? AppColors.nullEnergy : AppColors.gesColor.withOpacity(1),
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

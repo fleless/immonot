@@ -7,7 +7,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 
 class PlacesApiProvider {
   final String searchPlacesEndPoint =
-      Endpoints.URL + "suggestionsLocaliteUnifie.do?localite=";
+      Endpoints.CORE_URL + "geo/communes/autocomplete?input=";
   Dio _dio;
 
   PlacesApiProvider() {
@@ -31,19 +31,26 @@ class PlacesApiProvider {
   }
 
   Future<List<PlacesResponse>> searchPlaces(String item) async {
+    Map<String, String> headers = {
+      'Content-Type': 'application/json',
+      "Accept": "application/json",
+      'Charset': 'utf-8'
+    };
+
     try {
       Response response = await _dio.get(
-        searchPlacesEndPoint + item,
-        options: Options(responseType: ResponseType.json, headers: {
-          HttpHeaders.contentTypeHeader: "application/json",
-        }),
+        searchPlacesEndPoint + item + "*",
+        options: Options(responseType: ResponseType.plain, headers: headers),
       );
       if (response.data.length == 0) {
         List<PlacesResponse> vide = <PlacesResponse>[];
         return vide;
       } else {
         var res = jsonDecode(response.toString()) as List;
-        return (res as List).map((x) => PlacesResponse.fromJson(x)).toList();
+        //List<PlacesResponse> liste = json.decode(response.data);
+        //print("dagdeg" + liste.length.toString());
+        //return liste;
+        return (res).map((x) => PlacesResponse.fromJson(x)).toList();
       }
     } on DioError catch (e) {
       List<PlacesResponse> vide = <PlacesResponse>[];

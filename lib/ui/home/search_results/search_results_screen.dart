@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:immonot/constants/app_colors.dart';
@@ -9,6 +10,8 @@ import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/requests/search_request.dart';
+import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_screen.dart';
 import 'package:immonot/ui/home/search_results/honoraires/honoraire_bottom_sheet.dart';
@@ -16,6 +19,7 @@ import 'package:immonot/ui/home/search_results/tri_bottom_sheet.dart';
 import 'package:immonot/ui/home/widgets/home_annuaire_notaires.dart';
 import 'package:immonot/ui/home/widgets/home_header.dart';
 import 'package:immonot/ui/home/widgets/home_info_conseils.dart';
+import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_result.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "dart:ui" as ui;
@@ -30,29 +34,142 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   ScrollController _controller;
   final bloc = Modular.get<HomeBloc>();
+  final filterBloc = Modular.get<FilterBloc>();
   final _searchController = TextEditingController();
-  List<FakeResults> fakeList = <FakeResults>[];
+  bool loading = false;
+  bool _showPaginationLoader = false;
+  List<Content> searchList = <Content>[];
+  SearchResponse _searchResponse = SearchResponse(totalElements: 0);
   bool scrolling = false;
 
   @override
-  Future<void> initState() {
-    super.initState();
+  void initState() {
     _controller = ScrollController();
     _controller.addListener(_scrollListener);
     _searchController.text = _searchDetails();
-    _fillFakeList();
+    bloc.changesNotifier.listen((value) {
+      _goSearch(0);
+    });
+    bloc.triNotifier.listen((value) {
+      _goTri();
+    });
+    _goSearch(0);
+    filterBloc.filterTagsList.clear();
+    super.initState();
+  }
+
+  _goTri() async {
+    _goSearch(0);
+  }
+
+  _goSearch(int pageNumber) async {
+    if (pageNumber == 0) {
+      if (mounted) {
+        setState(() {
+          loading = true;
+        });
+      }
+    } else {
+      if (mounted) {
+        setState(() {
+          _showPaginationLoader = true;
+        });
+      }
+    }
+    //parse bloc elements to searchrequest before sending them
+    String _typeVentesFormatted = "";
+    String _typeVentesLabelFormatted = "";
+    String _references = "";
+    String _oidCommunes = "";
+    double _rayons = 0;
+    String _typeBiens = "";
+    String _prix = "";
+    String _surfaceExterieur = "";
+    String _surfaceInterieur = "";
+    String _nbPieces = "";
+    String _nbChambres = "";
+
+    print(bloc.currentFilter.listtypeDeBien.length.toString() + " la length");
+    bloc.currentFilter.listTypeVente.forEach((element) {
+      _typeVentesFormatted += element.code + ",";
+      _typeVentesLabelFormatted += element.label + ",";
+    });
+    _references = bloc.currentFilter.reference;
+    bloc.currentFilter.listPlaces.forEach((element) {
+      _oidCommunes += element.code + ",";
+    });
+    _rayons = bloc.currentFilter.rayon;
+    bloc.currentFilter.listtypeDeBien.forEach((element) {
+      _typeBiens += element.code + ",";
+    });
+    _prix = bloc.currentFilter.priceMin.toStringAsFixed(2) +
+        "," +
+        bloc.currentFilter.priceMax.toStringAsFixed(2);
+    _surfaceExterieur = bloc.currentFilter.surExterieurMin.toStringAsFixed(2) +
+        "," +
+        bloc.currentFilter.surExterieurMax.toStringAsFixed(2);
+    _surfaceInterieur = bloc.currentFilter.surInterieurMin.toStringAsFixed(2) +
+        "," +
+        bloc.currentFilter.surInterieurMax.toStringAsFixed(2);
+    _nbPieces = (bloc.currentFilter.piecesMin.toInt()).toString() +
+        "," +
+        (bloc.currentFilter.piecesMax.toInt()).toString();
+    _nbChambres = (bloc.currentFilter.chambresMin.toInt()).toString() +
+        "," +
+        (bloc.currentFilter.chambresMin.toInt()).toString();
+
+    SearchResponse resp = await bloc.searchAnnonces(
+        pageNumber,
+        SearchRequest(
+            typeVentes: _typeVentesFormatted,
+            references: _references,
+            oidCommunes: _oidCommunes,
+            //TODO: fix api
+            rayons: null,
+            typeBiens: _typeBiens,
+            prix: _prix == "0.00,0.00" ? null : _prix,
+            surfaceExterieure:
+                _surfaceExterieur == "0.00,0.00" ? null : _surfaceExterieur,
+            surfaceInterieure:
+                _surfaceInterieur == "0.00,0.00" ? null : _surfaceInterieur,
+            nbPieces: _nbPieces == "0,0" ? null : _nbPieces,
+            nbChambres: _nbChambres == "0,0" ? null : _nbChambres),
+        bloc.tri);
+    bloc.tri = null;
+    if (pageNumber == 0) {
+      _firstSearh(resp);
+    } else {
+      _getMoreSearch(resp);
+    }
+  }
+
+  _firstSearh(SearchResponse resp) {
+    if (mounted) {
+      setState(() {
+        searchList = resp.content;
+        _searchResponse = resp;
+        loading = false;
+      });
+    }
+  }
+
+  _getMoreSearch(SearchResponse resp) {
+    setState(() {
+      searchList.addAll(resp.content);
+      _searchResponse = resp;
+      _showPaginationLoader = false;
+    });
   }
 
   String _searchDetails() {
     String str = "";
-    print(bloc.tagsList.length.toString() + " hedha hwa");
-    bloc.tagsList.forEach((element) {
-      str = str + element.label + " (" + element.code + "), ";
+    bloc.currentFilter.listPlaces.forEach((element) {
+      str = str + element.nom + " (" + element.code + "), ";
     });
     return str;
   }
 
-  _scrollListener() {
+  _scrollListener() async {
     if (_controller.offset <= _controller.position.minScrollExtent &&
         !_controller.position.outOfRange) {
       setState(() {
@@ -62,6 +179,16 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       setState(() {
         scrolling = true;
       });
+    }
+    // detect when we reach the bottom of the listview
+    if (_controller.offset >= _controller.position.maxScrollExtent &&
+        !_controller.position.outOfRange) {
+      if (_searchResponse.number != _searchResponse.totalPages) {
+        setState(() {
+          _goSearch(_searchResponse.number + 1);
+        });
+        //_searchResponse = await _goSearch();
+      }
     }
   }
 
@@ -118,7 +245,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           SizedBox(height: 10),
           Expanded(
-            child: _buildList(),
+            child: loading ? buildShimmerSearchAnnonces() : _buildList(),
           ),
         ],
       ),
@@ -157,12 +284,10 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 ),
               },
               child: Card(
+                clipBehavior: Clip.antiAlias,
                 shape: RoundedRectangleBorder(
                   side: new BorderSide(color: AppColors.hint, width: 0.2),
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(4.0),
-                    bottomLeft: Radius.circular(4.0),
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(7.0)),
                 ),
                 elevation: 2,
                 shadowColor: AppColors.hint,
@@ -188,6 +313,24 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               ),
             ),
           ),
+          InkWell(
+            onTap: () {
+              showCupertinoModalBottomSheet(
+                context: context,
+                expand: false,
+                enableDrag: true,
+                builder: (context) => FilterSearchWidget(),
+              );
+            },
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15),
+              child: FaIcon(
+                FontAwesomeIcons.pencilAlt,
+                size: 17,
+                color: AppColors.defaultColor,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -205,7 +348,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                fakeList.length.toString() + " Résultats",
+                _searchResponse.totalElements.toString() + " Résultats",
                 style: AppStyles.subTitleStyle,
                 textAlign: TextAlign.left,
               ),
@@ -248,49 +391,67 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       child: ListView.builder(
         controller: _controller,
         scrollDirection: Axis.vertical,
-        itemCount: fakeList.length,
+        itemCount: searchList == null ? 0 : searchList.length + 1,
         shrinkWrap: true,
         itemBuilder: (context, index) {
-          final item = fakeList[index];
-          return InkWell(
-            onTap: () => Modular.to.pushNamed(Routes.detailsAnnonce, arguments: {'id': item}),
-            child: Container(
-                //height: 222,
-                child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
-              child: Card(
-                  clipBehavior: Clip.antiAliasWithSaveLayer,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10.0),
-                  ),
-                  elevation: 5,
-                  color: AppColors.white,
-                  child: Column(
-                    children: [
-                      _buildImage(item),
-                      SizedBox(height: 10),
-                      _buildDescription(item),
-                      SizedBox(height: 10),
-                    ],
+          Content item = Content();
+          if (index != searchList.length) {
+            item = searchList[index];
+          }
+          return index == searchList.length
+              ? _showPaginationLoader
+                  ? SizedBox(
+                      height: 50,
+                      width: 50,
+                      child: Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.defaultColor),
+                      ),
+                    )
+                  : SizedBox.shrink()
+              : InkWell(
+                  onTap: () => Modular.to.pushNamed(Routes.detailsAnnonce,
+                      arguments: {'id': item.oidAnnonce}),
+                  child: Container(
+                      //height: 222,
+                      child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 15, vertical: 5),
+                    child: Card(
+                        clipBehavior: Clip.antiAliasWithSaveLayer,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(10.0),
+                        ),
+                        elevation: 5,
+                        color: AppColors.white,
+                        child: Column(
+                          children: [
+                            _buildImage(item),
+                            SizedBox(height: 10),
+                            _buildDescription(item),
+                            SizedBox(height: 10),
+                          ],
+                        )),
                   )),
-            )),
-          );
+                );
         },
       ),
     );
   }
 
-  _buildImage(FakeResults fake) {
+  _buildImage(Content fake) {
     return Container(
       height: 230,
       width: double.infinity,
       child: Stack(
         children: [
           Container(
-            width: double.infinity,
-            height: double.infinity,
-            child: Image.network(fake.picture, fit: BoxFit.fill),
-          ),
+              width: double.infinity,
+              height: double.infinity,
+              child: fake.photo.principale == null
+                  ? Image.network(
+                      "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
+                      fit: BoxFit.fill)
+                  : Image.network(fake.photo.principale, fit: BoxFit.fill)),
           Positioned(
             top: 15.0,
             right: 15.0,
@@ -311,7 +472,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                   color: AppColors.default_black.withOpacity(0.7)),
               child: Center(
                 child: Text(
-                  fake.numberPictures.toString(),
+                  fake.photo.count == null ? "0" : fake.photo.count.toString(),
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -320,7 +481,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               ),
             ),
           ),
-          fake.offre != null
+          (!fake.coupDeCoeur) || (fake.coupDeCoeur == null)
+              ? SizedBox.shrink()
+              : Positioned(
+                  top: 15.0,
+                  left: 0.0,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(15.0),
+                        bottomRight: Radius.circular(15.0),
+                      ),
+                      color: AppColors.defaultColor,
+                    ),
+                    child: Center(
+                      child: Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 15, vertical: 8),
+                        child: Text(
+                          "Sélection",
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppStyles.offreStyle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+          //TODO: 36H immo
+          /*fake.offre != null
               ? Positioned(
                   top: 15.0,
                   left: 0.0,
@@ -349,13 +539,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     ),
                   ),
                 )
-              : SizedBox.shrink(),
+              : SizedBox.shrink(),*/
         ],
       ),
     );
   }
 
-  _buildDescription(FakeResults fake) {
+  _buildDescription(Content fake) {
     return Container(
       width: double.infinity,
       child: Column(
@@ -369,42 +559,47 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               text: TextSpan(
                 children: <TextSpan>[
                   TextSpan(
-                      text: fake.genre,
-                      style: fake.genre == "ACHAT"
+                      text: fake.typeVente,
+                      style: fake.typeVente == "Achat"
                           ? AppStyles.typeAnnoncesAchat
-                          : fake.genre == "LOCATION"
+                          : fake.typeVente == "Location"
                               ? AppStyles.typeAnnoncesLocation
-                              : fake.genre == "VIAGER"
+                              : fake.typeVente == "Viager"
                                   ? AppStyles.typeAnnoncesViager
-                                  : fake.genre == "VENTE AUX ENCHÈRES"
+                                  : fake.typeVente == "Vente aux enchères"
                                       ? AppStyles.typeAnnoncesVenteAuxEncheres
                                       : AppStyles.typeAnnoncesEVente),
                   TextSpan(text: ' - ', style: AppStyles.typeAnnonceBlack),
-                  TextSpan(text: fake.type, style: AppStyles.typeAnnonceBlack)
+                  TextSpan(
+                      text: fake.typeBien, style: AppStyles.typeAnnonceBlack)
                 ],
               ),
             ),
           ),
-          Padding(
-              padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-              child: Text(
-                fake.location,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: AppStyles.locationAnnonces,
-              )),
-          Padding(
-            padding: EdgeInsets.only(top: 10, left: 10, right: 10),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  fake.prize + " ",
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                  style: AppStyles.titleStyle,
-                ),
-                fake.down
+          fake.afficheCommune
+              ? Padding(
+                  padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: Text(
+                    fake.commune.nom + " - " + fake.commune.codePostal,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: AppStyles.locationAnnonces,
+                  ))
+              : SizedBox.shrink(),
+          fake.affichePrix
+              ? Padding(
+                  padding: EdgeInsets.only(top: 10, left: 10, right: 10),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        fake.prixLigne1.replaceAll("&euro;", "€") + " ",
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
+                        style: AppStyles.titleStyle,
+                      ),
+                      //TODO: prix en bas n'est pas retourné dans l'api
+                      /*fake.down
                     ? Container(
                         alignment: Alignment.topLeft,
                         child: FaIcon(
@@ -413,48 +608,62 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                           size: 10,
                         ),
                       )
-                    : SizedBox.shrink(),
-                SizedBox(width: 5),
-                InkWell(
-                  onTap: () {
-                    _showHonoraire(fake);
-                  },
-                  child: Image(
-                    image: AssetImage(AppIcons.info),
-                    color: AppColors.defaultColor,
-                    alignment: Alignment.center,
+                    : SizedBox.shrink(),*/
+                      SizedBox(width: 5),
+                      //TODO: add nom notaire (non provided in API)
+                      InkWell(
+                        onTap: () {
+                          _showHonoraire(
+                              fake.prixLigne1,
+                              fake.prixLigne2,
+                              fake.prixLigne3,
+                              fake.typeVente,
+                              "Nom du notaire");
+                        },
+                        child: Image(
+                          image: AssetImage(AppIcons.info),
+                          color: AppColors.defaultColor,
+                          alignment: Alignment.center,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ),
-          fake.debutEnchere != null
+                )
+              : SizedBox.shrink(),
+          //TODO: encheres en ligne à faire
+          /*fake.debutEnchere != null
               ? Padding(
                   padding: EdgeInsets.only(top: 5, left: 10, right: 10),
                   child: Text("1er offre possible",
                       style: AppStyles.locationAnnonces),
                 )
-              : SizedBox.shrink(),
+              : SizedBox.shrink(),*/
           _buildFooterDetails(fake)
         ],
       ),
     );
   }
 
-  Widget _buildFooterDetails(FakeResults fake) {
+  Widget _buildFooterDetails(Content fake) {
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
-      child: ((fake.genre.startsWith("E-") ||
-              (fake.genre.startsWith("VENTE AUX ENCHÈRES EN"))))
+      child: ((fake.typeVente.startsWith("E-") ||
+              (fake.typeVente.startsWith("Vente aux enchères en ligne"))))
           ? _buildAlternativeFooterDetails(fake)
-          : _buildNormalFooterDetails(fake),
+          : ((fake.caracteristiques.surfaceHabitable == 0.0) &&
+                  (fake.caracteristiques.surfaceTerrain == 0) &&
+                  (fake.caracteristiques.nbPieces == 0) &&
+                  (fake.caracteristiques.nbChambres == 0))
+              ? SizedBox.shrink()
+              : _buildNormalFooterDetails(fake),
     );
   }
 
-  Widget _buildAlternativeFooterDetails(FakeResults fake) {
+  Widget _buildAlternativeFooterDetails(Content fake) {
     return Row(
       children: [
-        fake.debutEnchere.startsWith("Début")
+        //TODO: when des enchères
+        /*fake.debutEnchere.startsWith("Début")
             ? FaIcon(FontAwesomeIcons.calendarAlt,
                 color: AppColors.blueTypeColor, size: 22)
             : FaIcon(FontAwesomeIcons.clock,
@@ -465,77 +674,82 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           children: [
             Text(fake.etatEnchere,
                 style: AppStyles.locationAnnonces, textAlign: TextAlign.start),
-            SizedBox(height: 3),
+            SizedBox(height: 3),13.99
             Text(fake.debutEnchere,
                 style: AppStyles.typeAnnonceBlack, textAlign: TextAlign.start)
           ],
-        )
+        )*/
       ],
     );
   }
 
-  Widget _buildNormalFooterDetails(FakeResults fake) {
+  Widget _buildNormalFooterDetails(Content fake) {
     double bigPadding = 12;
     double smallPadding = 3;
     return Container(
       height: 18,
       child: Row(
         children: [
-          fake.superficie != null
+          fake.caracteristiques.surfaceHabitable != 0.0
               ? Image(
                   image: AssetImage(AppIcons.square),
                   color: AppColors.defaultColor,
                 )
               : SizedBox.shrink(),
-          fake.superficie != null
+          fake.caracteristiques.surfaceHabitable != 0.0
               ? SizedBox(width: smallPadding)
               : SizedBox.shrink(),
-          fake.superficie != null
-              ? Text(fake.superficie, style: AppStyles.typeAnnonceBlack)
+          fake.caracteristiques.surfaceHabitable != 0.0
+              ? Text(fake.caracteristiques.surfaceHabitable.toString() + "m²",
+                  style: AppStyles.typeAnnonceBlack)
               : SizedBox.shrink(),
-          fake.superficie != null
+          fake.caracteristiques.surfaceHabitable != 0.0
               ? SizedBox(width: bigPadding)
               : SizedBox.shrink(),
-          fake.surfaceTerrain != null
+          fake.caracteristiques.surfaceTerrain != 0
               ? Image(
                   image: AssetImage(AppIcons.selectAll),
                   color: AppColors.defaultColor,
                 )
               : SizedBox.shrink(),
-          fake.surfaceTerrain != null
+          fake.caracteristiques.surfaceTerrain != 0
               ? SizedBox(width: smallPadding)
               : SizedBox.shrink(),
-          fake.surfaceTerrain != null
-              ? Text(fake.surfaceTerrain, style: AppStyles.typeAnnonceBlack)
+          fake.caracteristiques.surfaceTerrain != 0
+              ? Text(fake.caracteristiques.surfaceTerrain.toString() + "m²",
+                  style: AppStyles.typeAnnonceBlack)
               : SizedBox.shrink(),
-          fake.surfaceTerrain != null
+          fake.caracteristiques.surfaceTerrain != 0
               ? SizedBox(width: bigPadding)
               : SizedBox.shrink(),
-          fake.nbrChambres != null
+          fake.caracteristiques.nbPieces != 0
               ? Image(
                   image: AssetImage(AppIcons.door),
                   color: AppColors.defaultColor,
                 )
               : SizedBox.shrink(),
-          fake.nbrChambres != null
+          fake.caracteristiques.nbPieces != 0
               ? SizedBox(width: smallPadding)
               : SizedBox.shrink(),
-          fake.nbrChambres != null
-              ? Text(fake.nbrChambres.toString(),
+          fake.caracteristiques.nbPieces != 0
+              ? Text(fake.caracteristiques.nbPieces.toString(),
                   style: AppStyles.typeAnnonceBlack)
               : SizedBox.shrink(),
-          fake.nbrChambres != null
+          fake.caracteristiques.nbPieces != 0
               ? SizedBox(width: bigPadding)
               : SizedBox.shrink(),
-          fake.lits != null
+          fake.caracteristiques.nbChambres != 0
               ? Image(
                   image: AssetImage(AppIcons.lit),
                   color: AppColors.defaultColor,
                 )
               : SizedBox.shrink(),
-          fake.lits != null ? SizedBox(width: smallPadding) : SizedBox.shrink(),
-          fake.lits != null
-              ? Text(fake.lits.toString(), style: AppStyles.typeAnnonceBlack)
+          fake.caracteristiques.nbChambres != 0
+              ? SizedBox(width: smallPadding)
+              : SizedBox.shrink(),
+          fake.caracteristiques.nbChambres != 0
+              ? Text(fake.caracteristiques.nbChambres.toString(),
+                  style: AppStyles.typeAnnonceBlack)
               : SizedBox.shrink(),
         ],
       ),
@@ -616,200 +830,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  _showHonoraire(FakeResults item) {
+  _showHonoraire(
+      String ligne1, String ligne2, String ligne3, String type, String nom) {
     showBarModalBottomSheet(
         context: context,
         expand: false,
         enableDrag: true,
-        builder: (context) => HonorairesBottomSheetWidget(item));
-  }
-
-  void _fillFakeList() {
-    setState(() {
-      fakeList.add(
-        FakeResults(
-            "ACHAT",
-            "APPARTEMENT",
-            "690 000 €",
-            "Bordeaux - 33000",
-            2,
-            "https://www.depreux-construction.com/wp-content/uploads/2018/11/depreux-construction.jpg",
-            "111 m²",
-            "67 m²",
-            5,
-            2,
-            null,
-            false,
-            null,
-            null,
-            "660 000 €",
-            "30 000 €",
-            "4,81%",
-            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "LOCATION",
-            "APPARTEMENT",
-            "550 €/mois cc",
-            "Bordeaux - 33000",
-            1,
-            "https://www.trecobat.fr/wp-content/uploads/2020/05/construction-maison-contemporaine-maison-trecobat-1024x682.jpg",
-            "75 m²",
-            "854 m²",
-            4,
-            3,
-            null,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "SCP Bruno et Laurent LUTHIER",
-            "550 €",
-            "393 €"),
-      );
-      fakeList.add(
-        FakeResults(
-            "ACHAT",
-            "MAISON",
-            "680 000 €",
-            "Bordeaux - 33000",
-            12,
-            "https://www.habitatpresto.com/upload/devispresto//3456104__maison_bois_vignette.jpg",
-            "195 m²",
-            "139 m²",
-            3,
-            3,
-            "Sélection",
-            true,
-            null,
-            null,
-            "650 000 €",
-            "30 000 €",
-            "4,61%",
-            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "VENTE AUX ENCHÈRES EN LIGNE",
-            "APPARTEMENT",
-            "1 800 000 €",
-            "Nanterre - 92000",
-            4,
-            "https://cdn.futura-sciences.com/buildsv6/images/mediumoriginal/4/4/2/4420d92444_121015_maison-insolite-491597986.jpg",
-            null,
-            null,
-            null,
-            null,
-            "Exclusif 36h immo",
-            false,
-            "Prochainement",
-            "Début : 06/05/2021 09:00",
-            null,
-            null,
-            null,
-            "SELAS NOTAIRES 82",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "ACHAT",
-            "FONDS ET/OU MURS COMMERCIAUX",
-            "74 800 €",
-            "Bordeaux - 33000",
-            1,
-            "https://pbs.twimg.com/profile_images/1082578265859084289/OuS5RqsZ.jpg",
-            "64 m²",
-            "64 m²",
-            4,
-            null,
-            "Sélection",
-            false,
-            null,
-            null,
-            "68 320 €",
-            "7 480 €",
-            "10%",
-            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "VENTE AUX ENCHÈRES",
-            "APPARTEMENT",
-            "199 000 €",
-            "Nanterre - 92000",
-            4,
-            "https://www.travaux.com/images/cms/original/ebcd4d3c-6a00-47d2-8165-6d9e192082af.jpeg",
-            "91 m²",
-            "76 m²",
-            3,
-            null,
-            null,
-            false,
-            null,
-            null,
-            null,
-            null,
-            null,
-            "SELAS NOTAIRES 82",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "E-VENTE",
-            "MAISON",
-            "1 000 000 €",
-            "Nanterre - 92000",
-            4,
-            "https://www.sothebysrealty-france.com/datas/biens/images/18093/18093_00-2021-02-05-0332.jpg",
-            null,
-            null,
-            null,
-            null,
-            "Exclusif e-vente",
-            false,
-            "En cours",
-            "e-vente en cours",
-            null,
-            null,
-            null,
-            "SELAS NOTAIRES 82",
-            null,
-            null),
-      );
-      fakeList.add(
-        FakeResults(
-            "VIAGER",
-            "APPARTEMENT",
-            "Bouquet: 156 763,90 €",
-            "Bordeaux - 33000",
-            5,
-            "https://s.iha.com/2939700015264/Locations-vacances-Paris-13eme-arrondissement-Chez-jeannot_15.jpeg",
-            "41 m²",
-            null,
-            2,
-            1,
-            null,
-            true,
-            null,
-            null,
-            "650 000 €",
-            "30 000 €",
-            "4,61%",
-            "SCP Adrien DUTOUR, Cyrille DE RUL, Christophe LACOSTE, Sandrine PAGÈS, Audrey PELLET-LAVÊVE, Grégory DANDIEU, Mélodie REMIA et Delphine HUREL",
-            null,
-            null),
-      );
-    });
+        builder: (context) =>
+            HonorairesBottomSheetWidget(ligne1, ligne2, ligne3, type, nom));
   }
 }

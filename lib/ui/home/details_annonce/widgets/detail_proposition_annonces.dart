@@ -8,13 +8,14 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:page_indicator/page_indicator.dart';
 
 class DetailPropAnnoncesWidget extends StatefulWidget {
-  FakeResults fake;
+  DetailAnnonceResponse fake;
   double heightPadding;
 
-  DetailPropAnnoncesWidget(FakeResults item, double heightPadding) {
+  DetailPropAnnoncesWidget(DetailAnnonceResponse item, double heightPadding) {
     this.fake = item;
     this.heightPadding = heightPadding;
   }
@@ -25,7 +26,7 @@ class DetailPropAnnoncesWidget extends StatefulWidget {
 
 class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
   List<FakeJsonResponse> fakeAnnonces = <FakeJsonResponse>[];
 
   @override
@@ -47,6 +48,9 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          SizedBox(height: widget.heightPadding),
+          Divider(color: AppColors.hint),
+          SizedBox(height: widget.heightPadding),
           Text("Ces biens peuvent aussi vous intéresser", style: AppStyles.titleStyle),
           _buildList(),
         ],

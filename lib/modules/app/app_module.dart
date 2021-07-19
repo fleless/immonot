@@ -14,6 +14,12 @@ import 'package:immonot/ui/home/search_place/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_results_screen.dart';
+import 'package:immonot/ui/profil/auth/auth_bloc.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/ui/profil/auth/creation_compte.dart';
+import 'package:immonot/ui/profil/auth/password_forgotten.dart';
+import 'package:immonot/ui/profil/profil/profil_bloc.dart';
+import 'package:immonot/ui/profil/profil/profil_screen.dart';
 import 'package:immonot/ui/splash/splash_screen.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'app_widget.dart';
@@ -27,6 +33,8 @@ class AppModule extends MainModule {
         Bind((_) => UserLocation()), // Injecting userLocation
         Bind((_) => FavorisBloc()), // Injecting a BLoC
         Bind((_) => CalculatriceBloc()), // Injecting a BLoC
+        Bind((_) => AuthBloc()),
+        Bind((_) => ProfilBloc()),
       ];
 
   // Provide all the routes for your module
@@ -34,8 +42,7 @@ class AppModule extends MainModule {
   List<ModularRouter> get routers => [
         ...ModularRouter.group(
           transition: TransitionType.defaultTransition,
-          routes: [
-          ],
+          routes: [],
         ),
         ...ModularRouter.group(
           transition: TransitionType.downToUp,
@@ -55,16 +62,24 @@ class AppModule extends MainModule {
                 child: (_, args) => SearchResultsScreen()),
             ModularRouter(Routes.detailsAnnonce,
                 child: (_, args) => DetailAnnonceWidget(args.data['id'])),
+            ModularRouter(Routes.forgottenPassword,
+                child: (_, args) => ForgottenPasswordScreen()),
+            ModularRouter(Routes.creationCompte,
+                child: (_, args) => CreationCompteScreen()),
           ],
         ),
         ...ModularRouter.group(
           transition: TransitionType.fadeIn,
           routes: [
-            ModularRouter(Routes.splash, child: (_, args) => SplashScreenWidget()),
-            ModularRouter(Routes.home, child: (_, args) => HomeScreen(args.data['scroll'])),
+            ModularRouter(Routes.splash,
+                child: (_, args) => SplashScreenWidget()),
+            ModularRouter(Routes.home,
+                child: (_, args) => HomeScreen(args.data['scroll'])),
             ModularRouter(Routes.favoris, child: (_, args) => FavorisScreen()),
             ModularRouter(Routes.calculatrice,
                 child: (_, args) => CalculatriceScreen(args.data['index'])),
+            ModularRouter(Routes.auth, child: (_, args) => AuthScreen()),
+            ModularRouter(Routes.profil, child: (_, args) => ProfilScreen()),
           ],
         ),
       ];

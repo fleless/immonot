@@ -6,6 +6,9 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/type_biens.dart';
+import 'package:immonot/models/enum/type_ventes.dart';
+import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
@@ -27,20 +30,22 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   final homeBloc = Modular.get<HomeBloc>();
   final GlobalKey<TagsState> _multitagStateKey = GlobalKey<TagsState>();
   double _value = 0.0;
-  List<String> listTransactions = <String>[];
-  List<String> listTypeDeBiens = <String>[];
+  List<TypeVentesEnumeration> listTypesVentes = <TypeVentesEnumeration>[];
+  List<TypeBienEnumeration> listTypeDeBiens = <TypeBienEnumeration>[];
   SfRangeValues _priceValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _surfInterieurValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _surfExterieureValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _piecesValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _chambresValues = SfRangeValues(0.0, 0.0);
   TextEditingController _referenceController = TextEditingController();
+  TextEditingController _minPriceController = TextEditingController();
+  TextEditingController _maxPriceController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
     bloc.filterTagsList.clear();
-    bloc.filterTagsList.addAll(homeBloc.tagsList);
+    bloc.filterTagsList.addAll(homeBloc.currentFilter.listPlaces);
     initData();
   }
 
@@ -49,16 +54,25 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
       _referenceController.text = homeBloc.currentFilter.reference != null
           ? homeBloc.currentFilter.reference
           : "";
-      listTransactions.addAll(homeBloc.currentFilter.listTransactions);
+      listTypesVentes.addAll(homeBloc.currentFilter.listTypeVente);
       listTypeDeBiens.addAll(homeBloc.currentFilter.listtypeDeBien);
-      _rayonController.text = homeBloc.currentFilter.rayon.toStringAsFixed(0);
+      _rayonController.text = homeBloc.currentFilter.rayon == null
+          ? "0"
+          : homeBloc.currentFilter.rayon.toStringAsFixed(0);
       _value = homeBloc.currentFilter.rayon;
       _referenceController.text = homeBloc.currentFilter.reference;
-      _priceValues = SfRangeValues(homeBloc.currentFilter.priceMin, homeBloc.currentFilter.priceMax);
-      _surfInterieurValues = SfRangeValues(homeBloc.currentFilter.surInterieurMin, homeBloc.currentFilter.surInterieurMax);
-      _surfExterieureValues = SfRangeValues(homeBloc.currentFilter.surExterieurMin, homeBloc.currentFilter.surExterieurMax);
-      _piecesValues = SfRangeValues(homeBloc.currentFilter.piecesMin, homeBloc.currentFilter.piecesMax);
-      _chambresValues = SfRangeValues(homeBloc.currentFilter.chambresMin, homeBloc.currentFilter.chambresMax);
+      _priceValues = SfRangeValues(
+          homeBloc.currentFilter.priceMin, homeBloc.currentFilter.priceMax);
+      _surfInterieurValues = SfRangeValues(
+          homeBloc.currentFilter.surInterieurMin,
+          homeBloc.currentFilter.surInterieurMax);
+      _surfExterieureValues = SfRangeValues(
+          homeBloc.currentFilter.surExterieurMin,
+          homeBloc.currentFilter.surExterieurMax);
+      _piecesValues = SfRangeValues(
+          homeBloc.currentFilter.piecesMin, homeBloc.currentFilter.piecesMax);
+      _chambresValues = SfRangeValues(homeBloc.currentFilter.chambresMin,
+          homeBloc.currentFilter.chambresMax);
     });
   }
 
@@ -267,7 +281,11 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                     textStyle: AppStyles.subTitleStyle,
                     //pressEnabled: false,
                     active: true,
-                    title: item.code + " " + item.label,
+                    title: (item.codePostal == null
+                            ? item.code
+                            : item.codePostal) +
+                        " " +
+                        item.nom,
                     removeButton: ItemTagsRemoveButton(
                       backgroundColor: AppColors.white,
                       color: AppColors.default_black,
@@ -358,31 +376,31 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Text("Transaction",
               style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
           SizedBox(height: 10),
-          _buildCheckBoxTransactions("Achat"),
-          _buildCheckBoxTransactions("Location"),
-          _buildCheckBoxTransactions("Enchères en ligne"),
-          _buildCheckBoxTransactions("Enchères classiques"),
-          _buildCheckBoxTransactions("Viager"),
+          _buildCheckBoxTransactions(typeVentes[0]),
+          _buildCheckBoxTransactions(typeVentes[1]),
+          _buildCheckBoxTransactions(typeVentes[2]),
+          _buildCheckBoxTransactions(typeVentes[3]),
+          _buildCheckBoxTransactions(typeVentes[4]),
         ],
       ),
     );
   }
 
-  Widget _buildCheckBoxTransactions(String type) {
+  Widget _buildCheckBoxTransactions(TypeVentesEnumeration type) {
     return Theme(
       data: ThemeData(unselectedWidgetColor: AppColors.defaultColor),
       child: CheckboxListTile(
         contentPadding: EdgeInsets.only(left: 0),
-        title: Text(type, style: AppStyles.textNormal),
+        title: Text(type.label, style: AppStyles.textNormal),
         checkColor: AppColors.white,
         activeColor: AppColors.defaultColor,
-        value: listTransactions.contains(type),
+        value: listTypesVentes.contains(type),
         onChanged: (newValue) {
           setState(() {
             if (newValue) {
-              listTransactions.add(type);
+              listTypesVentes.add(type);
             } else {
-              listTransactions.removeWhere((element) => element == type);
+              listTypesVentes.removeWhere((element) => element == type);
             }
           });
         },
@@ -410,8 +428,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Maisons")),
-                Expanded(child: _buildCheckBoxTypeDeBien("Immeubles")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[1])),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[6])),
               ],
             ),
           ),
@@ -423,9 +441,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Appartements")),
-                Expanded(
-                    child: _buildCheckBoxTypeDeBien("Propriétés viticoles")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[0])),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[8])),
               ],
             ),
           ),
@@ -437,10 +454,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Terrains à batir")),
-                Expanded(
-                    child:
-                        _buildCheckBoxTypeDeBien("Fonds / Murs commerciaux")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[9])),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[4])),
               ],
             ),
           ),
@@ -452,10 +467,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Propriétés")),
-                Expanded(
-                    child: _buildCheckBoxTypeDeBien(
-                        "Terrins de loisirs / Bois / Étangs")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[7])),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[10])),
               ],
             ),
           ),
@@ -467,8 +480,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Garages / Parkings")),
-                Expanded(child: _buildCheckBoxTypeDeBien("Divers")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[5])),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[3])),
               ],
             ),
           ),
@@ -480,7 +493,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
               mainAxisAlignment: MainAxisAlignment.start,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildCheckBoxTypeDeBien("Biens agricoles")),
+                Expanded(child: _buildCheckBoxTypeDeBien(typeBiens[2])),
               ],
             ),
           ),
@@ -489,7 +502,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     );
   }
 
-  Widget _buildCheckBoxTypeDeBien(String type) {
+  Widget _buildCheckBoxTypeDeBien(TypeBienEnumeration type) {
     return Container(
       height: 80,
       width: 123,
@@ -497,7 +510,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
         data: ThemeData(unselectedWidgetColor: AppColors.defaultColor),
         child: CheckboxListTile(
           contentPadding: EdgeInsets.only(left: 0),
-          title: Text(type, style: AppStyles.textNormal),
+          title: Text(type.label, style: AppStyles.textNormal),
           checkColor: AppColors.white,
           activeColor: AppColors.defaultColor,
           value: listTypeDeBiens.contains(type),
@@ -555,9 +568,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             onChanged: (SfRangeValues value) {
               setState(() {
                 _priceValues = value;
+                _minPriceController.text = value.start.toStringAsFixed(0);
+                _maxPriceController.text = value.end.toStringAsFixed(0);
               });
             },
           ),
+          _priceTextFields(),
         ],
       ),
     );
@@ -810,11 +826,147 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     );
   }
 
+  Widget _priceTextFields() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Minimum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        if (value.isNotEmpty) {
+                          _priceValues = SfRangeValues(
+                              double.parse(value), _priceValues.end);
+                          if (double.parse(value) > _priceValues.end) {
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              _minPriceController.text =
+                                  _priceValues.end.toStringAsFixed(0);
+                              _priceValues = SfRangeValues(
+                                  _priceValues.end, _priceValues.end);
+                            });
+                          }
+                        } else {
+                          setState(() {
+                            _priceValues = SfRangeValues(0, _priceValues.end);
+                          });
+                        }
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _minPriceController,
+                    style: AppStyles.filterSubStyle,
+                    cursorColor: AppColors.default_black,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                          borderSide: BorderSide(
+                              width: 1, color: AppColors.defaultColor)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Center(child: Text("-")),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Maximum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    onChanged: (value) {
+                      setState(() {
+                        if (value.isNotEmpty) {
+                          _priceValues = SfRangeValues(
+                              _priceValues.start, double.parse(value));
+                          if (double.parse(value) < _priceValues.start) {
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              _maxPriceController.text =
+                                  _priceValues.start.toStringAsFixed(0);
+                              _priceValues = SfRangeValues(
+                                  _priceValues.start, _priceValues.start);
+                            });
+                          } else if (double.parse(value) > 1000000.0) {
+                            FocusScope.of(context).unfocus();
+                            setState(() {
+                              _maxPriceController.text = "1000000";
+                              _priceValues =
+                                  SfRangeValues(_priceValues.start, 1000000);
+                            });
+                          }
+                        } else {
+                          _maxPriceController.text = _minPriceController.text;
+                          _priceValues = SfRangeValues(
+                              _priceValues.start, _priceValues.start);
+                        }
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _maxPriceController,
+                    cursorColor: AppColors.default_black,
+                    style: AppStyles.filterSubStyle,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   void submitNewFilter() {
     homeBloc.currentFilter.listPlaces.clear();
     homeBloc.currentFilter.listPlaces.addAll(bloc.filterTagsList);
-    homeBloc.currentFilter.listTransactions.clear();
-    homeBloc.currentFilter.listTransactions.addAll(listTransactions);
+    homeBloc.currentFilter.listTypeVente.clear();
+    homeBloc.currentFilter.listTypeVente.addAll(listTypesVentes);
     homeBloc.currentFilter.listtypeDeBien.clear();
     homeBloc.currentFilter.listtypeDeBien.addAll(listTypeDeBiens);
     homeBloc.currentFilter.rayon = _value;
@@ -830,5 +982,6 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     homeBloc.currentFilter.chambresMax = _chambresValues.end;
     homeBloc.currentFilter.reference = _referenceController.text;
     Modular.to.pop();
+    homeBloc.notifChanges();
   }
 }

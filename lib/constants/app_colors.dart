@@ -12,6 +12,7 @@ class AppColors {
   static const Color desactivatedBell = Color(0xFF333333);
   static const Color hint = Color(0xFF808080);
   static const Color grey = Color(0xFFE2DFDF);
+  static const Color nullEnergy = Color(0xFFD8D8D8);
   static const Color dividerColor = Color(0xFFC9B7C0);
   static const Color greenColor = Color(0xFF34A853);
   static const Color orangeColor = Color(0xFFF1705E);
@@ -23,6 +24,9 @@ class AppColors {
   static const Color thirdChartColor = Color(0xFF0073CB);
   static Color headerTableColor = Color(0xFF0D0C0C).withOpacity(0.35);
   static Color rowTableColor = Color(0xFF999999).withOpacity(0.15);
+  static Color clipperWaveColor = Color(0xFF999999).withOpacity(0.15);
+  static Color faceBookColor = Color(0xFF3B5998);
+  static const Color alert = Color(0xFFF50029);
 
   static const Color dpeA = Color(0xFF00FF02);
   static const Color dpeB = Color(0xFF4EFF00);

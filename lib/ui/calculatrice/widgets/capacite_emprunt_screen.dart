@@ -260,26 +260,25 @@ class _CapaciteEmpruntScreenWidgetState
 
   Widget _buildButton() {
     return Container(
+      width: MediaQuery.of(context).size.width * 0.35,
       decoration: new BoxDecoration(
         color: AppColors.defaultColor,
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            _goCalcul();
-          },
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.35,
-            height: 45,
-            child: Center(
-                child: Text("CACULER",
-                    style: AppStyles.buttonTextWhite,
-                    overflow: TextOverflow.clip,
-                    maxLines: 1)),
-          ),
-        ),
+      child: ElevatedButton(
+        child: Text("CACULER",
+            style: AppStyles.buttonTextWhite,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1),
+        onPressed: () {
+          _goCalcul();
+        },
+        style: ElevatedButton.styleFrom(
+            elevation: 3,
+            onPrimary: AppColors.white,
+            primary: AppColors.defaultColor,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
       ),
     );
   }

@@ -5,12 +5,13 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 
 class DetailDpeWidget extends StatefulWidget {
   //For now wee pass type to static values until we get endpoint and change this with int id
-  FakeResults idAnnonce;
+  DetailAnnonceResponse idAnnonce;
 
-  DetailDpeWidget(FakeResults id) {
+  DetailDpeWidget(DetailAnnonceResponse id) {
     this.idAnnonce = id;
   }
 
@@ -20,9 +21,9 @@ class DetailDpeWidget extends StatefulWidget {
 
 class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
   bool expanded = false;
-  int dpe;
+  double dpe;
   String dpePosition;
   Color dpeColor;
 
@@ -31,7 +32,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   void initState() {
     super.initState();
     _fakeItem = widget.idAnnonce;
-    dpe = 333;
+    dpe = _fakeItem.energie.energie;
     getDpePosition();
   }
 
@@ -43,7 +44,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   void getDpePosition() {
     if (dpe == null) {
       dpePosition = "null";
-      dpeColor = AppColors.hint;
+      dpeColor = AppColors.nullEnergy;
     } else if (dpe < 51) {
       dpePosition = "A";
       dpeColor = AppColors.dpeA;
@@ -128,7 +129,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
                           ),
                           Center(
                             child: Text(
-                              dpePosition + " (" + dpe.toString() + ")",
+                              dpe == null ? 'VIERGE' :dpePosition + " (" + dpe.toString() + ")",
                               style: AppStyles.smallTitleStyleBlack,
                               overflow: TextOverflow.clip,
                               maxLines: 1,
@@ -171,7 +172,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.2,
-            color: AppColors.dpeA,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeA,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -210,7 +211,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.3,
-            color: AppColors.dpeB,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeB,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -249,7 +250,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.4,
-            color: AppColors.dpeC,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeC,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -288,7 +289,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.5,
-            color: AppColors.dpeD,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeD,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -327,7 +328,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.6,
-            color: AppColors.dpeE,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeE,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -366,7 +367,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.7,
-            color: AppColors.dpeF,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeF,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -405,7 +406,7 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
           Container(
             height: 35,
             width: MediaQuery.of(context).size.width * 0.8,
-            color: AppColors.dpeG,
+            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeG,
             child: Center(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

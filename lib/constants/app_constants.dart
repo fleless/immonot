@@ -8,4 +8,8 @@ class AppConstants {
   static const String HERO_IMAGE_ANIMATION = 'imageHero';
   static const String SHOW_ANNONCE_GUIDE = 'annoceGuide';
   static const String SHOW_SEARCH_GUIDE = 'searchGuide';
+
+
+  static const double BTN_CMN_RADIUS = 7;
+
 }

@@ -8,6 +8,8 @@ import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/type_biens.dart';
+import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/utils/user_location.dart';
 
 import '../home_bloc.dart';
@@ -22,25 +24,14 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
   final userLocation = Modular.get<UserLocation>();
   final bloc = Modular.get<HomeBloc>();
-  final List<String> typeDeBiensStrings = [
-    "Maisons",
-    "Appartements",
-    "Terrains à batir",
-    "Propriétés",
-    "Garages / Parkings",
-    "Biens agricoles",
-    "Immeubles",
-    "Propriétés viticoles",
-    "Fonds / Murs commerciaux",
-    "Terrins de loisirs / Bois / Étangs",
-    "Divers"
-  ];
 
   // 0 pour acheter, 1 pour louer, 2 pour vendre
   int selectionType = 0;
 
-  // liste du choix dans la liste prédéfini
-  List<int> selectionTypeDeBienListe = <int>[];
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -76,8 +67,12 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
             SizedBox(height: 15),
             _buildSearch(),
             SizedBox(height: 15),
-            bloc.tagsList.length > 0 ? _buildTags() : SizedBox.shrink(),
-            bloc.tagsList.length > 0 ? SizedBox(height: 15) : SizedBox.shrink(),
+            bloc.currentFilter.listPlaces.length > 0
+                ? _buildTags()
+                : SizedBox.shrink(),
+            bloc.currentFilter.listPlaces.length > 0
+                ? SizedBox(height: 15)
+                : SizedBox.shrink(),
             _buildButton(),
             SizedBox(height: 20),
           ],
@@ -108,16 +103,6 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                   ? AppStyles.underlinedSelectionedText
                   : AppStyles.notSelectionedText),
         ),
-        SizedBox(width: 20),
-        InkWell(
-          onTap: () {
-            changeSelectionType(2);
-          },
-          child: Text("Vendre",
-              style: selectionType == 2
-                  ? AppStyles.underlinedSelectionedText
-                  : AppStyles.notSelectionedText),
-        ),
       ],
     );
   }
@@ -127,7 +112,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       height: 50,
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: typeDeBiensStrings.length,
+          itemCount: typeBiens.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
             return InkWell(
@@ -138,20 +123,23 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
                   padding: const EdgeInsets.all(8.0),
                   decoration: new BoxDecoration(
-                    color: selectionTypeDeBienListe.contains(index)
+                    color: bloc.currentFilter.listtypeDeBien
+                            .contains(typeBiens[index])
                         ? AppColors.defaultColor
                         : AppColors.white.withOpacity(0.3),
                     borderRadius: BorderRadius.circular(5.0),
                     border: Border.all(
-                        color: selectionTypeDeBienListe.contains(index)
+                        color: bloc.currentFilter.listtypeDeBien
+                                .contains(typeBiens[index])
                             ? AppColors.defaultColor
                             : AppColors.white),
                   ),
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      typeDeBiensStrings[index],
-                      style: selectionTypeDeBienListe.contains(index)
+                      typeBiens[index].label,
+                      style: bloc.currentFilter.listtypeDeBien
+                              .contains(typeBiens[index])
                           ? AppStyles.selectionedItemText
                           : AppStyles.notSelectionedItemText,
                       textAlign: TextAlign.center,
@@ -248,9 +236,9 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       child: Tags(
           key: _tagStateKey,
           alignment: WrapAlignment.start,
-          itemCount: bloc.tagsList.length,
+          itemCount: bloc.currentFilter.listPlaces.length,
           itemBuilder: (int index) {
-            final item = bloc.tagsList[index];
+            final item = bloc.currentFilter.listPlaces[index];
             return ItemTags(
               key: Key(index.toString()),
               index: index,
@@ -265,14 +253,16 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
               textStyle: AppStyles.subTitleStyle,
               //pressEnabled: false,
               active: true,
-              title: item.code + " " + item.label,
+              title: (item.codePostal == null ? item.code : item.codePostal) +
+                  " " +
+                  item.nom,
               removeButton: ItemTagsRemoveButton(
                 backgroundColor: AppColors.white,
                 color: AppColors.defaultColor,
                 size: 16,
                 onRemoved: () {
                   setState(() {
-                    bloc.tagsList.removeAt(index);
+                    bloc.currentFilter.listPlaces.removeAt(index);
                   });
                   return true;
                 },
@@ -328,25 +318,46 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
 
   changeSelectionTypeDeBien(int index) {
     setState(() {
-      if (selectionTypeDeBienListe.contains(index)) {
-        selectionTypeDeBienListe.removeWhere((element) => element == index);
+      if (bloc.currentFilter.listtypeDeBien.contains(typeBiens[index])) {
+        bloc.currentFilter.listtypeDeBien
+            .removeWhere((element) => element == typeBiens[index]);
       } else {
-        selectionTypeDeBienListe.add(index);
+        bloc.currentFilter.listtypeDeBien.add(typeBiens[index]);
       }
     });
   }
 
   _launchSearch() {
-    bloc.currentFilter.clear();
-    bloc.currentFilter.listPlaces.addAll(bloc.tagsList);
-    selectionType == 0
-        ? bloc.currentFilter.listTransactions.add("Achat")
-        : selectionType == 1
-            ? bloc.currentFilter.listTransactions.add("Location")
-            : null;
-    selectionTypeDeBienListe.forEach((element) {
-      bloc.currentFilter.listtypeDeBien.add(typeDeBiensStrings[element]);
+    //save the data we need
+    num _rayon = bloc.currentFilter.rayon;
+    if (bloc.currentFilter.listPlaces.length == 0) {
+      _rayon = 0.0;
+    }
+    // we clear the filters
+    bloc.currentFilter.priceMin = 0.0;
+    bloc.currentFilter.priceMax = 0.0;
+    bloc.currentFilter.piecesMax = 0.0;
+    bloc.currentFilter.piecesMin = 0.0;
+    bloc.currentFilter.reference = null;
+    bloc.currentFilter.chambresMin = 0;
+    bloc.currentFilter.chambresMax = 0;
+    bloc.currentFilter.surInterieurMax = 0.0;
+    bloc.currentFilter.surInterieurMin = 0.0;
+    bloc.currentFilter.surExterieurMin = 0.0;
+    bloc.currentFilter.surExterieurMax = 0.0;
+
+    print("la longueur d'oid communes dans le bloc" +
+        bloc.currentFilter.listPlaces.length.toString());
+    bloc.currentFilter.listPlaces.forEach((element) {
+      print(element.code);
     });
+    bloc.currentFilter.rayon = _rayon;
+    bloc.currentFilter.listTypeVente.clear();
+    selectionType == 0
+        ? bloc.currentFilter.listTypeVente.add(typeVentes[3])
+        : selectionType == 1
+            ? bloc.currentFilter.listTypeVente.add(typeVentes[0])
+            : null;
     Modular.to.pushNamed(Routes.searchResults);
   }
 }

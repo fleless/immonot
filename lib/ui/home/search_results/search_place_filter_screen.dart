@@ -6,11 +6,8 @@ import 'package:flutter_tags/flutter_tags.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/app_constants.dart';
-import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/places_response.dart';
-import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/utils/user_location.dart';
 
@@ -34,10 +31,12 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
   List<PlacesResponse> villesList = <PlacesResponse>[];
   List<PlacesResponse> departementsList = <PlacesResponse>[];
   bool isSearching = false;
+  final List<PlacesResponse> currentList = <PlacesResponse>[];
 
   @override
   Future<void> initState() {
     super.initState();
+    currentList.addAll(bloc.filterTagsList);
     _changeSearchToCurrentPosition(widget.address);
   }
 
@@ -60,14 +59,12 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
     setState(() {
       bloc.filterTagsList.forEach((element) {
         resp.removeWhere((element2) =>
-        (element.id == element2.id) &&
             (element.type == element2.type) &&
             (element.code == element2.code) &&
-            (element.label == element2.label));
+            (element.nom == element2.nom));
       });
-      print(resp.length.toString());
-      villesList = resp.where((e) => e.type.startsWith("c")).toList();
-      departementsList = resp.where((e) => e.type.startsWith("d")).toList();
+      villesList = resp.where((e) => e.type.startsWith("C")).toList();
+      departementsList = resp.where((e) => e.type.startsWith("D")).toList();
       isSearching = false;
     });
   }
@@ -100,8 +97,11 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
                     child: isSearching
                         ? _buildLoader()
                         : villesList.length + departementsList.length == 0
-                        ? SizedBox.shrink()
-                        : _buildLists()),
+                            ? SizedBox.shrink()
+                            : _buildLists()),
+                SizedBox(height: 15),
+                _buildBValidationutton(),
+                SizedBox(height: 15),
               ],
             ),
           ),
@@ -175,7 +175,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
                           hintStyle: AppStyles.hintSearch,
                           border: InputBorder.none,
                           contentPadding:
-                          EdgeInsets.only(left: 8.0, top: -30.0),
+                              EdgeInsets.only(left: 8.0, top: -30.0),
                         ),
                       ),
                     ),
@@ -220,9 +220,9 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
       child: Tags(
           key: _tagStateKey,
           alignment: WrapAlignment.start,
-          itemCount: bloc.filterTagsList.length,
+          itemCount: currentList.length,
           itemBuilder: (int index) {
-            final item = bloc.filterTagsList[index];
+            final item = currentList[index];
             return ItemTags(
               key: Key(index.toString()),
               index: index,
@@ -237,14 +237,16 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
               textStyle: AppStyles.subTitleStyle,
               //pressEnabled: false,
               active: true,
-              title: item.code + " " + item.label,
+              title: (item.codePostal == null ? item.code : item.codePostal) +
+                  " " +
+                  item.nom,
               removeButton: ItemTagsRemoveButton(
                 backgroundColor: AppColors.white,
                 color: AppColors.defaultColor,
                 size: 16,
                 onRemoved: () {
                   setState(() {
-                    bloc.filterTagsList.removeAt(index);
+                    currentList.removeAt(index);
                     _searchDetails(_searchController.text);
                   });
                   return true;
@@ -278,7 +280,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
         departementsList.length == 0 ? SizedBox.shrink() : SizedBox(height: 20),
         villesList.length == 0
             ? SizedBox.shrink()
-            : Flexible(child: _buildVillesList())
+            : Expanded(child: _buildVillesList())
       ],
     );
   }
@@ -295,9 +297,9 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
           Flexible(
             child: ListView.separated(
                 separatorBuilder: (context, index) => Divider(
-                  color: AppColors.dividerColor,
-                  height: 30,
-                ),
+                      color: AppColors.dividerColor,
+                      height: 30,
+                    ),
                 itemCount: villesList.length,
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
@@ -315,10 +317,10 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
                             text: TextSpan(
                               children: <TextSpan>[
                                 TextSpan(
-                                    text: villesList[index].code,
+                                    text: villesList[index].codePostal,
                                     style: AppStyles.smallTitleStyleBlack),
                                 TextSpan(
-                                    text: "  " + villesList[index].label,
+                                    text: "  " + villesList[index].nom,
                                     style: AppStyles.subTitleStyle),
                               ],
                             ),
@@ -346,9 +348,9 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
           Flexible(
             child: ListView.separated(
                 separatorBuilder: (context, index) => Divider(
-                  color: AppColors.dividerColor,
-                  height: 30,
-                ),
+                      color: AppColors.dividerColor,
+                      height: 30,
+                    ),
                 itemCount: departementsList.length,
                 scrollDirection: Axis.vertical,
                 shrinkWrap: true,
@@ -369,7 +371,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
                                     text: departementsList[index].code,
                                     style: AppStyles.smallTitleStyleBlack),
                                 TextSpan(
-                                    text: "  " + departementsList[index].label,
+                                    text: "  " + departementsList[index].nom,
                                     style: AppStyles.subTitleStyle),
                               ],
                             ),
@@ -385,12 +387,43 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
     );
   }
 
+  _buildBValidationutton() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.35,
+      decoration: new BoxDecoration(
+        color: AppColors.defaultColor,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: ElevatedButton(
+        child: Text("Valider",
+            style: AppStyles.buttonTextWhite,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1),
+        onPressed: () {
+          _goValidate();
+        },
+        style: ElevatedButton.styleFrom(
+            elevation: 3,
+            onPrimary: AppColors.white,
+            primary: AppColors.defaultColor,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+
+  _goValidate() {
+    bloc.filterTagsList.clear();
+    bloc.filterTagsList.addAll(currentList);
+    Modular.to.pop();
+  }
+
   placeSelected(PlacesResponse place) {
     setState(() {
-      if (bloc.filterTagsList.length < 10) {
+      if (currentList.length < 10) {
         _searchController.text = "";
         _clearLists();
-        bloc.filterTagsList.add(place);
+        currentList.add(place);
       } else {
         Fluttertoast.showToast(msg: "Vous pouvez séléctionner 10 au maximum");
       }

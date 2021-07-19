@@ -8,12 +8,17 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import "dart:ui" as ui;
 
-class HonorairesBottomSheetWidget extends StatefulWidget {
-  FakeResults item;
+import 'package:immonot/models/responses/SearchResponse.dart';
 
-  HonorairesBottomSheetWidget(FakeResults item) {
-    this.item = item;
-  }
+class HonorairesBottomSheetWidget extends StatefulWidget {
+  String ligne1;
+  String ligne2;
+  String ligne3;
+  String typeVente;
+  String nomNotaire;
+
+  HonorairesBottomSheetWidget(
+      this.ligne1, this.ligne2, this.ligne3, this.typeVente, this.nomNotaire);
 
   @override
   State<StatefulWidget> createState() => _HonorairesBottomSheetWidgetState();
@@ -27,15 +32,15 @@ class _HonorairesBottomSheetWidgetState
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 15, vertical: 30),
         child: Container(
-          child: widget.item.genre.toUpperCase() == "ACHAT"
+          child: widget.typeVente == "Achat"
               ? _vente()
-              : widget.item.genre.toUpperCase() == "LOCATION"
-                  ? _location()
-                  : widget.item.genre.toUpperCase() == "VIAGER"
-              ? _viager()
-              : widget.item.genre.toUpperCase() == "VENTE AUX ENCHÈRES"
-              ? _venteAuxEncheres()
-              : _eVente(),
+              : widget.typeVente == "Location"
+                  ? _vente()
+                  : widget.typeVente == "Viager"
+                      ? _vente()
+                      : widget.typeVente == "Vente aux enchères"
+                          ? SizedBox.shrink()
+                          : SizedBox.shrink(),
         ),
       ),
     );
@@ -49,8 +54,12 @@ class _HonorairesBottomSheetWidgetState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(widget.item.prize, style: AppStyles.titleStyle),
-            widget.item.down
+            widget.ligne1 == null
+                ? SizedBox.shrink()
+                : Text(widget.ligne1.toString().replaceAll("&euro;", "€"),
+                    style: AppStyles.titleStyle),
+            //TODO: prix bas non retourné
+            /* widget.item.down
                 ? Container(
                     alignment: Alignment.topLeft,
                     child: FaIcon(
@@ -59,7 +68,7 @@ class _HonorairesBottomSheetWidgetState
                       size: 10,
                     ),
                   )
-                : SizedBox.shrink(),
+                : SizedBox.shrink(),*/
           ],
         ),
         Padding(
@@ -68,21 +77,19 @@ class _HonorairesBottomSheetWidgetState
             color: AppColors.hint,
           ),
         ),
-        Text(
-            widget.item.prixHonoraire +
-                " + Honoraires de négociation : " +
-                widget.item.honoraireNegociation,
-            style: AppStyles.smallTitleStyleBlack,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
+        widget.ligne2 == null
+            ? SizedBox.shrink()
+            : Text(widget.ligne2.toString().replaceAll("&euro;", "€"),
+                style: AppStyles.smallTitleStyleBlack,
+                overflow: TextOverflow.clip,
+                maxLines: 3),
         SizedBox(height: 8),
-        Text(
-            "Soit " +
-                widget.item.chargeHonoraire +
-                " à la charge de l'acquéreur",
-            style: AppStyles.locationAnnonces,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
+        widget.ligne3 == null
+            ? SizedBox.shrink()
+            : Text(widget.ligne3.toString().replaceAll("&euro;", "€"),
+                style: AppStyles.locationAnnonces,
+                overflow: TextOverflow.clip,
+                maxLines: 3),
         SizedBox(height: 25),
         _commonWidgets(),
         SizedBox(height: 5),
@@ -90,103 +97,7 @@ class _HonorairesBottomSheetWidgetState
     );
   }
 
-  Widget _location() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.item.prize, style: AppStyles.titleStyle),
-            widget.item.down
-                ? Container(
-              alignment: Alignment.topLeft,
-              child: FaIcon(
-                FontAwesomeIcons.arrowDown,
-                color: AppColors.greenColor,
-                size: 10,
-              ),
-            )
-                : SizedBox.shrink(),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          child: Divider(
-            color: AppColors.hint,
-          ),
-        ),
-        Text(
-                " Dépot de garantie : " +
-                widget.item.garantie,
-            style: AppStyles.smallTitleStyleBlack,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
-        SizedBox(height: 8),
-        Text(
-            "Honoraires Charge Locataire : " +
-                widget.item.honoraireChargeLocataire,
-            style: AppStyles.smallTitleStyleBlack,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
-        SizedBox(height: 25),
-        _commonWidgets(),
-        SizedBox(height: 5),
-      ],
-    );
-  }
-
-  Widget _viager() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.item.prize, style: AppStyles.titleStyle),
-            widget.item.down
-                ? Container(
-              alignment: Alignment.topLeft,
-              child: FaIcon(
-                FontAwesomeIcons.arrowDown,
-                color: AppColors.greenColor,
-                size: 10,
-              ),
-            )
-                : SizedBox.shrink(),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          child: Divider(
-            color: AppColors.hint,
-          ),
-        ),
-        Text(
-            widget.item.prixHonoraire +
-                " + Honoraires de négociation : " +
-                widget.item.honoraireNegociation,
-            style: AppStyles.smallTitleStyleBlack,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
-        SizedBox(height: 8),
-        Text(
-            "Soit " +
-                widget.item.chargeHonoraire +
-                " à la charge de l'acquéreur",
-            style: AppStyles.locationAnnonces,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
-        SizedBox(height: 25),
-        _commonWidgets(),
-        SizedBox(height: 5),
-      ],
-    );
-  }
-
-  Widget _eVente() {
+/*Widget _eVente() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,9 +137,9 @@ class _HonorairesBottomSheetWidgetState
         SizedBox(height: 5),
       ],
     );
-  }
+  }*/
 
-  Widget _venteAuxEncheres() {
+/*Widget _venteAuxEncheres() {
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,7 +171,7 @@ class _HonorairesBottomSheetWidgetState
         SizedBox(height: 5),
       ],
     );
-  }
+  }*/
 
   Widget _commonWidgets() {
     return Column(
@@ -278,7 +189,7 @@ class _HonorairesBottomSheetWidgetState
             ),
             SizedBox(width: 20),
             Expanded(
-              child: Text(widget.item.notaire,
+              child: Text(widget.nomNotaire,
                   maxLines: 7,
                   overflow: TextOverflow.ellipsis,
                   style: AppStyles.underlinedNotaireText),

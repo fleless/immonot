@@ -75,7 +75,7 @@ class UserLocation extends Disposable {
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
     String address =
-        placemarks.first.postalCode + " " + placemarks.first.locality;
+        placemarks.first.postalCode;
     print(address);
     return address;
   }

@@ -71,7 +71,14 @@ class AppStyles {
   static const buttonTextWhite = TextStyle(
     fontFamily: 'openSans',
     color: AppColors.white,
-    fontWeight: FontWeight.w600,
+    fontWeight: FontWeight.w700,
+    fontSize: 15,
+  );
+
+  static const buttonTextPink = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.defaultColor,
+    fontWeight: FontWeight.w700,
     fontSize: 15,
   );
 
@@ -251,9 +258,9 @@ class AppStyles {
   );
 
   static const underlinedNotaireText = TextStyle(
-    shadows: [Shadow(color: AppColors.white, offset: Offset(0, -5))],
+    shadows: [Shadow(color: AppColors.default_black, offset: Offset(0, -5))],
     fontFamily: 'openSans',
-    color: AppColors.default_black,
+    color: Colors.transparent,
     fontWeight: FontWeight.w700,
     fontSize: 16,
     decoration: TextDecoration.underline,
@@ -267,6 +274,17 @@ class AppStyles {
     color: Colors.transparent,
     fontWeight: FontWeight.w400,
     fontSize: 13,
+    decoration: TextDecoration.underline,
+    decorationColor: AppColors.defaultColor,
+    decorationThickness: 2,
+  );
+
+  static const underlinedPinkNormalStyle = TextStyle(
+    shadows: [Shadow(color: AppColors.defaultColor, offset: Offset(0, -5))],
+    fontFamily: 'openSans',
+    color: Colors.transparent,
+    fontWeight: FontWeight.w400,
+    fontSize: 15,
     decoration: TextDecoration.underline,
     decorationColor: AppColors.defaultColor,
     decorationThickness: 2,

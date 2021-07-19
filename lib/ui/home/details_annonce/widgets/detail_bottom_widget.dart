@@ -7,13 +7,16 @@ import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_indicator/page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class DetailBotttomWidget extends StatefulWidget {
-  FakeResults fake;
+  DetailAnnonceResponse fake;
 
-  DetailBotttomWidget(FakeResults item) {
+  DetailBotttomWidget(DetailAnnonceResponse item) {
     this.fake = item;
   }
 
@@ -23,12 +26,12 @@ class DetailBotttomWidget extends StatefulWidget {
 
 class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _item;
 
   @override
   void initState() {
+    _item = widget.fake;
     super.initState();
-    _fakeItem = widget.fake;
   }
 
   @override
@@ -55,22 +58,30 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 mainAxisSize: MainAxisSize.max,
                 children: [
-                  _fakeItem.genre == "ACHAT"
+                  _item.typeVente == "Location"
                       ? _phoneCall()
-                      : _fakeItem.genre == "LOCATION"
+                      : _item.typeVente == "Viager"
                           ? _phoneCall()
-                          : _fakeItem.genre == "VIAGER"
+                          : _item.typeVente == "Achat"
                               ? _phoneCall()
                               : _biddingWidget(),
                   InkWell(
                     splashColor: AppColors.white,
                     onTap: () {
-                      _sendMail();
+                      showCupertinoModalBottomSheet(
+                        context: context,
+                        expand: false,
+                        enableDrag: true,
+                        builder: (context) =>
+                            SendContactMessageDialog(_item.oidAnnonce),
+                      );
                     },
                     child: Column(
                       children: [
                         FaIcon(FontAwesomeIcons.solidPaperPlane,
-                            color: AppColors.white),
+                            color: _item.contact != null
+                                ? AppColors.white
+                                : AppColors.white.withOpacity(0.5)),
                         Text("Envoyer un e-mail",
                             style: AppStyles.detailsBottomStyle)
                       ],
@@ -99,8 +110,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
   Widget _biddingWidget() {
     return InkWell(
       splashColor: AppColors.white,
-      onTap: () {
-      },
+      onTap: () {},
       child: Column(
         children: [
           FaIcon(FontAwesomeIcons.hammer, color: AppColors.white),
@@ -112,24 +122,24 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
 
   Widget _phoneCall() {
     return InkWell(
-      splashColor: AppColors.white,
+      splashColor:
+          _item.contact.tel == null ? AppColors.white : AppColors.white,
       onTap: () {
-        _callPhone();
+        _item.contact.tel != null ? _callPhone(_item.contact.tel) : null;
       },
       child: Column(
         children: [
-          FaIcon(FontAwesomeIcons.phone, color: AppColors.white),
+          FaIcon(FontAwesomeIcons.phone,
+              color: _item.contact.tel == null
+                  ? AppColors.white.withOpacity(0.5)
+                  : AppColors.white),
           Text("Contacter", style: AppStyles.detailsBottomStyle)
         ],
       ),
     );
   }
 
-  void _callPhone() async => await canLaunch("tel:06295544332")
-      ? await launch("tel:06295544332")
-      : throw 'Could not launch';
-
-  void _sendMail() async => await canLaunch("mailto:fahmi.barguellil@esprit.tn")
-      ? await launch("mailto:fahmi.barguellil@esprit.tn")
+  void _callPhone(String phone) async => await canLaunch("tel:" + phone)
+      ? await launch("tel:" + phone)
       : throw 'Could not launch';
 }

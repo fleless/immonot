@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/calculatrice/widgets/pie_chart.dart';
+import 'package:immonot/utils/launchUrl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -447,26 +448,25 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
 
   Widget _buildButton() {
     return Container(
+      width: MediaQuery.of(context).size.width * 0.35,
       decoration: new BoxDecoration(
         color: AppColors.defaultColor,
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            _goCalcul();
-          },
-          child: Container(
-            width: MediaQuery.of(context).size.width * 0.35,
-            height: 45,
-            child: Center(
-                child: Text("CACULER",
-                    style: AppStyles.buttonTextWhite,
-                    overflow: TextOverflow.clip,
-                    maxLines: 1)),
-          ),
-        ),
+      child: ElevatedButton(
+        child: Text("CACULER",
+            style: AppStyles.buttonTextWhite,
+            overflow: TextOverflow.ellipsis,
+            maxLines: 1),
+        onPressed: () {
+          _goCalcul();
+        },
+        style: ElevatedButton.styleFrom(
+            elevation: 3,
+            onPrimary: AppColors.white,
+            primary: AppColors.defaultColor,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+            textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -605,24 +605,13 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                       style: AppStyles.textDescriptionDefaultColorStyle,
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          _launchUrl(
+                          launchUrl(
                               "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000000702304/");
                         }),
                   TextSpan(
                       text:
                           ". Les taux sont proportionnels au prix de la transaction et dégressif.\n\nLes frais d’acquisition dits « frais de notaire » se décomposent en quatre parties :\n\n",
                       style: AppStyles.textDescriptionStyle),
-                  /*WidgetSpan(
-                alignment: PlaceholderAlignment.middle,
-                child: FaIcon(FontAwesomeIcons.solidCircle, size: 10),
-              ),
-              TextSpan(
-                  text: "    - Les droits de mutation : ",
-                  style: AppStyles.textDescriptionBoldStyle),
-              TextSpan(
-                  text:
-                      "il s’agit de droits perçus par le fisc qui s’établissent à 5, 80 % du prix de vente dans la plupart des départements.\n\n",
-                  style: AppStyles.textDescriptionStyle),*/
                 ],
               ),
             ),
@@ -887,7 +876,7 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                   style: AppStyles.textDescriptionDefaultColorStyle,
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      _launchUrl(
+                      launchUrl(
                           "https://www.legifrance.gouv.fr/codes/article_lc/LEGIARTI000041684677/");
                     }),
               TextSpan(
@@ -897,7 +886,7 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                   style: AppStyles.textDescriptionDefaultColorStyle,
                   recognizer: TapGestureRecognizer()
                     ..onTap = () {
-                      _launchUrl(
+                      launchUrl(
                           "https://www.legifrance.gouv.fr/loda/id/JORFTEXT000032115547/");
                     }),
               TextSpan(text: ".", style: AppStyles.textDescriptionStyle),
@@ -908,11 +897,4 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
     );
   }
 
-  _launchUrl(String url) async {
-    if (await canLaunch(url))
-      await launch(url);
-    else
-      // can't launch url, there is some error
-      throw "Could not launch $url";
-  }
 }

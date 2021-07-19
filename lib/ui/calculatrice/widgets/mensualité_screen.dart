@@ -344,6 +344,7 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
         },
         style: ElevatedButton.styleFrom(
             elevation: 3,
+            onPrimary: AppColors.white,
             primary: AppColors.defaultColor,
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
             textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),

@@ -4,14 +4,16 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
+import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:page_indicator/page_indicator.dart';
 
 class DetailHeaderWidget extends StatefulWidget {
-  FakeResults fake;
+  DetailAnnonceResponse fake;
 
-  DetailHeaderWidget(FakeResults item) {
+  DetailHeaderWidget(DetailAnnonceResponse item) {
     this.fake = item;
   }
 
@@ -21,7 +23,9 @@ class DetailHeaderWidget extends StatefulWidget {
 
 class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
-  FakeResults _fakeItem;
+  DetailAnnonceResponse _fakeItem;
+  PageController controller =
+      PageController(viewportFraction: 1, keepPage: true);
 
   @override
   void initState() {
@@ -42,22 +46,30 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
           PageIndicatorContainer(
             key: key,
             child: PageView.builder(
+                controller: controller,
                 scrollDirection: Axis.horizontal,
-                itemCount: _fakeItem.numberPictures,
+                itemCount: _fakeItem.photo.galerie.isEmpty
+                    ? 1
+                    : _fakeItem.photo.galerie.length,
                 itemBuilder: (context, index) {
                   return Container(
                     height: double.infinity,
                     width: double.infinity,
-                    child: Image.network(_fakeItem.picture, fit: BoxFit.fill),
+                    child: _fakeItem.photo.galerie.isEmpty
+                        ? Image.network(
+                            "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
+                            fit: BoxFit.fill)
+                        : Image.network(_fakeItem.photo.galerie[index].img,
+                            fit: BoxFit.fill),
                   );
                 }),
             align: IndicatorAlign.bottom,
-            length: _fakeItem.numberPictures,
+            length: _fakeItem.photo.galerie.length,
             indicatorSpace: 10.0,
             padding: const EdgeInsets.all(10),
             indicatorColor: AppColors.grey,
             indicatorSelectorColor: AppColors.defaultColor,
-            shape: IndicatorShape.circle(size: 10),
+            shape: IndicatorShape.circle(size: 8),
           ),
           Positioned(
             top: 75.0,
@@ -69,8 +81,9 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
                     key.currentState.currentPage.toStringAsFixed(0)));
                 int ind =
                     int.parse(key.currentState.currentPage.toStringAsFixed(0));*/
-                Modular.to.pushNamed(Routes.photoView,
-                    arguments: {'image': _fakeItem.picture});
+                Modular.to.pushNamed(Routes.photoView, arguments: {
+                  'image': _fakeItem.photo.galerie[controller.page.toInt()].img
+                });
               },
               child: Container(
                 width: 40,
@@ -112,5 +125,4 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
     // shape: IndicatorShape.roundRectangleShape(size: Size.square(12),cornerSize: Size.square(3)),
     // shape: IndicatorShape.oval(size: Size(12, 8)),
   }
-
 }
