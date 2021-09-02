@@ -1,23 +1,44 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/endpoints.dart';
-import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/ui/home/widgets/home_annuaire_notaires.dart';
 import 'package:immonot/utils/user_location.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
-class HomeAnnuaireWidget extends StatefulWidget {
+class AnnuaireWebView extends StatefulWidget {
+  String url;
+  String ville;
+  String nom;
+
+  AnnuaireWebView(this.url, this.ville, this.nom);
+
   @override
-  State<StatefulWidget> createState() => _HomeAnnuaireWidgetState();
+  State<StatefulWidget> createState() => _AnnuaireWebViewState();
 }
 
-class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
-  final _formKey = GlobalKey<FormState>();
+class _AnnuaireWebViewState extends State<AnnuaireWebView> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
+  final GlobalKey<ScaffoldState> _key = new GlobalKey<ScaffoldState>();
   TextEditingController _villeController = TextEditingController();
   TextEditingController _nomController = TextEditingController();
   final userLocation = Modular.get<UserLocation>();
+  final _formKey = GlobalKey<FormState>();
+  WebViewController controller;
+
+  @override
+  void initState() {
+    print(widget.url);
+    if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    super.initState();
+    _nomController.text = widget.nom;
+    _villeController.text = widget.ville;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,26 +46,57 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
   }
 
   Widget _buildContent() {
+    return Scaffold(
+      key: _scaffoldKey,
+      resizeToAvoidBottomInset: true,
+      backgroundColor: AppColors.appBackground,
+      body: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            _buildHeader(),
+            Expanded(
+              child: WebView(
+                  key: _key,
+                  javascriptMode: JavascriptMode.unrestricted,
+                  initialUrl: widget.url,
+                  gestureNavigationEnabled: true,
+                  onWebViewCreated: (WebViewController webViewController) {
+                    controller = webViewController;
+                  }),
+            ),
+          ],
+        ),
+      ),
+      //LoadingIndicator(loading: _bloc.loading),
+      //NetworkErrorMessages(error: _bloc.error),
+    );
+  }
+
+  Widget _buildHeader() {
     return Padding(
-      padding: EdgeInsets.only(right: 0, top: 40, bottom: 40, left: 15),
+      padding: EdgeInsets.only(right: 0, top: 40, bottom: 20, left: 15),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            "Annuaire des Notaires",
-            textAlign: TextAlign.left,
-            style: AppStyles.titleStyle,
-            overflow: TextOverflow.clip,
-            maxLines: 1,
+          ListTile(
+            leading: GestureDetector(
+              onTap: () => Modular.to.pop(),
+              child: Icon(
+                Icons.arrow_back,
+                color: AppColors.default_black,
+              ),
+            ),
+            title: Text(
+              "Annuaire des Notaires",
+              textAlign: TextAlign.left,
+              style: AppStyles.titleStyle,
+              overflow: TextOverflow.clip,
+              maxLines: 1,
+            ),
           ),
-          SizedBox(height: 5),
-          Text(
-              "Trouvez votre Notaire parmi près de 9 000 notaires et plus de 4 500 offices notariaux répartis sur l’ensemble du térritoire.",
-              overflow: TextOverflow.ellipsis,
-              maxLines: 5,
-              style: AppStyles.subTitleStyle),
-          Padding(padding: EdgeInsets.only(top: 20)),
+          SizedBox(height: 10),
           Padding(padding: EdgeInsets.only(right: 15), child: _buildForm()),
         ],
       ),
@@ -59,7 +111,7 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
           _buildNomTextField(),
           SizedBox(height: 10),
           _buildVilleTextField(),
-          SizedBox(height: 30),
+          SizedBox(height: 10),
           _buildButton()
         ],
       ),
@@ -146,14 +198,12 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            Modular.to.pushNamed(Routes.annuaireWebView, arguments: {
-              "url": Endpoints.ANNUAIRE_WEB_VIEW +
+            setState(() {
+              controller.loadUrl(Endpoints.ANNUAIRE_WEB_VIEW +
                   "?nom=" +
                   _nomController.text +
                   "&ville=" +
-                  _villeController.text,
-              "ville": _villeController.text,
-              "nom": _nomController.text
+                  _villeController.text);
             });
           },
           child: Container(

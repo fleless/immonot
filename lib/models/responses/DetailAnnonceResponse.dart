@@ -8,6 +8,7 @@ class DetailAnnonceResponse {
   String titre;
   String descriptif;
   bool coupDeCoeur;
+  bool prixEnBaisse;
   bool affichePrix;
   String prixLigne1;
   String prixLigne2;
@@ -30,6 +31,7 @@ class DetailAnnonceResponse {
       this.titre,
       this.descriptif,
       this.coupDeCoeur,
+      this.prixEnBaisse,
       this.affichePrix,
       this.prixLigne1,
       this.prixLigne2,
@@ -51,6 +53,7 @@ class DetailAnnonceResponse {
     titre = json['titre'];
     descriptif = json['descriptif'];
     coupDeCoeur = json['coupDeCoeur'];
+    prixEnBaisse = json['prixEnBaisse'];
     affichePrix = json['affichePrix'];
     prixLigne1 = json['prixLigne1'];
     prixLigne2 = json['prixLigne2'];
@@ -82,6 +85,7 @@ class DetailAnnonceResponse {
     data['titre'] = this.titre;
     data['descriptif'] = this.descriptif;
     data['coupDeCoeur'] = this.coupDeCoeur;
+    data['prixEnBaisse'] = this.prixEnBaisse;
     data['affichePrix'] = this.affichePrix;
     data['prixLigne1'] = this.prixLigne1;
     data['prixLigne2'] = this.prixLigne2;
@@ -110,14 +114,17 @@ class DetailAnnonceResponse {
 }
 
 class Commune {
+  String code;
   String nom;
   String codePostal;
   num latitude;
   num longitude;
 
-  Commune({this.nom, this.codePostal, this.latitude, this.longitude});
+  Commune(
+      {this.code, this.nom, this.codePostal, this.latitude, this.longitude});
 
   Commune.fromJson(Map<String, dynamic> json) {
+    code = json['code'];
     nom = json['nom'];
     codePostal = json['codePostal'];
     latitude = json['latitude'];
@@ -126,6 +133,7 @@ class Commune {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['code'] = this.code;
     data['nom'] = this.nom;
     data['codePostal'] = this.codePostal;
     data['latitude'] = this.latitude;

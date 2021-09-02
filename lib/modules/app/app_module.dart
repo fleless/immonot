@@ -14,6 +14,8 @@ import 'package:immonot/ui/home/search_place/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_results_screen.dart';
+import 'package:immonot/ui/home/widgets/webviews/annuaire_webView.dart';
+import 'package:immonot/ui/home/widgets/webviews/info_conseil_webView.dart';
 import 'package:immonot/ui/profil/auth/auth_bloc.dart';
 import 'package:immonot/ui/profil/auth/auth_screen.dart';
 import 'package:immonot/ui/profil/auth/creation_compte.dart';
@@ -42,7 +44,10 @@ class AppModule extends MainModule {
   List<ModularRouter> get routers => [
         ...ModularRouter.group(
           transition: TransitionType.defaultTransition,
-          routes: [],
+          routes: [
+            ModularRouter(Routes.photoView,
+                child: (_, args) => PhotoViewScreenWidget(args.data['image'])),
+          ],
         ),
         ...ModularRouter.group(
           transition: TransitionType.downToUp,
@@ -51,8 +56,6 @@ class AppModule extends MainModule {
                 child: (_, args) => SearchScreen(args.data['address'])),
             ModularRouter(Routes.filterSearch,
                 child: (_, args) => SearchFilterScreen(args.data['address'])),
-            ModularRouter(Routes.photoView,
-                child: (_, args) => PhotoViewScreenWidget(args.data['image'])),
           ],
         ),
         ...ModularRouter.group(
@@ -80,6 +83,10 @@ class AppModule extends MainModule {
                 child: (_, args) => CalculatriceScreen(args.data['index'])),
             ModularRouter(Routes.auth, child: (_, args) => AuthScreen()),
             ModularRouter(Routes.profil, child: (_, args) => ProfilScreen()),
+            ModularRouter(Routes.infoConseilWebView,
+                child: (_, args) => InfoConseilWebView(args.data['url'])),
+            ModularRouter(Routes.annuaireWebView,
+                child: (_, args) => AnnuaireWebView(args.data['url'],args.data['ville'],args.data['nom'])),
           ],
         ),
       ];

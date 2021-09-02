@@ -2,14 +2,23 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
+import 'package:immonot/constants/app_images.dart';
+import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/models/responses/SearchResponse.dart';
+import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_horizontal.dart';
+import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_result.dart';
 import 'package:page_indicator/page_indicator.dart';
+
+import '../../home_bloc.dart';
 
 class DetailPropAnnoncesWidget extends StatefulWidget {
   DetailAnnonceResponse fake;
@@ -27,14 +36,47 @@ class DetailPropAnnoncesWidget extends StatefulWidget {
 class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
   DetailAnnonceResponse _fakeItem;
-  List<FakeJsonResponse> fakeAnnonces = <FakeJsonResponse>[];
+  final bloc = Modular.get<HomeBloc>();
+  bool loading = false;
+  List<Content> searchList = <Content>[];
+  SearchResponse _searchResponse = SearchResponse(totalElements: 0);
 
   @override
   void initState() {
     super.initState();
     _fakeItem = widget.fake;
-    var res = jsonDecode(annonces.toString()) as List;
-    fakeAnnonces = res.map((x) => FakeJsonResponse.fromJson(x)).toList();
+    _loadAnnonces();
+  }
+
+  _loadAnnonces() async {
+    if (mounted) {
+      setState(() {
+        loading = true;
+      });
+    }
+    SearchResponse resp = await bloc.searchAnnonces(
+        0,
+        SearchRequest(
+            typeVentes: _fakeItem.typeVenteCode,
+            references: "",
+            oidCommunes: _fakeItem.commune.code,
+            departements: "",
+            rayons: null,
+            typeBiens: _fakeItem.typeBienCode,
+            prix: "",
+            surfaceExterieure: "",
+            surfaceInterieure: "",
+            nbPieces: "",
+            nbChambres: ""),
+        bloc.tri);
+    if (mounted)
+      setState(() {
+        searchList = resp.content;
+        searchList.removeWhere(
+            (element) => element.oidAnnonce == _fakeItem.oidAnnonce);
+        _searchResponse = resp;
+        loading = false;
+      });
   }
 
   @override
@@ -43,19 +85,22 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
   }
 
   Widget _buildContent() {
-    return Container(
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(height: widget.heightPadding),
-          Divider(color: AppColors.hint),
-          SizedBox(height: widget.heightPadding),
-          Text("Ces biens peuvent aussi vous intéresser", style: AppStyles.titleStyle),
-          _buildList(),
-        ],
-      ),
-    );
+    return searchList.length == 0
+        ? SizedBox.shrink()
+        : Container(
+            width: double.infinity,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(height: widget.heightPadding),
+                Divider(color: AppColors.hint),
+                SizedBox(height: widget.heightPadding),
+                Text("Ces biens peuvent aussi vous intéresser",
+                    style: AppStyles.titleStyle),
+                loading ? buildShimmerAnnoncesHorizontal() : _buildList(),
+              ],
+            ),
+          );
   }
 
   Widget _buildList() {
@@ -63,12 +108,15 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
       height: 330,
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: fakeAnnonces.length,
+          itemCount: searchList == null ? 0 : searchList.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
-            var item = fakeAnnonces[index];
+            var item = searchList[index];
             return InkWell(
-              onTap: () => {},
+              onTap: () => {
+                Modular.to.pushNamed(Routes.detailsAnnonce,
+                    arguments: {'id': item.oidAnnonce})
+              },
               child: Container(
                 width: 190,
                 child: Column(
@@ -88,8 +136,12 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
                                   borderRadius: BorderRadius.circular(10.0),
                                 ),
                                 elevation: 5,
-                                child: Image.network(item.photo,
-                                    fit: BoxFit.fitHeight),
+                                child: item.photo.principale == null
+                                    ? Image.network(
+                                        "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
+                                        fit: BoxFit.cover)
+                                    : Image.network(item.photo.principale,
+                                        fit: BoxFit.cover),
                               ),
                             ),
                             Positioned(
@@ -113,39 +165,55 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
                         text: TextSpan(
                           children: <TextSpan>[
                             TextSpan(
-                                text: item.genre,
-                                style: item.genre == "ACHAT"
+                                text: item.typeVente,
+                                style: item.typeVente == "Achat"
                                     ? AppStyles.typeAnnoncesAchat
-                                    : item.genre == "LOCATION"
-                                    ? AppStyles.typeAnnoncesLocation
-                                    : AppStyles
-                                    .typeAnnoncesVenteAuxEncheres),
+                                    : item.typeVente == "Location"
+                                        ? AppStyles.typeAnnoncesLocation
+                                        : item.typeVente == "Viager"
+                                            ? AppStyles.typeAnnoncesViager
+                                            : item.typeVente ==
+                                                    "Vente aux enchères"
+                                                ? AppStyles
+                                                    .typeAnnoncesVenteAuxEncheres
+                                                : AppStyles.typeAnnoncesEVente),
                             TextSpan(
-                                text: ' - ',
-                                style: AppStyles.genreAnnonces),
+                                text: ' - ', style: AppStyles.genreAnnonces),
                             TextSpan(
-                                text: item.type,
+                                text: item.typeBien,
                                 style: AppStyles.genreAnnonces)
                           ],
                         ),
                       ),
                     ),
-                    Padding(
-                        padding: EdgeInsets.only(top: 6, left: 10, right: 10),
-                        child: Text(
-                          item.location,
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 2,
-                          style: AppStyles.locationAnnonces,
-                        )),
-                    Padding(
-                        padding: EdgeInsets.only(top: 6, left: 10, right: 10),
-                        child: Text(
-                          item.prize + " €",
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          style: AppStyles.titleStyle,
-                        )),
+                    item.afficheCommune
+                        ? Padding(
+                            padding:
+                                EdgeInsets.only(top: 6, left: 10, right: 10),
+                            child: Text(
+                              item.commune.nom +
+                                  " - " +
+                                  item.commune.codePostal,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2,
+                              style: AppStyles.locationAnnonces,
+                            ))
+                        : SizedBox.shrink(),
+                    item.affichePrix
+                        ? Padding(
+                            padding:
+                                EdgeInsets.only(top: 6, left: 10, right: 10),
+                            child: Text(
+                              item.prixLigne1 != null
+                                  ? item.prixLigne1.replaceAll("&euro;", "€") +
+                                      " "
+                                  : " Nous consulter ",
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                              style: AppStyles.titleStyle,
+                            ),
+                          )
+                        : SizedBox.shrink(),
                   ],
                 ),
               ),
@@ -153,5 +221,4 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
           }),
     );
   }
-
 }

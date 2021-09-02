@@ -16,9 +16,10 @@ class HonorairesBottomSheetWidget extends StatefulWidget {
   String ligne3;
   String typeVente;
   String nomNotaire;
+  bool prixEnBaisse;
 
-  HonorairesBottomSheetWidget(
-      this.ligne1, this.ligne2, this.ligne3, this.typeVente, this.nomNotaire);
+  HonorairesBottomSheetWidget(this.ligne1, this.ligne2, this.ligne3,
+      this.typeVente, this.nomNotaire, this.prixEnBaisse);
 
   @override
   State<StatefulWidget> createState() => _HonorairesBottomSheetWidgetState();
@@ -54,12 +55,12 @@ class _HonorairesBottomSheetWidgetState
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            widget.ligne1 == null
-                ? SizedBox.shrink()
-                : Text(widget.ligne1.toString().replaceAll("&euro;", "€"),
-                    style: AppStyles.titleStyle),
-            //TODO: prix bas non retourné
-            /* widget.item.down
+            Text(
+                widget.ligne1 != null
+                    ? widget.ligne1.toString().replaceAll("&euro;", "€")
+                    : "Nous Consulter",
+                style: AppStyles.titleStyle),
+            widget.prixEnBaisse
                 ? Container(
                     alignment: Alignment.topLeft,
                     child: FaIcon(
@@ -68,7 +69,7 @@ class _HonorairesBottomSheetWidgetState
                       size: 10,
                     ),
                   )
-                : SizedBox.shrink(),*/
+                : SizedBox.shrink(),
           ],
         ),
         Padding(

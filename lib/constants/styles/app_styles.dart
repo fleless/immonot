@@ -261,6 +261,7 @@ class AppStyles {
     shadows: [Shadow(color: AppColors.default_black, offset: Offset(0, -5))],
     fontFamily: 'openSans',
     color: Colors.transparent,
+    height: 1.7,
     fontWeight: FontWeight.w700,
     fontSize: 16,
     decoration: TextDecoration.underline,

@@ -148,11 +148,11 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text("surfaceHabitable,DESC",
+                    Text("Surface décroissant",
                         style: AppStyles.filterSubStyle),
                     RadioButton(
                       description: "",
-                      value: "surface décroissant",
+                      value: "surfaceHabitable,DESC",
                       groupValue: _singleValue,
                       onChanged: (value) => setState(
                         () => _goChange(value),

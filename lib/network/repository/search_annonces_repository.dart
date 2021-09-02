@@ -7,7 +7,7 @@ class SearchAnnoncesRepository {
   SearchAnnoncesApiProvider _apiProvider = new SearchAnnoncesApiProvider();
 
   Future<SearchResponse> searchAnnonces(int pageId, SearchRequest request, String sort) {
-    return _apiProvider.searchAnnonces(pageId, request, sort);
+    return _apiProvider.searchAnnonces(pageId, request, sort,);
   }
 
   Future<DetailAnnonceResponse> getDetailAnnonce(String oidAnnonce) async {

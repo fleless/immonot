@@ -454,7 +454,7 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
         borderRadius: BorderRadius.all(Radius.circular(5)),
       ),
       child: ElevatedButton(
-        child: Text("CACULER",
+        child: Text("CALCULER",
             style: AppStyles.buttonTextWhite,
             overflow: TextOverflow.ellipsis,
             maxLines: 1),

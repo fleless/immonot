@@ -21,6 +21,8 @@ class Routes {
   static const String forgottenPassword = '/forgottenPassword';
   static const String creationCompte = '/creationCompte';
   static const String profil = '/profil';
+  static const String infoConseilWebView = '/infoConseilWebView';
+  static const String annuaireWebView = '/annuaireWebView';
 
   // Utility method used to build a dynamic route with params.
   // Example: Routes.buildRouteWithParams('/users/{id}, {'id': 1}); would generate '/users/1'

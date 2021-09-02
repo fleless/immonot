@@ -58,9 +58,9 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
                     child: _fakeItem.photo.galerie.isEmpty
                         ? Image.network(
                             "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
-                            fit: BoxFit.fill)
+                            fit: BoxFit.cover)
                         : Image.network(_fakeItem.photo.galerie[index].img,
-                            fit: BoxFit.fill),
+                            fit: BoxFit.cover),
                   );
                 }),
             align: IndicatorAlign.bottom,

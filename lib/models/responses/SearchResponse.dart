@@ -1,3 +1,5 @@
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+
 class SearchResponse {
   List<Content> content;
   Pageable pageable;
@@ -74,6 +76,7 @@ class Content {
   String typeVente;
   String typeVenteCode;
   bool coupDeCoeur;
+  bool prixEnBaisse;
   String typeBien;
   String typeBienCode;
   bool affichePrix;
@@ -84,6 +87,7 @@ class Content {
   Commune commune;
   Photo photo;
   Caracteristiques caracteristiques;
+  Contactt contact;
 
   Content(
       {this.oidAnnonce,
@@ -91,6 +95,7 @@ class Content {
       this.typeVente,
       this.typeVenteCode,
       this.coupDeCoeur,
+      this.prixEnBaisse,
       this.typeBien,
       this.typeBienCode,
       this.affichePrix,
@@ -100,6 +105,7 @@ class Content {
       this.afficheCommune,
       this.commune,
       this.photo,
+      this.contact,
       this.caracteristiques});
 
   Content.fromJson(Map<String, dynamic> json) {
@@ -110,11 +116,14 @@ class Content {
     typeBien = json['typeBien'];
     typeBienCode = json['typeBienCode'];
     affichePrix = json['affichePrix'];
+    prixEnBaisse = json['prixEnBaisse'];
     prixLigne1 = json['prixLigne1'];
     prixLigne2 = json['prixLigne2'];
     prixLigne3 = json['prixLigne3'];
     coupDeCoeur = json['coupDeCoeur'];
     afficheCommune = json['afficheCommune'];
+    contact =
+        json['contact'] != null ? new Contactt.fromJson(json['contact']) : null;
     commune =
         json['commune'] != null ? new Commune.fromJson(json['commune']) : null;
     photo = json['photo'] != null ? new Photo.fromJson(json['photo']) : null;
@@ -131,12 +140,16 @@ class Content {
     data['typeVenteCode'] = this.typeVenteCode;
     data['typeBien'] = this.typeBien;
     data['typeBienCode'] = this.typeBienCode;
+    data['prixEnBaisse'] = this.prixEnBaisse;
     data['affichePrix'] = this.affichePrix;
     data['prixLigne1'] = this.prixLigne1;
     data['prixLigne2'] = this.prixLigne2;
     data['prixLigne3'] = this.prixLigne3;
     data['coupDeCoeur'] = this.coupDeCoeur;
     data['afficheCommune'] = this.afficheCommune;
+    if (this.contact != null) {
+      data['contact'] = this.contact.toJson();
+    }
     if (this.commune != null) {
       data['commune'] = this.commune.toJson();
     }
@@ -283,6 +296,22 @@ class Sort {
     data['sorted'] = this.sorted;
     data['unsorted'] = this.unsorted;
     data['empty'] = this.empty;
+    return data;
+  }
+}
+
+class Contactt {
+  String nom;
+
+  Contactt({this.nom});
+
+  Contactt.fromJson(Map<String, dynamic> json) {
+    nom = json['nom'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['nom'] = this.nom;
     return data;
   }
 }

@@ -81,6 +81,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     String _typeVentesLabelFormatted = "";
     String _references = "";
     String _oidCommunes = "";
+    String _oidDepartements = "";
     double _rayons = 0;
     String _typeBiens = "";
     String _prix = "";
@@ -96,7 +97,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     });
     _references = bloc.currentFilter.reference;
     bloc.currentFilter.listPlaces.forEach((element) {
-      _oidCommunes += element.code + ",";
+      if (element.code.length < 5) {
+        _oidDepartements += element.code + ",";
+      } else {
+        _oidCommunes += element.code + ",";
+      }
     });
     _rayons = bloc.currentFilter.rayon;
     bloc.currentFilter.listtypeDeBien.forEach((element) {
@@ -124,8 +129,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             typeVentes: _typeVentesFormatted,
             references: _references,
             oidCommunes: _oidCommunes,
-            //TODO: fix api
-            rayons: null,
+            //TODO: fix api for departments and rayons
+            departements: _oidDepartements,
+            rayons: _oidCommunes.length + _oidDepartements.length == 0 < 2
+                ? null
+                : _rayons,
             typeBiens: _typeBiens,
             prix: _prix == "0.00,0.00" ? null : _prix,
             surfaceExterieure:
@@ -450,8 +458,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               child: fake.photo.principale == null
                   ? Image.network(
                       "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
-                      fit: BoxFit.fill)
-                  : Image.network(fake.photo.principale, fit: BoxFit.fill)),
+                      fit: BoxFit.cover)
+                  : Image.network(fake.photo.principale, fit: BoxFit.cover)),
           Positioned(
             top: 15.0,
             right: 15.0,
@@ -593,24 +601,25 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        fake.prixLigne1.replaceAll("&euro;", "€") + " ",
+                        fake.prixLigne1 != null
+                            ? fake.prixLigne1.replaceAll("&euro;", "€") + " "
+                            : " Nous consulter ",
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                         style: AppStyles.titleStyle,
                       ),
-                      //TODO: prix en bas n'est pas retourné dans l'api
-                      /*fake.down
-                    ? Container(
-                        alignment: Alignment.topLeft,
-                        child: FaIcon(
-                          FontAwesomeIcons.arrowDown,
-                          color: AppColors.greenColor,
-                          size: 10,
-                        ),
-                      )
-                    : SizedBox.shrink(),*/
+                      if (fake.prixEnBaisse != null)
+                        fake.prixEnBaisse
+                            ? Container(
+                                alignment: Alignment.topLeft,
+                                child: FaIcon(
+                                  FontAwesomeIcons.arrowDown,
+                                  color: AppColors.greenColor,
+                                  size: 10,
+                                ),
+                              )
+                            : SizedBox.shrink(),
                       SizedBox(width: 5),
-                      //TODO: add nom notaire (non provided in API)
                       InkWell(
                         onTap: () {
                           _showHonoraire(
@@ -618,7 +627,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                               fake.prixLigne2,
                               fake.prixLigne3,
                               fake.typeVente,
-                              "Nom du notaire");
+                              fake.contact != null
+                                  ? (fake.contact.nom != null
+                                      ? fake.contact.nom
+                                      : "Nom du notaire")
+                                  : "Nom du notaire",
+                              fake.prixEnBaisse != null
+                                  ? fake.prixEnBaisse
+                                  : false);
                         },
                         child: Image(
                           image: AssetImage(AppIcons.info),
@@ -830,13 +846,13 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  _showHonoraire(
-      String ligne1, String ligne2, String ligne3, String type, String nom) {
+  _showHonoraire(String ligne1, String ligne2, String ligne3, String type,
+      String nom, bool prixEnBaisse) {
     showBarModalBottomSheet(
         context: context,
         expand: false,
         enableDrag: true,
-        builder: (context) =>
-            HonorairesBottomSheetWidget(ligne1, ligne2, ligne3, type, nom));
+        builder: (context) => HonorairesBottomSheetWidget(
+            ligne1, ligne2, ligne3, type, nom, prixEnBaisse));
   }
 }

@@ -35,7 +35,7 @@ class UserLocation extends Disposable {
 
     if (permission == LocationPermission.deniedForever) {
       Geolocator.openAppSettings();
-       Fluttertoast.showToast(
+      Fluttertoast.showToast(
           msg:
               "Vous avez refusez de nous fournir la permission de vous localiser.Vous pouvez changer les paramètres dans la section autorisation",
           toastLength: Toast.LENGTH_LONG,
@@ -74,10 +74,28 @@ class UserLocation extends Disposable {
     Position position = await determinePosition();
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
-    String address =
-        placemarks.first.postalCode;
+    String address = placemarks.first.postalCode;
     print(address);
     return address;
+  }
+
+  Future<String> getUserDepartment() async {
+    Position position = await determinePosition();
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
+    String address = placemarks.first.locality;
+    print(address);
+    return address;
+  }
+
+
+  Future<bool> checkIfGPSEnabled() async {
+    serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    if (!serviceEnabled) {
+      return false;
+    } else {
+      return true;
+    }
   }
 
   @override

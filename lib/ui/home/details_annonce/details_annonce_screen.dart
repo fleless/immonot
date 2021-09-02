@@ -270,23 +270,30 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
               maxLines: 1,
               style: AppStyles.titleStyle,
             ),
-            //TODO: flèche en bas not provided
-            /*annonce.
-                  ? Container(
-                      alignment: Alignment.topLeft,
-                      child: FaIcon(
-                        FontAwesomeIcons.arrowDown,
-                        color: AppColors.greenColor,
-                        size: 10,
-                      ),
-                    )
-                  : SizedBox.shrink(),
-              SizedBox(width: 5),*/
-            //TODO; régler les honoraires
+            annonce.prixEnBaisse == null
+                ? SizedBox.shrink()
+                : (annonce.prixEnBaisse
+                    ? Container(
+                        alignment: Alignment.topLeft,
+                        child: FaIcon(
+                          FontAwesomeIcons.arrowDown,
+                          color: AppColors.greenColor,
+                          size: 10,
+                        ),
+                      )
+                    : SizedBox.shrink()),
+            SizedBox(width: 5),
             InkWell(
               onTap: () {
-                _showHonoraire(annonce.prixLigne1, annonce.prixLigne2,
-                    annonce.prixLigne3, annonce.typeVente, annonce.contact.nom);
+                _showHonoraire(
+                    annonce.prixLigne1,
+                    annonce.prixLigne2,
+                    annonce.prixLigne3,
+                    annonce.typeVente,
+                    annonce.contact.nom,
+                    annonce.prixEnBaisse == null
+                        ? false
+                        : annonce.prixEnBaisse);
               },
               child: Image(
                 image: AssetImage(AppIcons.info),
@@ -376,14 +383,14 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     );
   }
 
-  _showHonoraire(
-      String ligne1, String ligne2, String ligne3, String type, String nom) {
+  _showHonoraire(String ligne1, String ligne2, String ligne3, String type,
+      String nom, bool prixEnBaisse) {
     showBarModalBottomSheet(
         context: context,
         expand: false,
         enableDrag: true,
-        builder: (context) =>
-            HonorairesBottomSheetWidget(ligne1, ligne2, ligne3, type, nom));
+        builder: (context) => HonorairesBottomSheetWidget(
+            ligne1, ligne2, ligne3, type, nom, prixEnBaisse));
   }
 
   Widget _bienCopropriete() {

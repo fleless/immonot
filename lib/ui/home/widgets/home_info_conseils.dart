@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
+import 'package:immonot/constants/endpoints.dart';
+import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 
 class HomeInfoConseilWidget extends StatefulWidget {
@@ -10,13 +13,17 @@ class HomeInfoConseilWidget extends StatefulWidget {
 }
 
 class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
+  TextEditingController _rechercheController = TextEditingController();
   final List<String> hashTagsList = [
-    "#J'achète",
-    "#Je vends",
-    "#J'investis",
-    "#Je prépare l'avenir",
-    "#Je rénove",
-    "#Je veux des infos pratiques"
+    "Je m'informe sur l'immobilier",
+    "J'achète",
+    "Je vends",
+    "Je rénove",
+    "Je prépare l'avenir",
+    "Je veux des infos pratiques",
+    "J'investis",
+    "Interview de notaires",
+    "Interview de personnalités"
   ];
 
   @override
@@ -75,12 +82,13 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
                 color: AppColors.appBackground,
                 child: Center(
                   child: TextFormField(
+                    controller: _rechercheController,
                     cursorColor: AppColors.defaultColor,
                     decoration: const InputDecoration(
                       border: InputBorder.none,
                       contentPadding: EdgeInsets.only(
                           bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
-                      hintText: "Nom de votre notaire",
+                      hintText: "Tapez votre recherche..",
                       hintStyle: AppStyles.hintSearch,
                     ),
                   ),
@@ -89,18 +97,27 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
             ),
             SizedBox(
               width: 55,
-              child: Card(
-                shape: RoundedRectangleBorder(
-                    side: new BorderSide(color: AppColors.hint, width: 0.2),
-                    borderRadius: BorderRadius.circular(4.0)),
-                elevation: 2,
-                shadowColor: AppColors.hint,
-                color: AppColors.defaultColor,
-                child: Center(
-                  child: FaIcon(
-                    FontAwesomeIcons.search,
-                    color: AppColors.white,
-                    size: 18,
+              child: InkWell(
+                splashColor: AppColors.white,
+                onTap: () {
+                  Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
+                    "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
+                        _rechercheController.text
+                  });
+                },
+                child: Card(
+                  shape: RoundedRectangleBorder(
+                      side: new BorderSide(color: AppColors.hint, width: 0.2),
+                      borderRadius: BorderRadius.circular(4.0)),
+                  elevation: 2,
+                  shadowColor: AppColors.hint,
+                  color: AppColors.defaultColor,
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.search,
+                      color: AppColors.white,
+                      size: 18,
+                    ),
                   ),
                 ),
               ),
@@ -120,7 +137,12 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
           shrinkWrap: true,
           itemBuilder: (context, index) {
             return InkWell(
-              onTap: () => {}, //changeSelectionTypeDeBien(index),
+              onTap: () => {
+                Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
+                  "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
+                      (index > 6 ? (index + 1).toString() : index.toString())
+                })
+              }, //changeSelectionTypeDeBien(index),
               child: Center(
                 child: Container(
                   height: 33,
@@ -134,7 +156,7 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      hashTagsList[index],
+                      "#" + hashTagsList[index],
                       style: AppStyles.selectionedItemText,
                       textAlign: TextAlign.center,
                     ),
