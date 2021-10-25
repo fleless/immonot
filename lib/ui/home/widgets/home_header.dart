@@ -10,6 +10,10 @@ import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/enum/type_biens.dart';
 import 'package:immonot/models/enum/type_ventes.dart';
+import 'package:immonot/models/fake/filtersModel.dart';
+import 'package:immonot/models/requests/search_request.dart';
+import 'package:immonot/models/responses/places_response.dart';
+import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/utils/user_location.dart';
 
 import '../home_bloc.dart';
@@ -24,6 +28,13 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
   final userLocation = Modular.get<UserLocation>();
   final bloc = Modular.get<HomeBloc>();
+  final SharedPref sharedPref = SharedPref();
+
+  // cette booléenne détermine si on a fait une recherche avant ou non
+  bool lastSearchFound = false;
+
+  // c'est la dernière requete pour l'utilisateur dans le device
+  FilterModels req;
 
   // 0 pour acheter, 1 pour louer, 2 pour vendre
   int selectionType = 0;
@@ -31,6 +42,21 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
   @override
   void initState() {
     super.initState();
+    _loadLastSearchFilters();
+  }
+
+  _loadLastSearchFilters() async {
+    req =
+        FilterModels.fromJson(await sharedPref.read(AppConstants.LAST_FILTER));
+    if (req != null) {
+      setState(() {
+        lastSearchFound = true;
+      });
+    }
+  }
+
+  _reprendreRechercheButton() {
+    _launchPrecedentSearch(req);
   }
 
   @override
@@ -61,23 +87,126 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
               ),
             ),
             SizedBox(height: 50),
-            _buildSelections(),
-            SizedBox(height: 10),
-            _buildHomeFilters(),
-            SizedBox(height: 15),
-            _buildSearch(),
-            SizedBox(height: 15),
-            bloc.currentFilter.listPlaces.length > 0
-                ? _buildTags()
-                : SizedBox.shrink(),
-            bloc.currentFilter.listPlaces.length > 0
-                ? SizedBox(height: 15)
-                : SizedBox.shrink(),
-            _buildButton(),
-            SizedBox(height: 20),
+            lastSearchFound ? _buildRequestLastSearch() : _buildNewSearch(),
+            SizedBox(height: lastSearchFound ? 50 : 20),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildNewSearch() {
+    return Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+      _buildSelections(),
+      SizedBox(height: 10),
+      _buildHomeFilters(),
+      SizedBox(height: 15),
+      _buildSearch(),
+      SizedBox(height: 15),
+      bloc.currentFilter.listPlaces.length > 0
+          ? _buildTags()
+          : SizedBox.shrink(),
+      bloc.currentFilter.listPlaces.length > 0
+          ? SizedBox(height: 15)
+          : SizedBox.shrink(),
+      _buildButton(),
+    ]);
+  }
+
+  Widget _buildRequestLastSearch() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.appBackground,
+        borderRadius: BorderRadius.all(Radius.circular(8)),
+      ),
+      alignment: Alignment.center,
+      padding: EdgeInsets.all(15),
+      margin: EdgeInsets.only(right: 15),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
+        Text(
+          "Voulez-vous reprendre votre dernière recherche ?",
+          textAlign: TextAlign.center,
+          style: AppStyles.titleStyleH2,
+        ),
+        SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            ElevatedButton(
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: AppColors.defaultColor,
+                  border: Border.all(color: AppColors.defaultColor),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                ),
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  alignment: Alignment.center,
+                  height: 50,
+                  child: Text(
+                    "Reprendre",
+                    style: AppStyles.buttonTextWhite,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                _reprendreRechercheButton();
+              },
+              style: ElevatedButton.styleFrom(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  onPrimary: AppColors.white.withOpacity(0.1),
+                  primary: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  textStyle:
+                      TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            ),
+            ElevatedButton(
+              child: Ink(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  border: Border.all(color: AppColors.defaultColor),
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(8),
+                  ),
+                ),
+                child: Container(
+                  alignment: Alignment.center,
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  height: 50,
+                  child: Text(
+                    "NOUVELLE RECHERCHE",
+                    style: AppStyles.buttonTextPink,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              onPressed: () {
+                setState(() {
+                  sharedPref.remove(AppConstants.LAST_FILTER);
+                  bloc.reinitCurrentFilter();
+                  lastSearchFound = false;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                  elevation: 5,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20)),
+                  onPrimary: AppColors.defaultColor.withOpacity(0.1),
+                  primary: Colors.transparent,
+                  padding: EdgeInsets.zero,
+                  textStyle:
+                      TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            ),
+          ],
+        ),
+      ]),
     );
   }
 
@@ -345,9 +474,6 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
     bloc.currentFilter.surInterieurMin = 0.0;
     bloc.currentFilter.surExterieurMin = 0.0;
     bloc.currentFilter.surExterieurMax = 0.0;
-
-    print("la longueur d'oid communes dans le bloc" +
-        bloc.currentFilter.listPlaces.length.toString());
     bloc.currentFilter.listPlaces.forEach((element) {
       print(element.code);
     });
@@ -358,6 +484,54 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
         : selectionType == 1
             ? bloc.currentFilter.listTypeVente.add(typeVentes[0])
             : null;
+    Modular.to.pushNamed(Routes.searchResults);
+  }
+
+  _launchPrecedentSearch(FilterModels model) {
+    //save the data we need
+    double _rayon = model.rayon == null ? null : model.rayon;
+    if (bloc.currentFilter.listPlaces.length == 0) {
+      _rayon = 0.0;
+    }
+    // we clear the filters
+    bloc.currentFilter.priceMin = model.priceMin == null ? 0.0 : model.priceMin;
+    bloc.currentFilter.priceMax = model.priceMax == null ? 0.0 : model.priceMax;
+    bloc.currentFilter.piecesMax =
+        model.piecesMax == null ? 0.0 : model.piecesMax;
+    bloc.currentFilter.piecesMin =
+        model.piecesMin == null ? 0.0 : model.piecesMin;
+    bloc.currentFilter.reference = null;
+    bloc.currentFilter.chambresMin =
+        model.chambresMin == null ? 0 : model.chambresMin;
+    bloc.currentFilter.chambresMax =
+        model.chambresMax == null ? 0 : model.chambresMax;
+    bloc.currentFilter.surInterieurMax =
+        model.surInterieurMax == null ? 0.0 : model.surInterieurMax;
+    bloc.currentFilter.surInterieurMin =
+        model.surInterieurMin == null ? 0.0 : model.surInterieurMin;
+    bloc.currentFilter.surExterieurMin =
+        model.surExterieurMin == null ? 0.0 : model.surExterieurMin;
+    bloc.currentFilter.surExterieurMax =
+        model.surExterieurMax == null ? 0.0 : model.surExterieurMax;
+    bloc.currentFilter.listPlaces.clear();
+    if (model.listPlaces.length != 0) {
+      bloc.currentFilter.listPlaces.addAll(model.listPlaces);
+    }
+    bloc.currentFilter.rayon = _rayon;
+    bloc.currentFilter.listTypeVente.clear();
+    if (model.listTypeVente.length != 0) {
+      model.listTypeVente.forEach((element) {
+        bloc.currentFilter.listTypeVente
+            .add(TypeVentesEnumeration.findTypeVenteByCode(element.code));
+      });
+    }
+    bloc.currentFilter.listtypeDeBien.clear();
+    if (model.listtypeDeBien.length != 0) {
+      model.listtypeDeBien.forEach((element) {
+        bloc.currentFilter.listtypeDeBien
+            .add(TypeBienEnumeration.findTypeBienByCode(element.code));
+      });
+    }
     Modular.to.pushNamed(Routes.searchResults);
   }
 }

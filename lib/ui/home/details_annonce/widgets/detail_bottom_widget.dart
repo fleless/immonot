@@ -8,7 +8,11 @@ import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
+import 'package:immonot/ui/home/home_bloc.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_indicator/page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -27,6 +31,9 @@ class DetailBotttomWidget extends StatefulWidget {
 class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
   DetailAnnonceResponse _item;
+  final bloc = Modular.get<HomeBloc>();
+  final favorisBloc = Modular.get<FavorisBloc>();
+  final sessionController = Modular.get<SessionController>();
 
   @override
   void initState() {
@@ -89,11 +96,20 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
                   ),
                   InkWell(
                     splashColor: AppColors.white,
-                    onTap: () {},
+                    onTap: () async {
+                      await sessionController.isSessionConnected()
+                          ? _addOrDeleteFavori(_item,
+                              _item.favori == null ? false : _item.favori)
+                          : _showConnectionDialog();
+                    },
                     child: Column(
                       children: [
                         FaIcon(FontAwesomeIcons.solidHeart,
-                            color: AppColors.white.withOpacity(0.6)),
+                            color: _item.favori == null
+                                ? AppColors.white.withOpacity(0.6)
+                                : _item.favori
+                                    ? AppColors.white.withOpacity(1)
+                                    : AppColors.white.withOpacity(0.6)),
                         Text("Sauvegarder", style: AppStyles.detailsBottomStyle)
                       ],
                     ),
@@ -142,4 +158,53 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
   void _callPhone(String phone) async => await canLaunch("tel:" + phone)
       ? await launch("tel:" + phone)
       : throw 'Could not launch';
+
+  _addOrDeleteFavori(DetailAnnonceResponse item, bool isFavoris) async {
+    if (isFavoris) {
+      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = false;
+        });
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = true;
+        });
+      }
+    }
+  }
+
+  _loadAnnonce() async {
+    DetailAnnonceResponse resp = await bloc.getDetailAnnonce(_item.oidAnnonce);
+    if (resp != null) {
+      if (resp.favori != null) {
+        if (resp.favori) {
+          setState(() {
+            _item.favori = true;
+          });
+        }
+      } else {
+        setState(() {
+          _item.favori = false;
+        });
+      }
+    } else {
+      setState(() {
+        _item.favori = false;
+      });
+    }
+  }
+
+  _showConnectionDialog() {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
+    ).then((value) async =>
+        await sessionController.isSessionConnected() ? _loadAnnonce() : null);
+  }
 }

@@ -23,10 +23,12 @@ class Routes {
   static const String profil = '/profil';
   static const String infoConseilWebView = '/infoConseilWebView';
   static const String annuaireWebView = '/annuaireWebView';
+  static const String alertes = '/alertes';
 
   // Utility method used to build a dynamic route with params.
   // Example: Routes.buildRouteWithParams('/users/{id}, {'id': 1}); would generate '/users/1'
-  String buildRouteWithParams(final String route, final Map<String, dynamic> params) {
+  String buildRouteWithParams(
+      final String route, final Map<String, dynamic> params) {
     return interpolation.eval(route, params);
   }
 }

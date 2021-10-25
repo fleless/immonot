@@ -52,7 +52,7 @@ class AppStyles {
     fontFamily: 'openSans',
     color: AppColors.default_black,
     fontWeight: FontWeight.w400,
-    fontSize: 16,
+    fontSize: 15,
   );
 
   static const textNormalTitleStyle = TextStyle(

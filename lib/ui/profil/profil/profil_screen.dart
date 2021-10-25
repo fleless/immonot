@@ -10,6 +10,8 @@ import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/profil/auth/auth_bloc.dart';
 import 'package:immonot/ui/profil/profil/profil_bloc.dart';
+import 'package:immonot/ui/profil/profil/widgets/my_params_widget.dart';
+import 'package:immonot/ui/profil/profil/widgets/my_profil_widget.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 
@@ -45,21 +47,19 @@ class _ProfilScreenState extends State<ProfilScreen> {
           onTap: () {
             FocusScope.of(context).requestFocus(new FocusNode());
           },
-          child: SingleChildScrollView(
-            child: Container(
-              width: double.infinity,
-              child: Padding(
-                padding: EdgeInsets.only(top: 50, right: 15, left: 15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text("Mon compte", style: AppStyles.titleStyle),
-                    SizedBox(height: 15),
-                    _buildContent(),
-                    SizedBox(height: 15),
-                  ],
-                ),
+          child: Container(
+            width: double.infinity,
+            height: double.infinity,
+            child: Padding(
+              padding: EdgeInsets.only(top: 50, right: 15, left: 15),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Text("Mon compte", style: AppStyles.titleStyle),
+                  SizedBox(height: 15),
+                  Expanded(child: _buildContent()),
+                ],
               ),
             ),
           ),
@@ -74,14 +74,13 @@ class _ProfilScreenState extends State<ProfilScreen> {
   Widget _buildContent() {
     return Container(
       width: double.infinity,
-      height: 150,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           _buildTitle(),
           SizedBox(height: 15),
           Expanded(
-            child: selectedPage == 0 ? SizedBox.shrink() : SizedBox.shrink(),
+            child: selectedPage == 0 ? MyProfilWidget() : MyParamsWidget(),
           ),
         ],
       ),

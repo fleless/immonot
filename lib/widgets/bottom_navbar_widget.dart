@@ -5,6 +5,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/widgets/show_calculatrice_modal_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'dart:ui' as ui;
@@ -19,6 +21,7 @@ class BottomNavbar extends StatefulWidget {
 }
 
 class _BottomNavbarState extends State<BottomNavbar> {
+  final sessionController = Modular.get<SessionController>();
   final double iconSize = 22;
 
   void _navigateTo(String route, [Object args]) {
@@ -95,10 +98,10 @@ class _BottomNavbarState extends State<BottomNavbar> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _buildNotifIcon(widget.route == "not"),
+                  _buildNotifIcon(widget.route == Routes.alertes),
                   Text(
                     'Alertes',
-                    style: widget.route == "d"
+                    style: widget.route == Routes.alertes
                         ? AppStyles.bottomNavTextStyle
                         : AppStyles.bottomNavTextNotSelectedStyle,
                     textAlign: TextAlign.center,
@@ -153,7 +156,9 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.favoris),
+        onPressed: () async => await sessionController.isSessionConnected()
+            ? _navigateTo(Routes.favoris)
+            : _showConnectionDialog(Routes.favoris),
       );
 
   Widget _builCalculatriceIcon(bool selected) => IconButton(
@@ -192,21 +197,38 @@ class _BottomNavbarState extends State<BottomNavbar> {
             ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
           ),
         ),
-        onPressed: () => _navigateTo(Routes.home, {'scroll': false}),
+        onPressed: () async => await sessionController.isSessionConnected()
+            ? _navigateTo(Routes.alertes)
+            : _showConnectionDialog(Routes.alertes),
       );
 
   Widget _buildProfileIcon(bool selected) => IconButton(
-        iconSize: iconSize,
-        icon: ConstrainedBox(
-          constraints: const BoxConstraints(minWidth: 50.0),
-          child: Center(
-            child: FaIcon(
-              FontAwesomeIcons.user,
-              color:
-                  selected ? AppColors.defaultColor : AppColors.default_black,
-            ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
-          ),
+      iconSize: iconSize,
+      icon: ConstrainedBox(
+        constraints: const BoxConstraints(minWidth: 50.0),
+        child: Center(
+          child: FaIcon(
+            FontAwesomeIcons.user,
+            color: selected ? AppColors.defaultColor : AppColors.default_black,
+          ), //AppIcons.home(color: selected ? AppColors.green : AppColors.iconDefault),
         ),
-        onPressed: () => _navigateTo(Routes.auth),
-      );
+      ),
+      onPressed: () async => _navigateTo(
+          await sessionController.isSessionConnected()
+              ? Routes.profil
+              : Routes.auth,
+          await sessionController.isSessionConnected()
+              ? null
+              : {'openedAsDialog': false}));
+
+  _showConnectionDialog(String route) {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
+    ).then((value) async {
+      await sessionController.isSessionConnected() ? _navigateTo(route) : null;
+    });
+  }
 }

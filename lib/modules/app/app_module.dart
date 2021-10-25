@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/routes.dart';
+import 'package:immonot/ui/alertes/alertes_bloc.dart';
+import 'package:immonot/ui/alertes/alertes_screen.dart';
 import 'package:immonot/ui/calculatrice/calculatrice_bloc.dart';
 import 'package:immonot/ui/calculatrice/calculatrice_screen.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
@@ -23,6 +25,8 @@ import 'package:immonot/ui/profil/auth/password_forgotten.dart';
 import 'package:immonot/ui/profil/profil/profil_bloc.dart';
 import 'package:immonot/ui/profil/profil/profil_screen.dart';
 import 'package:immonot/ui/splash/splash_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
+import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'app_widget.dart';
 
@@ -34,9 +38,12 @@ class AppModule extends MainModule {
         Bind((_) => FilterBloc()), // Injecting a BLoC
         Bind((_) => UserLocation()), // Injecting userLocation
         Bind((_) => FavorisBloc()), // Injecting a BLoC
+        Bind((_) => AlertesBloc()), // Injecting a BLoC
         Bind((_) => CalculatriceBloc()), // Injecting a BLoC
         Bind((_) => AuthBloc()),
         Bind((_) => ProfilBloc()),
+        Bind((_) => SharedPref()),
+        Bind((_) => SessionController()),
       ];
 
   // Provide all the routes for your module
@@ -81,12 +88,15 @@ class AppModule extends MainModule {
             ModularRouter(Routes.favoris, child: (_, args) => FavorisScreen()),
             ModularRouter(Routes.calculatrice,
                 child: (_, args) => CalculatriceScreen(args.data['index'])),
-            ModularRouter(Routes.auth, child: (_, args) => AuthScreen()),
+            ModularRouter(Routes.auth,
+                child: (_, args) => AuthScreen(args.data['openedAsDialog'])),
             ModularRouter(Routes.profil, child: (_, args) => ProfilScreen()),
             ModularRouter(Routes.infoConseilWebView,
                 child: (_, args) => InfoConseilWebView(args.data['url'])),
             ModularRouter(Routes.annuaireWebView,
-                child: (_, args) => AnnuaireWebView(args.data['url'],args.data['ville'],args.data['nom'])),
+                child: (_, args) => AnnuaireWebView(
+                    args.data['url'], args.data['ville'], args.data['nom'])),
+            ModularRouter(Routes.alertes, child: (_, args) => AlertesScreen()),
           ],
         ),
       ];

@@ -1,10 +1,10 @@
-import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'DetailAnnonceResponse.dart';
 
-class SearchResponse {
+class GetFavorisResponse {
   List<Content> content;
   Pageable pageable;
-  num totalPages;
   num totalElements;
+  num totalPages;
   bool last;
   num number;
   Sort sort;
@@ -13,11 +13,11 @@ class SearchResponse {
   bool first;
   bool empty;
 
-  SearchResponse(
+  GetFavorisResponse(
       {this.content,
       this.pageable,
-      this.totalPages,
       this.totalElements,
+      this.totalPages,
       this.last,
       this.number,
       this.sort,
@@ -26,7 +26,7 @@ class SearchResponse {
       this.first,
       this.empty});
 
-  SearchResponse.fromJson(Map<String, dynamic> json) {
+  GetFavorisResponse.fromJson(Map<String, dynamic> json) {
     if (json['content'] != null) {
       content = new List<Content>();
       json['content'].forEach((v) {
@@ -36,8 +36,8 @@ class SearchResponse {
     pageable = json['pageable'] != null
         ? new Pageable.fromJson(json['pageable'])
         : null;
-    totalPages = json['totalPages'];
     totalElements = json['totalElements'];
+    totalPages = json['totalPages'];
     last = json['last'];
     number = json['number'];
     sort = json['sort'] != null ? new Sort.fromJson(json['sort']) : null;
@@ -55,8 +55,8 @@ class SearchResponse {
     if (this.pageable != null) {
       data['pageable'] = this.pageable.toJson();
     }
-    data['totalPages'] = this.totalPages;
     data['totalElements'] = this.totalElements;
+    data['totalPages'] = this.totalPages;
     data['last'] = this.last;
     data['number'] = this.number;
     if (this.sort != null) {
@@ -71,68 +71,96 @@ class SearchResponse {
 }
 
 class Content {
+  num oidFavori;
+  String oidAnnonce;
+  bool alertePrix;
+  Annonce annonce;
+
+  Content({this.oidFavori, this.oidAnnonce, this.alertePrix, this.annonce});
+
+  Content.fromJson(Map<String, dynamic> json) {
+    oidFavori = json['oidFavori'];
+    oidAnnonce = json['oidAnnonce'];
+    alertePrix = json['alertePrix'];
+    annonce =
+        json['annonce'] != null ? new Annonce.fromJson(json['annonce']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['oidFavori'] = this.oidFavori;
+    data['oidAnnonce'] = this.oidAnnonce;
+    data['alertePrix'] = this.alertePrix;
+    if (this.annonce != null) {
+      data['annonce'] = this.annonce.toJson();
+    }
+    return data;
+  }
+}
+
+class Annonce {
   String oidAnnonce;
   String oidNotaire;
   String typeVente;
   String typeVenteCode;
-  bool coupDeCoeur;
-  bool prixEnBaisse;
-  bool favori;
   String typeBien;
   String typeBienCode;
   bool affichePrix;
   String prixLigne1;
   String prixLigne2;
   String prixLigne3;
+  String titre;
+  String descriptif;
   bool afficheCommune;
+  bool coupDeCoeur;
   Commune commune;
   Photo photo;
   Caracteristiques caracteristiques;
-  Contactt contact;
+  Contact contact;
 
-  Content(
+  Annonce(
       {this.oidAnnonce,
       this.oidNotaire,
       this.typeVente,
       this.typeVenteCode,
-      this.coupDeCoeur,
-      this.prixEnBaisse,
       this.typeBien,
-      this.favori,
       this.typeBienCode,
       this.affichePrix,
       this.prixLigne1,
       this.prixLigne2,
       this.prixLigne3,
+        this.titre,
+      this.descriptif,
       this.afficheCommune,
+      this.coupDeCoeur,
       this.commune,
       this.photo,
-      this.contact,
-      this.caracteristiques});
+      this.caracteristiques,
+      this.contact});
 
-  Content.fromJson(Map<String, dynamic> json) {
+  Annonce.fromJson(Map<String, dynamic> json) {
     oidAnnonce = json['oidAnnonce'];
     oidNotaire = json['oidNotaire'];
     typeVente = json['typeVente'];
     typeVenteCode = json['typeVenteCode'];
     typeBien = json['typeBien'];
-    favori = json['favori'];
     typeBienCode = json['typeBienCode'];
     affichePrix = json['affichePrix'];
-    prixEnBaisse = json['prixEnBaisse'];
     prixLigne1 = json['prixLigne1'];
     prixLigne2 = json['prixLigne2'];
     prixLigne3 = json['prixLigne3'];
-    coupDeCoeur = json['coupDeCoeur'];
+    titre = json['titre'];
+    descriptif = json['descriptif'];
     afficheCommune = json['afficheCommune'];
-    contact =
-        json['contact'] != null ? new Contactt.fromJson(json['contact']) : null;
+    coupDeCoeur = json['coupDeCoeur'];
     commune =
         json['commune'] != null ? new Commune.fromJson(json['commune']) : null;
     photo = json['photo'] != null ? new Photo.fromJson(json['photo']) : null;
     caracteristiques = json['caracteristiques'] != null
         ? new Caracteristiques.fromJson(json['caracteristiques'])
         : null;
+    contact =
+        json['contact'] != null ? new Contact.fromJson(json['contact']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -142,18 +170,15 @@ class Content {
     data['typeVente'] = this.typeVente;
     data['typeVenteCode'] = this.typeVenteCode;
     data['typeBien'] = this.typeBien;
-    data['favori'] = this.favori;
     data['typeBienCode'] = this.typeBienCode;
-    data['prixEnBaisse'] = this.prixEnBaisse;
     data['affichePrix'] = this.affichePrix;
     data['prixLigne1'] = this.prixLigne1;
     data['prixLigne2'] = this.prixLigne2;
     data['prixLigne3'] = this.prixLigne3;
-    data['coupDeCoeur'] = this.coupDeCoeur;
+    data['titre'] = this.titre;
+    data['descriptif'] = this.descriptif;
     data['afficheCommune'] = this.afficheCommune;
-    if (this.contact != null) {
-      data['contact'] = this.contact.toJson();
-    }
+    data['coupDeCoeur'] = this.coupDeCoeur;
     if (this.commune != null) {
       data['commune'] = this.commune.toJson();
     }
@@ -163,19 +188,25 @@ class Content {
     if (this.caracteristiques != null) {
       data['caracteristiques'] = this.caracteristiques.toJson();
     }
+    if (this.contact != null) {
+      data['contact'] = this.contact.toJson();
+    }
     return data;
   }
 }
 
 class Commune {
+  String code;
   String nom;
   String codePostal;
   num latitude;
   num longitude;
 
-  Commune({this.nom, this.codePostal, this.latitude, this.longitude});
+  Commune(
+      {this.code, this.nom, this.codePostal, this.latitude, this.longitude});
 
   Commune.fromJson(Map<String, dynamic> json) {
+    code = json['code'];
     nom = json['nom'];
     codePostal = json['codePostal'];
     latitude = json['latitude'];
@@ -184,6 +215,7 @@ class Commune {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['code'] = this.code;
     data['nom'] = this.nom;
     data['codePostal'] = this.codePostal;
     data['latitude'] = this.latitude;
@@ -193,7 +225,7 @@ class Commune {
 }
 
 class Photo {
-  int count;
+  num count;
   String principale;
   String principaleThumb;
 
@@ -300,22 +332,6 @@ class Sort {
     data['sorted'] = this.sorted;
     data['unsorted'] = this.unsorted;
     data['empty'] = this.empty;
-    return data;
-  }
-}
-
-class Contactt {
-  String nom;
-
-  Contactt({this.nom});
-
-  Contactt.fromJson(Map<String, dynamic> json) {
-    nom = json['nom'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['nom'] = this.nom;
     return data;
   }
 }

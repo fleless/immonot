@@ -82,16 +82,26 @@ class UserLocation extends Disposable {
   Future<String> getUserDepartment() async {
     Position position = await determinePosition();
     List<Placemark> placemarks =
-    await placemarkFromCoordinates(position.latitude, position.longitude);
+        await placemarkFromCoordinates(position.latitude, position.longitude);
     String address = placemarks.first.locality;
     print(address);
     return address;
   }
 
-
   Future<bool> checkIfGPSEnabled() async {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  Future<bool> checkIfLocalisationPermissionProvided() async {
+    LocationPermission permission;
+    permission = await Geolocator.checkPermission();
+    if ((permission == LocationPermission.denied) ||
+        (permission == LocationPermission.deniedForever)) {
       return false;
     } else {
       return true;

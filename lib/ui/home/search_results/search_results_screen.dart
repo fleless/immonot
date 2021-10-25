@@ -1,25 +1,24 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
-import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fakeResults.dart';
+import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
+import 'package:immonot/ui/alertes/alertes_bloc.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/filter_screen.dart';
 import 'package:immonot/ui/home/search_results/honoraires/honoraire_bottom_sheet.dart';
 import 'package:immonot/ui/home/search_results/tri_bottom_sheet.dart';
-import 'package:immonot/ui/home/widgets/home_annuaire_notaires.dart';
-import 'package:immonot/ui/home/widgets/home_header.dart';
-import 'package:immonot/ui/home/widgets/home_info_conseils.dart';
 import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_result.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/flushbar_utils.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import "dart:ui" as ui;
@@ -33,14 +32,20 @@ class SearchResultsScreen extends StatefulWidget {
 class _SearchResultsScreenState extends State<SearchResultsScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   ScrollController _controller;
+  TextEditingController _nameController = TextEditingController();
   final bloc = Modular.get<HomeBloc>();
   final filterBloc = Modular.get<FilterBloc>();
+  final favorisBloc = Modular.get<FavorisBloc>();
+  final alertesBloc = Modular.get<AlertesBloc>();
+  final sessionController = Modular.get<SessionController>();
   final _searchController = TextEditingController();
   bool loading = false;
   bool _showPaginationLoader = false;
   List<Content> searchList = <Content>[];
   SearchResponse _searchResponse = SearchResponse(totalElements: 0);
   bool scrolling = false;
+  final _formKey = GlobalKey<FormState>();
+  bool _buttonDialogLoading = false;
 
   @override
   void initState() {
@@ -129,11 +134,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             typeVentes: _typeVentesFormatted,
             references: _references,
             oidCommunes: _oidCommunes,
-            //TODO: fix api for departments and rayons
             departements: _oidDepartements,
-            rayons: _oidCommunes.length + _oidDepartements.length == 0 < 2
-                ? null
-                : _rayons,
+            rayons: _oidCommunes.length == 0 ? null : _rayons,
             typeBiens: _typeBiens,
             prix: _prix == "0.00,0.00" ? null : _prix,
             surfaceExterieure:
@@ -142,7 +144,9 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                 _surfaceInterieur == "0.00,0.00" ? null : _surfaceInterieur,
             nbPieces: _nbPieces == "0,0" ? null : _nbPieces,
             nbChambres: _nbChambres == "0,0" ? null : _nbChambres),
-        bloc.tri);
+        bloc.tri,
+        true,
+        bloc.currentFilter);
     bloc.tri = null;
     if (pageNumber == 0) {
       _firstSearh(resp);
@@ -463,11 +467,25 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           Positioned(
             top: 15.0,
             right: 15.0,
-            child: CircleAvatar(
-                child: FaIcon(FontAwesomeIcons.solidHeart,
-                    color: AppColors.default_black, size: 18),
-                radius: 17.0,
-                backgroundColor: AppColors.white),
+            child: InkWell(
+              splashColor: AppColors.defaultColor,
+              onTap: () async {
+                await sessionController.isSessionConnected()
+                    ? _addOrDeleteFavori(
+                        fake, fake.favori == null ? false : fake.favori)
+                    : _showConnectionDialog();
+              },
+              child: CircleAvatar(
+                  child: FaIcon(FontAwesomeIcons.solidHeart,
+                      color: fake.favori == null
+                          ? AppColors.default_black
+                          : fake.favori
+                              ? AppColors.defaultColor
+                              : AppColors.default_black,
+                      size: 18),
+                  radius: 17.0,
+                  backgroundColor: AppColors.white),
+            ),
           ),
           Positioned(
             bottom: 15.0,
@@ -777,6 +795,23 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
       bottom: 10,
       right: 15,
       child: InkWell(
+        onTap: () async {
+          if (await sessionController.isSessionConnected()) {
+            _saveSearch();
+          } else {
+            if (!loading)
+              showCupertinoModalBottomSheet(
+                context: context,
+                expand: false,
+                enableDrag: true,
+                builder: (context) => AuthScreen(true),
+              ).then((value) async {
+                await sessionController.isSessionConnected()
+                    ? _saveSearch()
+                    : null;
+              });
+          }
+        },
         child: Card(
           clipBehavior: Clip.antiAliasWithSaveLayer,
           shape: RoundedRectangleBorder(
@@ -804,6 +839,23 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     return Align(
       alignment: FractionalOffset.bottomCenter,
       child: InkWell(
+        onTap: () async {
+          if (await sessionController.isSessionConnected()) {
+            _saveSearch();
+          } else {
+            if (!loading)
+              showCupertinoModalBottomSheet(
+                context: context,
+                expand: false,
+                enableDrag: true,
+                builder: (context) => AuthScreen(true),
+              ).then((value) async {
+                await sessionController.isSessionConnected()
+                    ? _saveSearch()
+                    : null;
+              });
+          }
+        },
         child: Card(
           clipBehavior: Clip.antiAliasWithSaveLayer,
           shape: RoundedRectangleBorder(
@@ -843,6 +895,196 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  _addOrDeleteFavori(Content item, bool isFavoris) async {
+    if (isFavoris) {
+      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = false;
+        });
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = true;
+        });
+      }
+    }
+  }
+
+  _saveSearch() {
+    _nameController.text = "";
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        "Sauvegarder la recherche et créer une alerte",
+                        textAlign: TextAlign.center,
+                        style: AppStyles.titleStyleH2,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      color: AppColors.defaultColor,
+                      height: 5,
+                    ),
+                    SizedBox(height: 10),
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(vertical: 20, horizontal: 10),
+                      child: Form(
+                        key: _formKey,
+                        child: TextFormField(
+                          controller: _nameController,
+                          cursorColor: AppColors.defaultColor,
+                          style: AppStyles.textNormal,
+                          onChanged: (value) =>
+                              _formKey.currentState.validate(),
+                          decoration: InputDecoration(
+                            hintText: "Nom de l'alerte",
+                            hintStyle: AppStyles.hintSearch,
+                            enabledBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.hint),
+                            ),
+                            errorBorder: UnderlineInputBorder(
+                              borderSide: BorderSide(color: AppColors.alert),
+                            ),
+                            focusedBorder: UnderlineInputBorder(
+                              borderSide:
+                                  BorderSide(color: AppColors.defaultColor),
+                            ),
+                          ),
+                          validator: (value) {
+                            if (value.isEmpty) {
+                              return "Le nom est obligatoire";
+                            } else {
+                              return null;
+                            }
+                          },
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 5),
+                    Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerRight,
+                      child: Center(
+                        child: ElevatedButton(
+                          child: Text("Sauvegarder",
+                              style: AppStyles.buttonTextWhite,
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 2),
+                          onPressed: () async {
+                            if (_formKey.currentState.validate()) {
+                              if (!loading) _goSaveAlerte();
+                            }
+                          },
+                          style: ElevatedButton.styleFrom(
+                              elevation: 1,
+                              onPrimary: AppColors.white,
+                              primary: AppColors.defaultColor,
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: 10, vertical: 15),
+                              textStyle: TextStyle(
+                                  fontSize: 30, fontWeight: FontWeight.bold)),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+        }).then((value) => setState(() {}));
+  }
+
+  _goSaveAlerte() async {
+    setState(() {
+      _buttonDialogLoading = true;
+    });
+    //We parse the current Filter to create alert request
+    CreateAlerteRequest req = CreateAlerteRequest();
+    Recherche contenu = Recherche();
+    contenu.rayons = <int>[];
+    contenu.prix = <int>[];
+    contenu.surfaceInterieure = <int>[];
+    contenu.surfaceExterieure = <int>[];
+    contenu.nbPieces = <int>[];
+    contenu.nbChambres = <int>[];
+    contenu.departements = <String>[];
+    contenu.oidCommunes = <String>[];
+    contenu.typeBiens = <String>[];
+    contenu.typeVentes = <String>[];
+
+    req.nom = _nameController.text;
+    req.token = "";
+    req.commentaire = "";
+    contenu.rayons.add(int.parse(bloc.currentFilter.rayon.toStringAsFixed(0)));
+    contenu.prix.add(int.parse(bloc.currentFilter.priceMin.toStringAsFixed(0)));
+    contenu.prix.add(int.parse(bloc.currentFilter.priceMax.toStringAsFixed(0)));
+    contenu.surfaceInterieure
+        .add(int.parse(bloc.currentFilter.surInterieurMin.toStringAsFixed(0)));
+    contenu.surfaceInterieure
+        .add(int.parse(bloc.currentFilter.surInterieurMax.toStringAsFixed(0)));
+    contenu.surfaceExterieure
+        .add(int.parse(bloc.currentFilter.surExterieurMin.toStringAsFixed(0)));
+    contenu.surfaceExterieure
+        .add(int.parse(bloc.currentFilter.surExterieurMax.toStringAsFixed(0)));
+    contenu.nbPieces
+        .add(int.parse(bloc.currentFilter.piecesMin.toStringAsFixed(0)));
+    contenu.nbPieces
+        .add(int.parse(bloc.currentFilter.piecesMax.toStringAsFixed(0)));
+    contenu.nbChambres
+        .add(int.parse(bloc.currentFilter.chambresMin.toStringAsFixed(0)));
+    contenu.nbChambres
+        .add(int.parse(bloc.currentFilter.chambresMin.toStringAsFixed(0)));
+    bloc.currentFilter.listPlaces.forEach((element) {
+      element.code.length == 2
+          ? contenu.departements.add(element.code)
+          : contenu.oidCommunes.add(element.code);
+    });
+    bloc.currentFilter.listTypeVente.forEach((element) {
+      contenu.typeVentes.add(element.code);
+    });
+    bloc.currentFilter.listtypeDeBien.forEach((element) {
+      contenu.typeBiens.add(element.code);
+    });
+    req.recherche = contenu;
+    bool resp = await alertesBloc.addAlerte(req);
+    if (resp) {
+      Modular.to.pop();
+      showSuccessToast(context, "Votre alerte a été sauvegardé");
+    } else {
+      showErrorToast(context, 'Une erreur est survenue');
+    }
+    setState(() {
+      _buttonDialogLoading = false;
+    });
+  }
+
+  _showConnectionDialog() {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
     );
   }
 

@@ -7,6 +7,7 @@ class DetailAnnonceResponse {
   String typeBienCode;
   String titre;
   String descriptif;
+  bool favori;
   bool coupDeCoeur;
   bool prixEnBaisse;
   bool affichePrix;
@@ -29,6 +30,7 @@ class DetailAnnonceResponse {
       this.typeBien,
       this.typeBienCode,
       this.titre,
+      this.favori,
       this.descriptif,
       this.coupDeCoeur,
       this.prixEnBaisse,
@@ -51,6 +53,7 @@ class DetailAnnonceResponse {
     typeBien = json['typeBien'];
     typeBienCode = json['typeBienCode'];
     titre = json['titre'];
+    favori = json['favori'];
     descriptif = json['descriptif'];
     coupDeCoeur = json['coupDeCoeur'];
     prixEnBaisse = json['prixEnBaisse'];
@@ -83,6 +86,7 @@ class DetailAnnonceResponse {
     data['typeBien'] = this.typeBien;
     data['typeBienCode'] = this.typeBienCode;
     data['titre'] = this.titre;
+    data['favori'] = this.favori;
     data['descriptif'] = this.descriptif;
     data['coupDeCoeur'] = this.coupDeCoeur;
     data['prixEnBaisse'] = this.prixEnBaisse;

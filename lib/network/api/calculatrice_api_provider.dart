@@ -20,15 +20,15 @@ class CalculatriceApiProvider {
     if (_dio == null) {
       BaseOptions options = new BaseOptions(
           receiveDataWhenStatusError: true,
-          connectTimeout: 2 * 1000, // 5 seconds
-          receiveTimeout: 2 * 1000 // 5 seconds
+          connectTimeout: 60 * 1000, // 5 seconds
+          receiveTimeout: 60 * 1000 // 5 seconds
           );
 
       _dio = new Dio(options);
       _dio.interceptors.add(PrettyDioLogger(
-          requestHeader: true,
-          requestBody: true,
-          responseBody: true,
+          requestHeader: false,
+          requestBody: false,
+          responseBody: false,
           responseHeader: false,
           error: true,
           compact: true,

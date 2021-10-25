@@ -11,8 +11,11 @@ import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/requests/create_account_request.dart';
 import 'package:immonot/models/responses/newsletter_response.dart';
 import 'package:immonot/ui/profil/auth/auth_bloc.dart';
+import 'package:immonot/ui/profil/profil/profil_bloc.dart';
+import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/utils/launchUrl.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
@@ -25,6 +28,7 @@ class CreationCompteScreen extends StatefulWidget {
 class _CreationCompteScreenState extends State<CreationCompteScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final bloc = Modular.get<AuthBloc>();
+  final _profilBloc = Modular.get<ProfilBloc>();
   final _formKey = GlobalKey<FormState>();
 
   // 1 pour homme ; 2 pour femme
@@ -38,6 +42,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
   bool _newsLetter = false;
   bool _magazine = false;
   bool _info = false;
+  bool _loading = false;
 
   @override
   Future<void> initState() {
@@ -166,15 +171,48 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.BTN_CMN_RADIUS),
               child: ElevatedButton(
-                child: Text("CRÉER MON COMPTE",
-                    style: AppStyles.buttonTextWhite,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1),
-                onPressed: () {
+                child: _loading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.white, strokeWidth: 1.0),
+                      )
+                    : Text("CRÉER MON COMPTE",
+                        style: AppStyles.buttonTextWhite,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1),
+                onPressed: () async {
+                  setState(() {
+                    _loading = true;
+                  });
                   if (_formKey.currentState.validate()) {
-                    print("validate");
+                    CreateAccountRequest data = CreateAccountRequest(
+                        backlink:
+                            "https://core-immonot.notariat.services/inbound/registration-confirmation",
+                        civilite: _civilityController == 1 ? "M" : "MME",
+                        nom: _nomController.text,
+                        prenom: _prenomController.text,
+                        codePostal: _zipController.text,
+                        email: _emailController.text,
+                        password: _mdpController.text,
+                        confirmPassword: _confirmMdpController.text,
+                        subscribeMagazineDesNotaires: _magazine,
+                        subscribeInfosPartenaires: _info,
+                        subscribeNewsletterImmonot: _newsLetter);
+                    int resp = await _profilBloc.createAccount(data);
+                    if (resp == 1) {
+                      Modular.to.popAndPushNamed(Routes.auth,
+                          arguments: {'openedAsDialog': false});
+                      showSuccessToast(context, "Utilisateur créé avec succès");
+                    } else if (resp == 2) {
+                      showErrorToast(
+                          context, "Cet utilisateur a déjà un compte");
+                    } else {
+                      showErrorToast(context, "Une erreur est survenue");
+                    }
                   }
-                  print("not validate");
+                  setState(() {
+                    _loading = false;
+                  });
                 },
                 style: ElevatedButton.styleFrom(
                     elevation: 3,
@@ -256,7 +294,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -266,8 +303,21 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   controller: _nomController,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -302,7 +352,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -312,8 +361,21 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   controller: _prenomController,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -348,7 +410,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -358,8 +419,21 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   controller: _emailController,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.emailAddress,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -396,7 +470,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -409,8 +482,21 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   ],
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.number,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -445,7 +531,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -456,8 +541,21 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   obscureText: true,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -465,7 +563,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                     hintStyle: AppStyles.hintSearch,
                   ),
                   validator: (String value) {
-                    if (value.trim().isEmpty) {
+                    if ((value.trim().isEmpty) || (value.length < 8)) {
                       return "";
                     }
                     return null;
@@ -492,7 +590,6 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             width: double.infinity,
             child: Card(
               shape: RoundedRectangleBorder(
-                  side: new BorderSide(color: AppColors.hint, width: 0.2),
                   borderRadius: BorderRadius.circular(4.0)),
               elevation: 2,
               shadowColor: AppColors.hint,
@@ -502,9 +599,22 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   controller: _confirmMdpController,
                   obscureText: true,
                   cursorColor: AppColors.defaultColor,
-                  keyboardType: TextInputType.number,
+                  keyboardType: TextInputType.text,
+                  onChanged: (value) => _formKey.currentState.validate(),
                   decoration: const InputDecoration(
-                    border: InputBorder.none,
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
                     contentPadding: EdgeInsets.only(
                         bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
@@ -614,7 +724,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
     );
   }
 
-   Widget buildRGPD() {
+  Widget buildRGPD() {
     return Align(
       alignment: Alignment.centerLeft,
       child: TextButton(

@@ -9,6 +9,7 @@ import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/profil/auth/auth_bloc.dart';
+import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 
@@ -22,6 +23,7 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
   final bloc = Modular.get<AuthBloc>();
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
+  bool _loading = false;
 
   @override
   Future<void> initState() {
@@ -89,7 +91,7 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
                   alignment: Alignment.topLeft,
                   child: IconButton(
                     splashColor: AppColors.white,
-                    onPressed: (){
+                    onPressed: () {
                       Modular.to.pop();
                     },
                     icon: FaIcon(
@@ -129,12 +131,16 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
       text: TextSpan(
         children: [
           TextSpan(
-              text: "Cette page vous permet de réinitialiser votre mot de passe afin d'accéder aux services personnalisés d'immonot.com.\n\n", style: AppStyles.textNormal),
+              text:
+                  "Cette page vous permet de réinitialiser votre mot de passe afin d'accéder aux services personnalisés d'immonot.com.\n\n",
+              style: AppStyles.textNormal),
           TextSpan(
               text: "Vous êtes un internaute ?\n\n",
               style: AppStyles.mediumTitleStyle),
           TextSpan(
-              text: "Veuillez saisir votre adresse e-mail afin que nous puissions vous faire parvenir un e-mail de réinitialisation de mot de passe.\n\n", style: AppStyles.textNormal),
+              text:
+                  "Veuillez saisir votre adresse e-mail afin que nous puissions vous faire parvenir un e-mail de réinitialisation de mot de passe.\n\n",
+              style: AppStyles.textNormal),
         ],
       ),
     );
@@ -157,8 +163,21 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
                 controller: _emailController,
                 cursorColor: AppColors.defaultColor,
                 keyboardType: TextInputType.emailAddress,
+                onChanged: (value) => _formKey.currentState.validate(),
                 decoration: const InputDecoration(
-                  border: InputBorder.none,
+                  border: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.hint, width: 1),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.hint, width: 1),
+                  ),
+                  errorBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: AppColors.alert, width: 1),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        BorderSide(color: AppColors.defaultColor, width: 1),
+                  ),
                   contentPadding: EdgeInsets.only(
                       bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
                   errorStyle: TextStyle(height: 0),
@@ -188,15 +207,17 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(AppConstants.BTN_CMN_RADIUS),
               child: ElevatedButton(
-                child: Text("RÉCUPÉRER MOT DE PASSE",
-                    style: AppStyles.buttonTextWhite,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1),
+                child: _loading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                            color: AppColors.white, strokeWidth: 1.0),
+                      )
+                    : Text("RÉCUPÉRER MOT DE PASSE",
+                        style: AppStyles.buttonTextWhite,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1),
                 onPressed: () {
-                  if (_formKey.currentState.validate()) {
-                    print("validate");
-                  }
-                  print("not validate");
+                  _loading ? null : _goAction();
                 },
                 style: ElevatedButton.styleFrom(
                     elevation: 3,
@@ -212,5 +233,22 @@ class _ForgottenPasswordScreenState extends State<ForgottenPasswordScreen> {
         ],
       ),
     );
+  }
+
+  _goAction() async {
+    setState(() {
+      _loading = true;
+    });
+    if (_formKey.currentState.validate()) {
+      bool resp = await bloc.forgottenPassword(_emailController.text);
+      if (resp) {
+        showSuccessToast(context, "Un email vous a été envoyé");
+      } else {
+        showErrorToast(context, "Une erreur est survenue");
+      }
+    }
+    setState(() {
+      _loading = false;
+    });
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
@@ -7,6 +8,7 @@ import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/network/repository/places_repository.dart';
 import 'package:immonot/network/repository/search_annonces_repository.dart';
+import 'package:immonot/utils/shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
 
 class HomeBloc extends Disposable {
@@ -18,16 +20,19 @@ class HomeBloc extends Disposable {
   final changesNotifier = PublishSubject<bool>();
   final triNotifier = PublishSubject<String>();
   String tri;
+  final SharedPref sharedPref = SharedPref();
 
   Future<List<PlacesResponse>> searchPlaces(String item) async {
     List<PlacesResponse> response = await _placesRepository.searchPlaces(item);
     return response;
   }
 
-  Future<SearchResponse> searchAnnonces(
-      int pageNumber, SearchRequest request, String sort) async {
+  Future<SearchResponse> searchAnnonces(int pageNumber, SearchRequest request,
+      String sort, bool _saveSearch, FilterModels filterModel) async {
     SearchResponse response = await _searchAnnoncesRepository.searchAnnonces(
         pageNumber, request, sort);
+    //Save last search request params
+    if (_saveSearch) sharedPref.save(AppConstants.LAST_FILTER, filterModel);
     return response;
   }
 
@@ -56,5 +61,9 @@ class HomeBloc extends Disposable {
     controller.close();
     changesNotifier.close();
     triNotifier.close();
+  }
+
+  reinitCurrentFilter() {
+    currentFilter = FilterModels();
   }
 }

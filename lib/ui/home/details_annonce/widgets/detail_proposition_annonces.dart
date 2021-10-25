@@ -14,8 +14,12 @@ import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_horizontal.dart';
 import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_result.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_indicator/page_indicator.dart';
 
 import '../../home_bloc.dart';
@@ -37,6 +41,8 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
   DetailAnnonceResponse _fakeItem;
   final bloc = Modular.get<HomeBloc>();
+  final favorisBloc = Modular.get<FavorisBloc>();
+  final sessionController = Modular.get<SessionController>();
   bool loading = false;
   List<Content> searchList = <Content>[];
   SearchResponse _searchResponse = SearchResponse(totalElements: 0);
@@ -68,7 +74,9 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
             surfaceInterieure: "",
             nbPieces: "",
             nbChambres: ""),
-        bloc.tri);
+        bloc.tri,
+        false,
+        bloc.currentFilter);
     if (mounted)
       setState(() {
         searchList = resp.content;
@@ -147,11 +155,28 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
                             Positioned(
                               top: 15.0,
                               right: 15.0,
-                              child: CircleAvatar(
-                                  child: FaIcon(FontAwesomeIcons.solidHeart,
-                                      color: AppColors.default_black, size: 18),
-                                  radius: 17.0,
-                                  backgroundColor: AppColors.white),
+                              child: InkWell(
+                                splashColor: AppColors.defaultColor,
+                                onTap: () async {
+                                  await sessionController.isSessionConnected()
+                                      ? _addOrDeleteFavori(
+                                          item,
+                                          item.favori == null
+                                              ? false
+                                              : item.favori)
+                                      : _showConnectionDialog();
+                                },
+                                child: CircleAvatar(
+                                    child: FaIcon(FontAwesomeIcons.solidHeart,
+                                        color: item.favori == null
+                                            ? AppColors.default_black
+                                            : item.favori
+                                                ? AppColors.defaultColor
+                                                : AppColors.default_black,
+                                        size: 18),
+                                    radius: 17.0,
+                                    backgroundColor: AppColors.white),
+                              ),
                             ),
                           ],
                         ),
@@ -220,5 +245,33 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
             );
           }),
     );
+  }
+
+  _addOrDeleteFavori(Content item, bool isFavoris) async {
+    if (isFavoris) {
+      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = false;
+        });
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = true;
+        });
+      }
+    }
+  }
+
+  _showConnectionDialog() {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
+    ).then((value) async =>
+        await sessionController.isSessionConnected() ? _loadAnnonces() : null);
   }
 }

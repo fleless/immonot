@@ -12,8 +12,12 @@ import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/models/responses/places_response.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_horizontal.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/user_location.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../home_bloc.dart';
 
@@ -26,6 +30,8 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
   List<FakeJsonResponse> fakeAnnonces = <FakeJsonResponse>[];
   bool loading = false;
   final bloc = Modular.get<HomeBloc>();
+  final favorisBloc = Modular.get<FavorisBloc>();
+  final sessionController = Modular.get<SessionController>();
   List<Content> searchList = <Content>[];
   SearchResponse _searchResponse = SearchResponse(totalElements: 0);
   final userLocation = Modular.get<UserLocation>();
@@ -50,7 +56,9 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
     }
     bool _gpsEnabled = await userLocation.checkIfGPSEnabled();
     String _positionToSearch = "";
-    if (_gpsEnabled) {
+    bool _locationPermission =
+        await userLocation.checkIfLocalisationPermissionProvided();
+    if ((_gpsEnabled) && (_locationPermission)) {
       String _userDepartment = await userLocation.getUserDepartment();
       List<PlacesResponse> resp = await bloc.searchPlaces(_userDepartment);
       if (resp != null) {
@@ -61,6 +69,8 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
           }
         }
       }
+    } else {
+      print("permission not enabled");
     }
     SearchResponse resp = await bloc.searchAnnonces(
         0,
@@ -76,7 +86,9 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
             surfaceInterieure: "",
             nbPieces: "",
             nbChambres: ""),
-        bloc.tri);
+        bloc.tri,
+        false,
+        bloc.currentFilter);
     // Si le nombre de résultats retournés est zéro on lance une nouvelle recherche par défaut
     if (resp.numberOfElements == 0) {
       resp = await bloc.searchAnnonces(
@@ -93,7 +105,9 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
               surfaceInterieure: "",
               nbPieces: "",
               nbChambres: ""),
-          bloc.tri);
+          bloc.tri,
+          false,
+          bloc.currentFilter);
     }
     if (mounted)
       setState(() {
@@ -196,11 +210,28 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
                             Positioned(
                               top: 15.0,
                               right: 15.0,
-                              child: CircleAvatar(
-                                  child: FaIcon(FontAwesomeIcons.solidHeart,
-                                      color: AppColors.default_black, size: 18),
-                                  radius: 17.0,
-                                  backgroundColor: AppColors.white),
+                              child: InkWell(
+                                splashColor: AppColors.defaultColor,
+                                onTap: () async {
+                                  await sessionController.isSessionConnected()
+                                      ? _addOrDeleteFavori(
+                                          item,
+                                          item.favori == null
+                                              ? false
+                                              : item.favori)
+                                      : _showConnectionDialog();
+                                },
+                                child: CircleAvatar(
+                                    child: FaIcon(FontAwesomeIcons.solidHeart,
+                                        color: item.favori == null
+                                            ? AppColors.default_black
+                                            : item.favori
+                                                ? AppColors.defaultColor
+                                                : AppColors.default_black,
+                                        size: 18),
+                                    radius: 17.0,
+                                    backgroundColor: AppColors.white),
+                              ),
                             ),
                           ],
                         ),
@@ -289,5 +320,33 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
     if (_currentDepartment != null)
       bloc.currentFilter.listPlaces.add(_currentDepartment);
     Modular.to.pushNamed(Routes.searchResults);
+  }
+
+  _addOrDeleteFavori(Content item, bool isFavoris) async {
+    if (isFavoris) {
+      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = false;
+        });
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      if (resp) {
+        setState(() {
+          item.favori = true;
+        });
+      }
+    }
+  }
+
+  _showConnectionDialog() {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
+    ).then((value) async =>
+        await sessionController.isSessionConnected() ? _loadAnnonces() : null);
   }
 }

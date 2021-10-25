@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -32,14 +33,20 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   double _value = 0.0;
   List<TypeVentesEnumeration> listTypesVentes = <TypeVentesEnumeration>[];
   List<TypeBienEnumeration> listTypeDeBiens = <TypeBienEnumeration>[];
+
   SfRangeValues _priceValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _surfInterieurValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _surfExterieureValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _piecesValues = SfRangeValues(0.0, 0.0);
   SfRangeValues _chambresValues = SfRangeValues(0.0, 0.0);
   TextEditingController _referenceController = TextEditingController();
+
   TextEditingController _minPriceController = TextEditingController();
   TextEditingController _maxPriceController = TextEditingController();
+  TextEditingController _minSurfExtController = TextEditingController();
+  TextEditingController _maxSurfExtController = TextEditingController();
+  TextEditingController _minSurfIntController = TextEditingController();
+  TextEditingController _maxSurfIntController = TextEditingController();
 
   @override
   void initState() {
@@ -54,6 +61,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
       _referenceController.text = homeBloc.currentFilter.reference != null
           ? homeBloc.currentFilter.reference
           : "";
+      homeBloc.currentFilter.listTypeVente.forEach((element) {});
       listTypesVentes.addAll(homeBloc.currentFilter.listTypeVente);
       listTypeDeBiens.addAll(homeBloc.currentFilter.listtypeDeBien);
       _rayonController.text = homeBloc.currentFilter.rayon == null
@@ -63,12 +71,34 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
       _referenceController.text = homeBloc.currentFilter.reference;
       _priceValues = SfRangeValues(
           homeBloc.currentFilter.priceMin, homeBloc.currentFilter.priceMax);
+      _minPriceController.text = homeBloc.currentFilter.priceMin == null
+          ? "0"
+          : homeBloc.currentFilter.priceMin.toStringAsFixed(0);
+      _maxPriceController.text = homeBloc.currentFilter.priceMax == null
+          ? "0"
+          : homeBloc.currentFilter.priceMax.toStringAsFixed(0);
       _surfInterieurValues = SfRangeValues(
           homeBloc.currentFilter.surInterieurMin,
           homeBloc.currentFilter.surInterieurMax);
+      _minSurfIntController.text =
+          homeBloc.currentFilter.surInterieurMin == null
+              ? "0"
+              : homeBloc.currentFilter.surInterieurMin.toStringAsFixed(0);
+      _maxSurfIntController.text =
+          homeBloc.currentFilter.surInterieurMax == null
+              ? "0"
+              : homeBloc.currentFilter.surInterieurMax.toStringAsFixed(0);
       _surfExterieureValues = SfRangeValues(
           homeBloc.currentFilter.surExterieurMin,
           homeBloc.currentFilter.surExterieurMax);
+      _minSurfExtController.text =
+          homeBloc.currentFilter.surExterieurMin == null
+              ? "0"
+              : homeBloc.currentFilter.surExterieurMin.toStringAsFixed(0);
+      _maxSurfExtController.text =
+          homeBloc.currentFilter.surExterieurMax == null
+              ? "0"
+              : homeBloc.currentFilter.surExterieurMax.toStringAsFixed(0);
       _piecesValues = SfRangeValues(
           homeBloc.currentFilter.piecesMin, homeBloc.currentFilter.piecesMax);
       _chambresValues = SfRangeValues(homeBloc.currentFilter.chambresMin,
@@ -347,7 +377,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             inactiveColor: AppColors.hint.withOpacity(0.2),
             min: 0.0,
             max: 50.0,
-            value: _value,
+            value: _value == null ? 0.0 : _value,
             interval: 5,
             stepSize: 5,
             showTicks: false,
@@ -380,7 +410,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           _buildCheckBoxTransactions(typeVentes[1]),
           _buildCheckBoxTransactions(typeVentes[2]),
           _buildCheckBoxTransactions(typeVentes[3]),
-          _buildCheckBoxTransactions(typeVentes[4]),
+          //_buildCheckBoxTransactions(typeVentes[4]),
         ],
       ),
     );
@@ -402,6 +432,9 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             } else {
               listTypesVentes.removeWhere((element) => element == type);
             }
+            listTypesVentes.forEach((element) {
+              print(element.code + "   ");
+            });
           });
         },
         controlAffinity:
@@ -617,9 +650,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             onChanged: (SfRangeValues value) {
               setState(() {
                 _surfInterieurValues = value;
+                _minSurfIntController.text = value.start.toStringAsFixed(0);
+                _maxSurfIntController.text = value.end.toStringAsFixed(0);
               });
             },
           ),
+          _surfIntTextFields()
         ],
       ),
     );
@@ -663,9 +699,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             onChanged: (SfRangeValues value) {
               setState(() {
                 _surfExterieureValues = value;
+                _minSurfExtController.text = value.start.toStringAsFixed(0);
+                _maxSurfExtController.text = value.end.toStringAsFixed(0);
               });
             },
           ),
+          _surfExtTextFields()
         ],
       ),
     );
@@ -843,24 +882,25 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                   padding: EdgeInsets.only(top: 5),
                   alignment: Alignment.center,
                   child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
                     onChanged: (value) {
                       setState(() {
-                        if (value.isNotEmpty) {
+                        if (value.isEmpty) {
+                          _priceValues = SfRangeValues(0.0, _priceValues.end);
+                        } else if (double.parse(value) > 1000000) {
+                          _minPriceController.text = "1000000";
+                          _maxPriceController.text = "1000000";
+                          _priceValues = SfRangeValues(1000000.0, 1000000.0);
+                        } else if (value.isNotEmpty) {
                           _priceValues = SfRangeValues(
                               double.parse(value), _priceValues.end);
                           if (double.parse(value) > _priceValues.end) {
-                            FocusScope.of(context).unfocus();
-                            setState(() {
-                              _minPriceController.text =
-                                  _priceValues.end.toStringAsFixed(0);
-                              _priceValues = SfRangeValues(
-                                  _priceValues.end, _priceValues.end);
-                            });
+                            _maxPriceController.text = value;
+                            _priceValues = SfRangeValues(double.parse(value),
+                                double.parse(_minPriceController.text));
                           }
-                        } else {
-                          setState(() {
-                            _priceValues = SfRangeValues(0, _priceValues.end);
-                          });
                         }
                       });
                     },
@@ -904,36 +944,310 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                   padding: EdgeInsets.only(top: 5),
                   alignment: Alignment.center,
                   child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
                     onChanged: (value) {
                       setState(() {
-                        if (value.isNotEmpty) {
-                          _priceValues = SfRangeValues(
-                              _priceValues.start, double.parse(value));
-                          if (double.parse(value) < _priceValues.start) {
-                            FocusScope.of(context).unfocus();
-                            setState(() {
-                              _maxPriceController.text =
-                                  _priceValues.start.toStringAsFixed(0);
+                        setState(() {
+                          if (value.isEmpty) {
+                            _minPriceController.text = "0";
+                            _priceValues = SfRangeValues(0.0, 0.0);
+                          } else if (double.parse(value) > 1000000) {
+                            _maxPriceController.text = "1000000";
+                            _priceValues =
+                                SfRangeValues(_priceValues.start, 1000000.0);
+                          } else if (value.isNotEmpty) {
+                            _priceValues = SfRangeValues(
+                                _priceValues.start, double.parse(value));
+                            if (double.parse(value) < _priceValues.start) {
+                              _minPriceController.text = value;
                               _priceValues = SfRangeValues(
-                                  _priceValues.start, _priceValues.start);
-                            });
-                          } else if (double.parse(value) > 1000000.0) {
-                            FocusScope.of(context).unfocus();
-                            setState(() {
-                              _maxPriceController.text = "1000000";
-                              _priceValues =
-                                  SfRangeValues(_priceValues.start, 1000000);
-                            });
+                                  double.parse(value), double.parse(value));
+                            }
                           }
-                        } else {
-                          _maxPriceController.text = _minPriceController.text;
-                          _priceValues = SfRangeValues(
-                              _priceValues.start, _priceValues.start);
-                        }
+                        });
                       });
                     },
                     textAlign: TextAlign.center,
                     controller: _maxPriceController,
+                    cursorColor: AppColors.default_black,
+                    style: AppStyles.filterSubStyle,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _surfExtTextFields() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Minimum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        if (value.isEmpty) {
+                          _surfExterieureValues =
+                              SfRangeValues(0.0, _surfExterieureValues.end);
+                        } else if (double.parse(value) > 100000) {
+                          _minSurfExtController.text = "100000";
+                          _maxSurfExtController.text = "100000";
+                          _surfExterieureValues =
+                              SfRangeValues(100000.0, 100000.0);
+                        } else if (value.isNotEmpty) {
+                          _surfExterieureValues = SfRangeValues(
+                              double.parse(value), _surfExterieureValues.end);
+                          if (double.parse(value) > _surfExterieureValues.end) {
+                            _maxSurfExtController.text = value;
+                            _surfExterieureValues = SfRangeValues(
+                                double.parse(value),
+                                double.parse(_minSurfExtController.text));
+                          }
+                        }
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _minSurfExtController,
+                    style: AppStyles.filterSubStyle,
+                    cursorColor: AppColors.default_black,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                          borderSide: BorderSide(
+                              width: 1, color: AppColors.defaultColor)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Center(child: Text("-")),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Maximum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        setState(() {
+                          if (value.isEmpty) {
+                            _minSurfExtController.text = "0";
+                            _surfExterieureValues = SfRangeValues(0.0, 0.0);
+                          } else if (double.parse(value) > 100000) {
+                            _maxSurfExtController.text = "100000";
+                            _surfExterieureValues = SfRangeValues(
+                                _surfExterieureValues.start, 100000.0);
+                          } else if (value.isNotEmpty) {
+                            _surfExterieureValues = SfRangeValues(
+                                _surfExterieureValues.start,
+                                double.parse(value));
+                            if (double.parse(value) <
+                                _surfExterieureValues.start) {
+                              _minSurfExtController.text = value;
+                              _surfExterieureValues = SfRangeValues(
+                                  double.parse(value), double.parse(value));
+                            }
+                          }
+                        });
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _maxSurfExtController,
+                    cursorColor: AppColors.default_black,
+                    style: AppStyles.filterSubStyle,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _surfIntTextFields() {
+    return Container(
+      padding: EdgeInsets.all(10),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Minimum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        if (value.isEmpty) {
+                          _surfInterieurValues =
+                              SfRangeValues(0.0, _surfInterieurValues.end);
+                        } else if (double.parse(value) > 2000) {
+                          _minSurfIntController.text = "2000";
+                          _maxSurfIntController.text = "2000";
+                          _surfInterieurValues = SfRangeValues(2000.0, 2000.0);
+                        } else if (value.isNotEmpty) {
+                          _surfInterieurValues = SfRangeValues(
+                              double.parse(value), _surfInterieurValues.end);
+                          if (double.parse(value) > _surfInterieurValues.end) {
+                            _maxSurfIntController.text = value;
+                            _surfInterieurValues = SfRangeValues(
+                                double.parse(value),
+                                double.parse(_minSurfIntController.text));
+                          }
+                        }
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _minSurfIntController,
+                    style: AppStyles.filterSubStyle,
+                    cursorColor: AppColors.default_black,
+                    decoration: new InputDecoration(
+                      enabledBorder: const OutlineInputBorder(
+                        borderSide:
+                            const BorderSide(color: Colors.grey, width: 0.0),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(4)),
+                        borderSide:
+                            BorderSide(width: 1, color: AppColors.defaultColor),
+                      ),
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(4)),
+                          borderSide: BorderSide(
+                              width: 1, color: AppColors.defaultColor)),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Center(child: Text("-")),
+          ),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Maximum",
+                  style: AppStyles.bottomNavTextNotSelectedStyle,
+                ),
+                Container(
+                  padding: EdgeInsets.only(top: 5),
+                  alignment: Alignment.center,
+                  child: TextField(
+                    inputFormatters: <TextInputFormatter>[
+                      FilteringTextInputFormatter.allow(RegExp(r'(^\d*)')),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        setState(() {
+                          if (value.isEmpty) {
+                            _minSurfIntController.text = "0";
+                            _surfInterieurValues = SfRangeValues(0.0, 0.0);
+                          } else if (double.parse(value) > 2000) {
+                            _maxSurfIntController.text = "2000";
+                            _surfInterieurValues = SfRangeValues(
+                                _surfInterieurValues.start, 2000.0);
+                          } else if (value.isNotEmpty) {
+                            _surfInterieurValues = SfRangeValues(
+                                _surfInterieurValues.start,
+                                double.parse(value));
+                            if (double.parse(value) <
+                                _surfInterieurValues.start) {
+                              _minSurfIntController.text = value;
+                              _surfInterieurValues = SfRangeValues(
+                                  double.parse(value), double.parse(value));
+                            }
+                          }
+                        });
+                      });
+                    },
+                    textAlign: TextAlign.center,
+                    controller: _maxSurfIntController,
                     cursorColor: AppColors.default_black,
                     style: AppStyles.filterSubStyle,
                     decoration: new InputDecoration(

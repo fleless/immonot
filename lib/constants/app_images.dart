@@ -9,7 +9,7 @@ class AppImages {
   static String get map => 'assets/images/map.png';
   static String get customShape => 'assets/images/customShape.png';
   static String get logoImmo => 'assets/images/36h_immo.png';
-  static String get appLogo => 'assets/images/immonot_logo.png';
+  static String get appLogo => 'assets/images/immonot_logo.jpeg';
   static String get leftArrow => 'assets/images/leftArrow.png';
   static String get handIcon => 'assets/images/handIcon.png';
 }

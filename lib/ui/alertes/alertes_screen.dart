@@ -5,45 +5,44 @@ import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/ui/favoris/widgets/list_annonce_favoris.dart';
+import 'package:immonot/ui/alertes/alertes_bloc.dart';
+import 'package:immonot/ui/alertes/widgets/list_alertes_widget.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/widgets/bottom_navbar_widget.dart';
 import "dart:ui" as ui;
 
-import 'favoris_bloc.dart';
-
-class FavorisScreen extends StatefulWidget {
+class AlertesScreen extends StatefulWidget {
   @override
-  State<StatefulWidget> createState() => _FavorisScreenState();
+  State<StatefulWidget> createState() => _AlertesScreenState();
 }
 
-class _FavorisScreenState extends State<FavorisScreen> {
+class _AlertesScreenState extends State<AlertesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final bloc = Modular.get<FavorisBloc>();
+  final bloc = Modular.get<AlertesBloc>();
   final sessionController = Modular.get<SessionController>();
   final SharedPref sharedPref = SharedPref();
-  bool showAnnonceGuide;
+  bool showSearchGuide;
 
   @override
   Future<void> initState() {
     super.initState();
-    showAnnonceGuide = false;
-    loadSharedPrefsForShowingAnnonceGuide();
+    showSearchGuide = false;
+    loadSharedPrefsForShowingSearchGuide();
   }
 
-  loadSharedPrefsForShowingAnnonceGuide() async {
+  loadSharedPrefsForShowingSearchGuide() async {
     try {
-      bool resp = await sharedPref.read(AppConstants.SHOW_ANNONCE_GUIDE);
+      bool resp = await sharedPref.read(AppConstants.SHOW_SEARCH_GUIDE);
       print(resp);
       if (resp == null) {
         setState(() {
-          showAnnonceGuide = true;
+          showSearchGuide = true;
         });
       }
     } catch (Exception) {
       setState(() {
-        showAnnonceGuide = true;
+        showSearchGuide = true;
       });
     }
   }
@@ -71,7 +70,7 @@ class _FavorisScreenState extends State<FavorisScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text("Mes favoris", style: AppStyles.titleStyle),
+                    Text("Mes Alertes", style: AppStyles.titleStyle),
                     SizedBox(height: 15),
                     Divider(color: AppColors.hint),
                     SizedBox(height: 15),
@@ -82,61 +81,17 @@ class _FavorisScreenState extends State<FavorisScreen> {
                 ),
               ),
             ),
-            showAnnonceGuide ? _buildShowAnnoceGuide() : SizedBox.shrink(),
+            showSearchGuide ? _buildShowSearchGuide() : SizedBox.shrink(),
           ],
         ),
       ),
       //LoadingIndicator(loading: _bloc.loading),
       //NetworkErrorMessages(error: _bloc.error),
-      bottomNavigationBar: const BottomNavbar(route: Routes.favoris),
+      bottomNavigationBar: const BottomNavbar(route: Routes.alertes),
     );
   }
 
-  Widget _buildShowAnnoceGuide() {
-    return Container(
-      color: AppColors.default_black.withOpacity(0.9),
-      child: Center(
-        child: Container(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset(AppImages.leftArrow,
-                  color: AppColors.white, height: 100),
-              Image.asset(AppImages.handIcon,
-                  color: AppColors.white, height: 100),
-              SizedBox(height: 15),
-              Text("Swipez une tuile vers la gauche",
-                  style: AppStyles.normalTextWhite),
-              RichText(
-                textAlign: TextAlign.center,
-                text: TextSpan(
-                  children: [
-                    TextSpan(text: "pour ", style: AppStyles.normalTextWhite),
-                    TextSpan(
-                        text: "supprimer", style: AppStyles.buttonTextWhite),
-                  ],
-                ),
-              ),
-              Text("une annoce favorite", style: AppStyles.normalTextWhite),
-              SizedBox(height: 30),
-              GestureDetector(
-                onTap: () {
-                  setState(() {
-                    showAnnonceGuide = false;
-                    sharedPref.save(AppConstants.SHOW_ANNONCE_GUIDE, false);
-                  });
-                },
-                child: Text("J'ai compris",
-                    style: AppStyles.underlinedButtonWhiteStyle),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  /*Widget _buildShowSearchGuide() {
+  Widget _buildShowSearchGuide() {
     return Container(
       color: AppColors.default_black.withOpacity(0.9),
       child: Center(
@@ -182,12 +137,12 @@ class _FavorisScreenState extends State<FavorisScreen> {
         ),
       ),
     );
-  }*/
+  }
 
   Widget _buildContent() {
     return Container(
         width: double.infinity,
         height: double.infinity,
-        child: ListAnnoncesFavorisWidget());
+        child: ListSearchFavorisWidget());
   }
 }
