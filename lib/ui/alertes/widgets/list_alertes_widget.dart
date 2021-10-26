@@ -6,18 +6,21 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
+import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/type_biens.dart';
 import 'package:immonot/models/enum/type_ventes.dart';
-import 'package:immonot/models/fake/fake_json_response.dart';
-import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/responses/get_alertes_response.dart';
 import 'package:immonot/ui/alertes/alertes_bloc.dart';
+import 'package:immonot/ui/alertes/screens/add_modif_alerte.dart';
+import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class ListSearchFavorisWidget extends StatefulWidget {
   @override
@@ -35,6 +38,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
   final sessionController = Modular.get<SessionController>();
   final SharedPref sharedPref = SharedPref();
   final alertesBloc = Modular.get<AlertesBloc>();
+  final homeBloc = Modular.get<HomeBloc>();
 
   @override
   void initState() {
@@ -42,6 +46,10 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
     _controller.addListener(_scrollListener);
     super.initState();
     _loadAlertes();
+    alertesBloc.changesNotifier.listen((value) async {
+      lista.clear();
+      await _loadAlertes();
+    });
   }
 
   _loadAlertes() async {
@@ -95,306 +103,348 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
   }
 
   Widget _buildContent() {
-    return Container(
-      height: double.infinity,
-      child: _loading
-          ? Center(
-              child: CircularProgressIndicator(
-                color: AppColors.defaultColor,
-              ),
-            )
-          : lista.isEmpty
-              ? Center(
-                  child: Text(
-                    "Vous n'avez actuellement aucune alerte enregistrée dans votre sélection.",
-                    style: AppStyles.hintSearch,
-                    textAlign: TextAlign.center,
-                  ),
-                )
-              : ListView.builder(
-                  controller: _controller,
-                  scrollDirection: Axis.vertical,
-                  itemCount: lista == null ? 0 : lista.length + 1,
-                  shrinkWrap: true,
-                  itemBuilder: (context, index) {
-                    Content item;
-                    if (index != lista.length) {
-                      item = lista[index];
-                    }
-                    return index == lista.length
-                        ? _showPaginationLoader
-                            ? SizedBox(
-                                height: 50,
-                                width: 50,
-                                child: Center(
-                                  child: CircularProgressIndicator(
-                                      color: AppColors.defaultColor),
-                                ),
-                              )
-                            : SizedBox.shrink()
-                        : item.recherche == null
-                            ? SizedBox.shrink()
-                            : InkWell(
-                                onTap: () => {},
-                                child: item.recherche == SizedBox.shrink()
-                                    ? null
-                                    : Column(
-                                        children: [
-                                          Slidable(
-                                              actionPane:
-                                                  SlidableDrawerActionPane(),
-                                              actionExtentRatio: 0.3,
-                                              secondaryActions: <Widget>[
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 10),
-                                                  child: IconSlideAction(
-                                                    color: Colors.transparent,
-                                                    iconWidget: Container(
-                                                      height: double.infinity,
-                                                      width: double.infinity,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                        color: AppColors.grey
-                                                            .withOpacity(0.7),
-                                                      ),
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          FaIcon(
-                                                              FontAwesomeIcons
-                                                                  .pen,
-                                                              color: AppColors
-                                                                  .default_black,
-                                                              size: 22),
-                                                          SizedBox(height: 20),
-                                                          Text("Modifier",
-                                                              style: AppStyles
-                                                                  .smallTitleStyleBlack),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    foregroundColor:
-                                                        AppColors.defaultColor,
-                                                    onTap: () {
-                                                      //modifierRecherche(item);
-                                                    },
-                                                  ),
-                                                ),
-                                                Padding(
-                                                  padding:
-                                                      EdgeInsets.only(left: 10),
-                                                  child: IconSlideAction(
-                                                    color: Colors.transparent,
-                                                    iconWidget: Container(
-                                                      height: double.infinity,
-                                                      width: double.infinity,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(20),
-                                                        color: AppColors.grey
-                                                            .withOpacity(0.7),
-                                                      ),
-                                                      child: Column(
-                                                        mainAxisSize:
-                                                            MainAxisSize.max,
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .center,
-                                                        crossAxisAlignment:
-                                                            CrossAxisAlignment
-                                                                .center,
-                                                        children: [
-                                                          FaIcon(
-                                                              FontAwesomeIcons
-                                                                  .trash,
-                                                              color: AppColors
-                                                                  .defaultColor,
-                                                              size: 22),
-                                                          SizedBox(height: 20),
-                                                          Text("Supprimer",
-                                                              style: AppStyles
-                                                                  .smallTitleStylePink),
-                                                        ],
-                                                      ),
-                                                    ),
-                                                    foregroundColor:
-                                                        AppColors.defaultColor,
-                                                    onTap: () {
-                                                      deleteAlerte(item, index);
-                                                    },
-                                                  ),
-                                                ),
-                                              ],
-                                              child: Card(
-                                                clipBehavior: Clip.antiAlias,
-                                                shape: RoundedRectangleBorder(
-                                                  side: BorderSide(
-                                                      color: Colors.white70,
-                                                      width: 1),
-                                                  borderRadius:
-                                                      BorderRadius.circular(20),
-                                                ),
-                                                elevation: 5,
-                                                child: Container(
-                                                  width: double.infinity,
-                                                  child: Row(
-                                                    mainAxisSize:
-                                                        MainAxisSize.max,
-                                                    children: [
+    return Column(
+      children: [
+        _buildButton(),
+        SizedBox(height: 15),
+        Expanded(
+          child: Container(
+            height: double.infinity,
+            child: ((lista == null) || (_loading))
+                ? Center(
+                    child: CircularProgressIndicator(
+                      color: AppColors.defaultColor,
+                    ),
+                  )
+                : lista.isEmpty
+                    ? Center(
+                        child: Text(
+                          "Vous n'avez actuellement aucune alerte enregistrée dans votre sélection.",
+                          style: AppStyles.hintSearch,
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : ListView.builder(
+                        controller: _controller,
+                        scrollDirection: Axis.vertical,
+                        itemCount: lista == null ? 0 : lista.length + 1,
+                        shrinkWrap: true,
+                        itemBuilder: (context, index) {
+                          Content item;
+                          if (index != lista.length) {
+                            item = lista[index];
+                          }
+                          return index == lista.length
+                              ? _showPaginationLoader
+                                  ? SizedBox(
+                                      height: 50,
+                                      width: 50,
+                                      child: Center(
+                                        child: CircularProgressIndicator(
+                                            color: AppColors.defaultColor),
+                                      ),
+                                    )
+                                  : SizedBox.shrink()
+                              : item.recherche == null
+                                  ? SizedBox.shrink()
+                                  : InkWell(
+                                      onTap: () => {_lancerRecherche(item)},
+                                      child: item.recherche == SizedBox.shrink()
+                                          ? null
+                                          : Column(
+                                              children: [
+                                                Slidable(
+                                                    actionPane:
+                                                        SlidableDrawerActionPane(),
+                                                    actionExtentRatio: 0.3,
+                                                    secondaryActions: <Widget>[
                                                       Padding(
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal: 10),
-                                                        child: InkWell(
-                                                          onTap: () async {
-                                                            //await _showNotifDialog(item);
-                                                            setState(() {});
-                                                          },
-                                                          child: Container(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 10),
+                                                        child: IconSlideAction(
+                                                          color: Colors
+                                                              .transparent,
+                                                          iconWidget: Container(
+                                                            height:
+                                                                double.infinity,
+                                                            width:
+                                                                double.infinity,
                                                             decoration:
                                                                 BoxDecoration(
-                                                              color: ((item
-                                                                              .push ==
-                                                                          null) &&
-                                                                      (item
-                                                                              .mail ==
-                                                                          null))
-                                                                  ? AppColors
-                                                                      .desactivatedBell
-                                                                  : AppColors
-                                                                      .defaultColor,
                                                               borderRadius:
                                                                   BorderRadius
                                                                       .circular(
-                                                                          8.0),
+                                                                          20),
+                                                              color: AppColors
+                                                                  .grey
+                                                                  .withOpacity(
+                                                                      0.7),
                                                             ),
-                                                            padding: EdgeInsets
-                                                                .symmetric(
-                                                                    horizontal:
-                                                                        8,
-                                                                    vertical:
-                                                                        8),
-                                                            child: FaIcon(
-                                                                ((item.push ==
-                                                                            null) &&
-                                                                        (item.mail ==
-                                                                            null))
-                                                                    ? FontAwesomeIcons
-                                                                        .solidBellSlash
-                                                                    : FontAwesomeIcons
-                                                                        .solidBell,
-                                                                color: AppColors
-                                                                    .white,
-                                                                size: 22),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                FaIcon(
+                                                                    FontAwesomeIcons
+                                                                        .pen,
+                                                                    color: AppColors
+                                                                        .default_black,
+                                                                    size: 22),
+                                                                SizedBox(
+                                                                    height: 20),
+                                                                Text("Modifier",
+                                                                    style: AppStyles
+                                                                        .smallTitleStyleBlack),
+                                                              ],
+                                                            ),
                                                           ),
+                                                          foregroundColor:
+                                                              AppColors
+                                                                  .defaultColor,
+                                                          onTap: () {
+                                                            modifierRecherche(
+                                                                item);
+                                                          },
                                                         ),
                                                       ),
-                                                      Expanded(
-                                                        child: Container(
-                                                          padding: EdgeInsets
-                                                              .symmetric(
-                                                                  horizontal:
-                                                                      10,
-                                                                  vertical: 15),
-                                                          child: Column(
-                                                            mainAxisAlignment:
-                                                                MainAxisAlignment
-                                                                    .center,
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .start,
-                                                            children: [
-                                                              Text(
-                                                                item.nom == null
-                                                                    ? "Recherche sans nom"
-                                                                    : item.nom ==
-                                                                            ""
-                                                                        ? "Recherche sans nom"
-                                                                        : item
-                                                                            .nom,
-                                                                style: AppStyles
-                                                                    .mediumTitleStyle,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                maxLines: 2,
-                                                              ),
-                                                              SizedBox(
-                                                                  height: 10),
-                                                              Text(
-                                                                  item.recherche
-                                                                              .typeVentes ==
-                                                                          null
-                                                                      ? "Achat, Location, Vente aux enchères"
-                                                                      : _getTypesVentes(item
-                                                                          .recherche),
-                                                                  style: AppStyles
-                                                                      .textNormal,
-                                                                  maxLines: 10,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis),
-                                                              Text(
-                                                                  _getEndroits(item
-                                                                      .recherche),
-                                                                  style: AppStyles
-                                                                      .textNormal,
-                                                                  maxLines: 1,
-                                                                  overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis),
-                                                              SizedBox(
-                                                                  height: 20),
-                                                              Text(
-                                                                item.dateCreation ==
-                                                                        null
-                                                                    ? "Date non définie"
-                                                                    : _parseDate(
-                                                                        item.dateCreation),
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                maxLines: 2,
-                                                                style: AppStyles
-                                                                    .hintSearch,
-                                                              ),
-                                                            ],
+                                                      Padding(
+                                                        padding:
+                                                            EdgeInsets.only(
+                                                                left: 10),
+                                                        child: IconSlideAction(
+                                                          color: Colors
+                                                              .transparent,
+                                                          iconWidget: Container(
+                                                            height:
+                                                                double.infinity,
+                                                            width:
+                                                                double.infinity,
+                                                            decoration:
+                                                                BoxDecoration(
+                                                              borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                          20),
+                                                              color: AppColors
+                                                                  .grey
+                                                                  .withOpacity(
+                                                                      0.7),
+                                                            ),
+                                                            child: Column(
+                                                              mainAxisSize:
+                                                                  MainAxisSize
+                                                                      .max,
+                                                              mainAxisAlignment:
+                                                                  MainAxisAlignment
+                                                                      .center,
+                                                              crossAxisAlignment:
+                                                                  CrossAxisAlignment
+                                                                      .center,
+                                                              children: [
+                                                                FaIcon(
+                                                                    FontAwesomeIcons
+                                                                        .trash,
+                                                                    color: AppColors
+                                                                        .defaultColor,
+                                                                    size: 22),
+                                                                SizedBox(
+                                                                    height: 20),
+                                                                Text(
+                                                                    "Supprimer",
+                                                                    style: AppStyles
+                                                                        .smallTitleStylePink),
+                                                              ],
+                                                            ),
                                                           ),
+                                                          foregroundColor:
+                                                              AppColors
+                                                                  .defaultColor,
+                                                          onTap: () {
+                                                            deleteAlerte(
+                                                                item, index);
+                                                          },
                                                         ),
                                                       ),
-                                                      Container(
-                                                        alignment:
-                                                            Alignment.center,
-                                                        padding: EdgeInsets
-                                                            .symmetric(
-                                                                horizontal: 15),
-                                                        child: FaIcon(
-                                                            FontAwesomeIcons
-                                                                .chevronRight,
-                                                            color: AppColors
-                                                                .defaultColor,
-                                                            size: 20),
-                                                      )
                                                     ],
-                                                  ),
-                                                ),
-                                              )),
-                                          SizedBox(height: 10),
-                                        ],
-                                      ),
-                              );
-                  }),
+                                                    child: Card(
+                                                      clipBehavior:
+                                                          Clip.antiAlias,
+                                                      shape:
+                                                          RoundedRectangleBorder(
+                                                        side: BorderSide(
+                                                            color:
+                                                                Colors.white70,
+                                                            width: 1),
+                                                        borderRadius:
+                                                            BorderRadius
+                                                                .circular(20),
+                                                      ),
+                                                      elevation: 5,
+                                                      child: Container(
+                                                        width: double.infinity,
+                                                        child: Row(
+                                                          mainAxisSize:
+                                                              MainAxisSize.max,
+                                                          children: [
+                                                            Padding(
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          10),
+                                                              child: InkWell(
+                                                                onTap:
+                                                                    () async {
+                                                                  await _showNotifDialog(
+                                                                      item);
+                                                                  setState(
+                                                                      () {});
+                                                                },
+                                                                child:
+                                                                    Container(
+                                                                  decoration:
+                                                                      BoxDecoration(
+                                                                    color: ((!item.push) &&
+                                                                            (!item
+                                                                                .mail))
+                                                                        ? AppColors
+                                                                            .desactivatedBell
+                                                                        : AppColors
+                                                                            .defaultColor,
+                                                                    borderRadius:
+                                                                        BorderRadius.circular(
+                                                                            8.0),
+                                                                  ),
+                                                                  padding: EdgeInsets
+                                                                      .symmetric(
+                                                                          horizontal:
+                                                                              8,
+                                                                          vertical:
+                                                                              8),
+                                                                  child: FaIcon(
+                                                                      ((!item.push) &&
+                                                                              (!item
+                                                                                  .mail))
+                                                                          ? FontAwesomeIcons
+                                                                              .solidBellSlash
+                                                                          : FontAwesomeIcons
+                                                                              .solidBell,
+                                                                      color: AppColors
+                                                                          .white,
+                                                                      size: 22),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Expanded(
+                                                              child: Container(
+                                                                padding: EdgeInsets
+                                                                    .symmetric(
+                                                                        horizontal:
+                                                                            10,
+                                                                        vertical:
+                                                                            15),
+                                                                child: Column(
+                                                                  mainAxisAlignment:
+                                                                      MainAxisAlignment
+                                                                          .center,
+                                                                  crossAxisAlignment:
+                                                                      CrossAxisAlignment
+                                                                          .start,
+                                                                  children: [
+                                                                    Text(
+                                                                      item.nom ==
+                                                                              null
+                                                                          ? "Recherche sans nom"
+                                                                          : item.nom == ""
+                                                                              ? "Recherche sans nom"
+                                                                              : item.nom,
+                                                                      style: AppStyles
+                                                                          .mediumTitleStyle,
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          2,
+                                                                    ),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            10),
+                                                                    Text(
+                                                                        item.recherche.typeVentes ==
+                                                                                null
+                                                                            ? "Achat, Location, Vente aux enchères"
+                                                                            : _getTypesVentes(item
+                                                                                .recherche),
+                                                                        style: AppStyles
+                                                                            .textNormal,
+                                                                        maxLines:
+                                                                            10,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis),
+                                                                    Text(
+                                                                        _getEndroits(item
+                                                                            .recherche),
+                                                                        style: AppStyles
+                                                                            .textNormal,
+                                                                        maxLines:
+                                                                            1,
+                                                                        overflow:
+                                                                            TextOverflow.ellipsis),
+                                                                    SizedBox(
+                                                                        height:
+                                                                            20),
+                                                                    Text(
+                                                                      item.dateCreation ==
+                                                                              null
+                                                                          ? "Date non définie"
+                                                                          : _parseDate(
+                                                                              item.dateCreation),
+                                                                      overflow:
+                                                                          TextOverflow
+                                                                              .ellipsis,
+                                                                      maxLines:
+                                                                          2,
+                                                                      style: AppStyles
+                                                                          .hintSearch,
+                                                                    ),
+                                                                  ],
+                                                                ),
+                                                              ),
+                                                            ),
+                                                            Container(
+                                                              alignment:
+                                                                  Alignment
+                                                                      .center,
+                                                              padding: EdgeInsets
+                                                                  .symmetric(
+                                                                      horizontal:
+                                                                          15),
+                                                              child: FaIcon(
+                                                                  FontAwesomeIcons
+                                                                      .chevronRight,
+                                                                  color: AppColors
+                                                                      .defaultColor,
+                                                                  size: 20),
+                                                            )
+                                                          ],
+                                                        ),
+                                                      ),
+                                                    )),
+                                                SizedBox(height: 10),
+                                              ],
+                                            ),
+                                    );
+                        }),
+          ),
+        ),
+      ],
     );
   }
 
@@ -422,7 +472,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
     }
     if (recherche.departements != null) {
       recherche.departements.forEach((element) {
-        collection += ", " + element;
+        if (element != null) collection += ", " + element;
       });
     }
     return collection == ""
@@ -517,14 +567,141 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
         }).then((value) => setState(() {}));
   }
 
-  modifierRecherche(FilterModels fake) {}
+  Widget _buildButton() {
+    return Container(
+      decoration: new BoxDecoration(
+        color: AppColors.defaultColor,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            showCupertinoModalBottomSheet(
+              context: context,
+              expand: false,
+              enableDrag: true,
+              builder: (context) => AddModifAlerteScreen(true, null),
+            );
+          },
+          child: Container(
+            width: MediaQuery.of(context).size.width * 0.50,
+            height: 45,
+            child: Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  FaIcon(
+                    FontAwesomeIcons.plus,
+                    color: AppColors.white,
+                    size: 17,
+                  ),
+                  SizedBox(width: 10),
+                  Text("CRÉER MON ALERTE",
+                      style: AppStyles.buttonTextWhite,
+                      overflow: TextOverflow.clip,
+                      maxLines: 1)
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-/*_showNotifDialog(GetAlertesResponse item) {
+  modifierRecherche(Content item) {
+    showCupertinoModalBottomSheet(
+        context: context,
+        expand: false,
+        enableDrag: true,
+        builder: (context) => AddModifAlerteScreen(false, item));
+  }
+
+  _lancerRecherche(Content item) {
+    //Parse Recherche to FilterModel
+    homeBloc.reinitCurrentFilter();
+    if (item.recherche.prix != null) {
+      if (item.recherche.prix.length > 0) {
+        homeBloc.currentFilter.priceMin = item.recherche.prix[0];
+        homeBloc.currentFilter.priceMax = item.recherche.prix[1];
+      }
+    }
+    if (item.recherche.surfaceInterieure != null) {
+      if (item.recherche.surfaceInterieure.length > 0) {
+        homeBloc.currentFilter.surInterieurMin =
+            item.recherche.surfaceInterieure[0];
+        homeBloc.currentFilter.surInterieurMax =
+            item.recherche.surfaceInterieure[1];
+      }
+    }
+    if (item.recherche.surfaceExterieure != null) {
+      if (item.recherche.surfaceExterieure.length > 0) {
+        homeBloc.currentFilter.surExterieurMin =
+            item.recherche.surfaceExterieure[0];
+        homeBloc.currentFilter.surExterieurMax =
+            item.recherche.surfaceExterieure[1];
+      }
+    }
+    if (item.recherche.references != null) {
+      if (item.recherche.references.length > 0) {
+        homeBloc.currentFilter.reference = item.recherche.references[0];
+      } else {
+        homeBloc.currentFilter.reference = null;
+      }
+    }
+
+    if (item.recherche.rayons != null) {
+      if (item.recherche.rayons.length > 0) {
+        homeBloc.currentFilter.rayon =
+            double.parse(item.recherche.rayons[0].toString());
+      }
+    }
+
+    if (item.recherche.typeVentes != null) {
+      if (item.recherche.typeVentes.length > 0) {
+        item.recherche.typeVentes.forEach((element) {
+          TypeVentesEnumeration _type =
+              TypeVentesEnumeration.findTypeVenteByCode(element);
+          homeBloc.currentFilter.listTypeVente.add(_type);
+        });
+      }
+    }
+
+    if (item.recherche.typeBiens != null) {
+      if (item.recherche.typeBiens.length > 0) {
+        item.recherche.typeBiens.forEach((element) {
+          TypeBienEnumeration _type =
+              TypeBienEnumeration.findTypeBienByCode(element);
+          homeBloc.currentFilter.listtypeDeBien.add(_type);
+        });
+      }
+    }
+    if (item.recherche.nbPieces != null) {
+      if (item.recherche.nbPieces.length > 0) {
+        homeBloc.currentFilter.piecesMin =
+            double.parse(item.recherche.nbPieces[0].toString());
+        homeBloc.currentFilter.piecesMax =
+            double.parse(item.recherche.nbPieces[1].toString());
+      }
+    }
+    if (item.recherche.nbChambres != null) {
+      if (item.recherche.nbChambres.length > 0) {
+        homeBloc.currentFilter.chambresMin =
+            double.parse(item.recherche.nbChambres[0].toString());
+        homeBloc.currentFilter.chambresMax =
+            double.parse(item.recherche.nbChambres[1].toString());
+      }
+    }
+    Modular.to.pushNamed(Routes.searchResults);
+  }
+
+  _showNotifDialog(Content item) {
     return showDialog(
         context: context,
         builder: (BuildContext context) {
-          bool notifOn = item.notificationsOn;
-          bool emailOn = item.emailOn;
+          bool notifOn = item.push;
+          bool emailOn = item.mail;
           return StatefulBuilder(
               builder: (BuildContext context, StateSetter setState) {
             return Dialog(
@@ -618,11 +795,24 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
                                         AppColors.defaultColor
                                             .withOpacity(0.3)),
                                   ),
-                                  onPressed: () {
-                                    setState(() {
-                                      item.notificationsOn = notifOn;
-                                      item.emailOn = emailOn;
-                                    });
+                                  onPressed: () async {
+                                    CreateAlerteRequest req =
+                                        CreateAlerteRequest(
+                                            push: notifOn, mail: emailOn);
+                                    bool resp = await alertesBloc
+                                        .modifierAlertes(req, item.id);
+                                    if (resp) {
+                                      setState(() {
+                                        item.push = notifOn;
+                                        item.mail = emailOn;
+                                      });
+                                    } else {
+                                      ScaffoldMessenger.of(context)
+                                          .showSnackBar(SnackBar(
+                                        content:
+                                            Text("Une erreur est survenue"),
+                                      ));
+                                    }
                                     Modular.to.pop();
                                   },
                                   child: Text(
@@ -642,5 +832,5 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
             );
           });
         });
-  }*/
+  }
 }

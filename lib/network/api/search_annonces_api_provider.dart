@@ -16,7 +16,7 @@ import 'package:pretty_dio_logger/pretty_dio_logger.dart';
 class SearchAnnoncesApiProvider {
   final sessionController = Modular.get<SessionController>();
   final String searchAnnoncesEndPoint =
-      Endpoints.CORE_URL + "immobilier/annonces/search";
+      Endpoints.CORE_URL + "immobilier/annonces/";
   final String detailAnnonceEndPoint =
       Endpoints.CORE_URL + "immobilier/annonces/";
   final String searchAnnoncesConnectedEndPoint =
@@ -49,7 +49,13 @@ class SearchAnnoncesApiProvider {
   }
 
   Future<SearchResponse> searchAnnonces(
-      int pageId, SearchRequest body, String sort, Recherche recherche) async {
+      int pageId, Recherche body, String sort) async {
+    //Hack refeerences bug from backend
+    if (body.references != null) if (body.references.isNotEmpty) {
+      if (body.references[0] == "") {
+        body.references.clear();
+      }
+    }
     try {
       bool connected = await sessionController.isSessionConnected();
       Map<String, String> header = connected

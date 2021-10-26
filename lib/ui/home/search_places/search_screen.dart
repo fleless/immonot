@@ -8,36 +8,43 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/places_response.dart';
-import 'package:immonot/ui/home/search_results/filter_bloc.dart';
+import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/utils/user_location.dart';
+import 'package:syncfusion_flutter_sliders/sliders.dart';
 
-class SearchFilterScreen extends StatefulWidget {
+class SearchScreen extends StatefulWidget {
   String address;
 
-  SearchFilterScreen(String address) {
+  SearchScreen(String address) {
     this.address = address;
   }
 
   @override
-  State<StatefulWidget> createState() => _SearchFilterScreenState();
+  State<StatefulWidget> createState() => _SearchScreenState();
 }
 
-class _SearchFilterScreenState extends State<SearchFilterScreen> {
+class _SearchScreenState extends State<SearchScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
-  final bloc = Modular.get<FilterBloc>();
   final _searchController = TextEditingController();
   final userLocation = Modular.get<UserLocation>();
+  final bloc = Modular.get<HomeBloc>();
   List<PlacesResponse> villesList = <PlacesResponse>[];
   List<PlacesResponse> departementsList = <PlacesResponse>[];
   bool isSearching = false;
+  final _rayonController = TextEditingController();
+  double _value = 0.0;
   final List<PlacesResponse> currentList = <PlacesResponse>[];
 
   @override
   Future<void> initState() {
     super.initState();
-    currentList.addAll(bloc.filterTagsList);
+    currentList.addAll(bloc.currentFilter.listPlaces);
     _changeSearchToCurrentPosition(widget.address);
+    _rayonController.text = bloc.currentFilter.rayon.toStringAsFixed(0) ?? "0";
+    setState(() {
+      _value = bloc.currentFilter.rayon ?? 0;
+    });
   }
 
   @override
@@ -57,7 +64,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
     });
     List<PlacesResponse> resp = await bloc.searchPlaces(item);
     setState(() {
-      bloc.filterTagsList.forEach((element) {
+      currentList.forEach((element) {
         resp.removeWhere((element2) =>
             (element.type == element2.type) &&
             (element.code == element2.code) &&
@@ -73,7 +80,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       key: _scaffoldKey,
-      resizeToAvoidBottomInset: true,
+      resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.appBackground,
       //drawer: DrawerWidget(),
       body: SafeArea(
@@ -86,10 +93,12 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
                 _buildTitle(),
                 SizedBox(height: 15),
                 _buildSearch(),
+                SizedBox(height: 10),
+                _buildRayon(),
                 SizedBox(height: 5),
                 _buildTags(),
                 SizedBox(height: 15),
-                bloc.filterTagsList.length > 0
+                currentList.length > 0
                     ? Container(color: AppColors.dividerColor, height: 1)
                     : SizedBox.shrink(),
                 SizedBox(height: 15),
@@ -127,7 +136,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
         },
         child: FaIcon(
           FontAwesomeIcons.times,
-          size: 22,
+          size: 20,
           color: AppColors.default_black,
         ),
       ),
@@ -214,6 +223,72 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
     );
   }
 
+  Widget _buildRayon() {
+    return Material(
+      color: AppColors.appBackground,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Rayon",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 10),
+          Container(
+            height: 44,
+            child: Row(
+              children: [
+                Container(
+                  width: 90,
+                  child: Card(
+                    shape: RoundedRectangleBorder(
+                      side: new BorderSide(color: AppColors.hint, width: 0.2),
+                      borderRadius: BorderRadius.circular(5.0),
+                    ),
+                    elevation: 2,
+                    shadowColor: AppColors.hint,
+                    color: AppColors.white,
+                    child: Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      alignment: Alignment.center,
+                      child: TextField(
+                        textAlign: TextAlign.center,
+                        enabled: false,
+                        controller: _rayonController,
+                        style: AppStyles.textNormal,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 10),
+                Expanded(child: Text("Km", style: AppStyles.textNormal)),
+              ],
+            ),
+          ),
+          SfSlider(
+            activeColor: AppColors.defaultColor,
+            inactiveColor: AppColors.hint.withOpacity(0.2),
+            min: 0.0,
+            max: 50.0,
+            value: _value,
+            interval: 5,
+            stepSize: 5,
+            showTicks: false,
+            showLabels: false,
+            enableTooltip: false,
+            minorTicksPerInterval: 1,
+            onChanged: (dynamic value) {
+              setState(() {
+                _value = value;
+                _rayonController.text = value.toStringAsFixed(0);
+              });
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTags() {
     return Align(
       alignment: Alignment.centerLeft,
@@ -280,7 +355,7 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
         departementsList.length == 0 ? SizedBox.shrink() : SizedBox(height: 20),
         villesList.length == 0
             ? SizedBox.shrink()
-            : Expanded(child: _buildVillesList())
+            : Flexible(child: _buildVillesList())
       ],
     );
   }
@@ -414,8 +489,9 @@ class _SearchFilterScreenState extends State<SearchFilterScreen> {
   }
 
   _goValidate() {
-    bloc.filterTagsList.clear();
-    bloc.filterTagsList.addAll(currentList);
+    bloc.currentFilter.rayon = _value;
+    bloc.currentFilter.listPlaces.clear();
+    bloc.currentFilter.listPlaces.addAll(currentList);
     Modular.to.pop();
   }
 

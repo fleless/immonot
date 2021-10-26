@@ -4,6 +4,8 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/ui/alertes/alertes_bloc.dart';
 import 'package:immonot/ui/alertes/alertes_screen.dart';
+import 'package:immonot/ui/alertes/screens/add_modif_alerte.dart';
+import 'package:immonot/ui/alertes/screens/search_places_alertes.dart';
 import 'package:immonot/ui/calculatrice/calculatrice_bloc.dart';
 import 'package:immonot/ui/calculatrice/calculatrice_screen.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
@@ -12,7 +14,7 @@ import 'package:immonot/ui/home/details_annonce/details_annonce_screen.dart';
 import 'package:immonot/ui/home/details_annonce/photo_view_screen.dart';
 import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/home_screen.dart';
-import 'package:immonot/ui/home/search_place/search_screen.dart';
+import 'package:immonot/ui/home/search_places/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
 import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_results_screen.dart';
@@ -97,6 +99,12 @@ class AppModule extends MainModule {
                 child: (_, args) => AnnuaireWebView(
                     args.data['url'], args.data['ville'], args.data['nom'])),
             ModularRouter(Routes.alertes, child: (_, args) => AlertesScreen()),
+            ModularRouter(Routes.addModifAlertes,
+                child: (_, args) => AddModifAlerteScreen(
+                    args.data['isAjout'], args.data['item'])),
+            ModularRouter(Routes.searchPlacesAlertes,
+                child: (_, args) => SearchPlacesAlertesScreen(
+                    args.data['places'], args.data['address'])),
           ],
         ),
       ];

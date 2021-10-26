@@ -92,8 +92,8 @@ class Content {
     active = json['active'] == null ? null : json['active'];
     nom = json['nom'] == null ? null : json['nom'];
     commentaire = json['commentaire'] == null ? null : json['commentaire'];
-    push = json['push'] == null ? null : json['push'];
-    mail = json['mail'] == null ? null : json['mail'];
+    push = json['push'] == null ? false : json['push'];
+    mail = json['mail'] == null ? false : json['mail'];
     action = json['action'] == null ? null : json['action'];
     frequence = json['frequence'] == null ? null : json['frequence'];
     frequenceLabel =

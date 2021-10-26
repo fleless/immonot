@@ -17,6 +17,8 @@ class AlertesApiProvider {
       Endpoints.CORE_URL + "immonot/internaute/alertes";
   final String supprimerAlertesEndPoint =
       Endpoints.CORE_URL + "immonot/internaute/alertes/";
+  final String modifierAlertesEndPoint =
+      Endpoints.CORE_URL + "immonot/internaute/alertes/";
   Dio _dio;
 
   AlertesApiProvider() {
@@ -86,6 +88,25 @@ class AlertesApiProvider {
       return false;
     } catch (e) {
       return false;
+    }
+  }
+
+  Future<bool> modifierAlertes(CreateAlerteRequest alerte, num idAlerte) async {
+    Map<String, String> header = await sessionController.getHeader();
+    try {
+      Response response = await _dio.put(
+          modifierAlertesEndPoint + idAlerte.toStringAsFixed(0),
+          options: Options(responseType: ResponseType.json, headers: header),
+          data: jsonEncode(alerte));
+      if (response.statusCode < 300) {
+        return true;
+      } else {
+        return false;
+      }
+    } on DioError catch (e) {
+      return false;
+    } catch (e) {
+      throw e.toString();
     }
   }
 }

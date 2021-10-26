@@ -24,6 +24,8 @@ class Routes {
   static const String infoConseilWebView = '/infoConseilWebView';
   static const String annuaireWebView = '/annuaireWebView';
   static const String alertes = '/alertes';
+  static const String addModifAlertes = '/addModifAlertes';
+  static const String searchPlacesAlertes = '/searchPlacesAlertes';
 
   // Utility method used to build a dynamic route with params.
   // Example: Routes.buildRouteWithParams('/users/{id}, {'id': 1}); would generate '/users/1'

@@ -10,41 +10,34 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/utils/user_location.dart';
-import 'package:syncfusion_flutter_sliders/sliders.dart';
 
-class SearchScreen extends StatefulWidget {
+class SearchPlacesAlertesScreen extends StatefulWidget {
+  List<PlacesResponse> places;
   String address;
 
-  SearchScreen(String address) {
-    this.address = address;
-  }
+  SearchPlacesAlertesScreen(this.places, this.address);
 
   @override
-  State<StatefulWidget> createState() => _SearchScreenState();
+  State<StatefulWidget> createState() => _SearchPlacesAlertesScreenState();
 }
 
-class _SearchScreenState extends State<SearchScreen> {
+class _SearchPlacesAlertesScreenState extends State<SearchPlacesAlertesScreen> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final GlobalKey<TagsState> _tagStateKey = GlobalKey<TagsState>();
   final _searchController = TextEditingController();
   final userLocation = Modular.get<UserLocation>();
-  final bloc = Modular.get<HomeBloc>();
+  final homeBloc = Modular.get<HomeBloc>();
   List<PlacesResponse> villesList = <PlacesResponse>[];
   List<PlacesResponse> departementsList = <PlacesResponse>[];
   bool isSearching = false;
   final _rayonController = TextEditingController();
-  double _value = 0.0;
   final List<PlacesResponse> currentList = <PlacesResponse>[];
 
   @override
   Future<void> initState() {
     super.initState();
-    currentList.addAll(bloc.currentFilter.listPlaces);
+    currentList.addAll(widget.places);
     _changeSearchToCurrentPosition(widget.address);
-    _rayonController.text = bloc.currentFilter.rayon.toStringAsFixed(0) ?? "0";
-    setState(() {
-      _value = bloc.currentFilter.rayon ?? 0;
-    });
   }
 
   @override
@@ -62,7 +55,7 @@ class _SearchScreenState extends State<SearchScreen> {
       isSearching = true;
       _clearLists();
     });
-    List<PlacesResponse> resp = await bloc.searchPlaces(item);
+    List<PlacesResponse> resp = await homeBloc.searchPlaces(item);
     setState(() {
       currentList.forEach((element) {
         resp.removeWhere((element2) =>
@@ -93,8 +86,6 @@ class _SearchScreenState extends State<SearchScreen> {
                 _buildTitle(),
                 SizedBox(height: 15),
                 _buildSearch(),
-                SizedBox(height: 10),
-                _buildRayon(),
                 SizedBox(height: 5),
                 _buildTags(),
                 SizedBox(height: 15),
@@ -223,72 +214,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildRayon() {
-    return Material(
-      color: AppColors.appBackground,
-      child: Column(
-        mainAxisSize: MainAxisSize.max,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Rayon",
-              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
-          SizedBox(height: 10),
-          Container(
-            height: 44,
-            child: Row(
-              children: [
-                Container(
-                  width: 90,
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      side: new BorderSide(color: AppColors.hint, width: 0.2),
-                      borderRadius: BorderRadius.circular(5.0),
-                    ),
-                    elevation: 2,
-                    shadowColor: AppColors.hint,
-                    color: AppColors.white,
-                    child: Container(
-                      height: double.infinity,
-                      width: double.infinity,
-                      alignment: Alignment.center,
-                      child: TextField(
-                        textAlign: TextAlign.center,
-                        enabled: false,
-                        controller: _rayonController,
-                        style: AppStyles.textNormal,
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 10),
-                Expanded(child: Text("Km", style: AppStyles.textNormal)),
-              ],
-            ),
-          ),
-          SfSlider(
-            activeColor: AppColors.defaultColor,
-            inactiveColor: AppColors.hint.withOpacity(0.2),
-            min: 0.0,
-            max: 50.0,
-            value: _value,
-            interval: 5,
-            stepSize: 5,
-            showTicks: false,
-            showLabels: false,
-            enableTooltip: false,
-            minorTicksPerInterval: 1,
-            onChanged: (dynamic value) {
-              setState(() {
-                _value = value;
-                _rayonController.text = value.toStringAsFixed(0);
-              });
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildTags() {
     return Align(
       alignment: Alignment.centerLeft,
@@ -301,7 +226,6 @@ class _SearchScreenState extends State<SearchScreen> {
             return ItemTags(
               key: Key(index.toString()),
               index: index,
-              // required
               borderRadius: BorderRadius.circular(7),
               color: AppColors.white,
               activeColor: AppColors.white,
@@ -310,11 +234,10 @@ class _SearchScreenState extends State<SearchScreen> {
               splashColor: AppColors.defaultColor,
               highlightColor: AppColors.defaultColor,
               textStyle: AppStyles.subTitleStyle,
-              //pressEnabled: false,
               active: true,
               title: (item.codePostal == null ? item.code : item.codePostal) +
                   " " +
-                  item.nom,
+                  (item.nom == null ? "" : item.nom),
               removeButton: ItemTagsRemoveButton(
                 backgroundColor: AppColors.white,
                 color: AppColors.defaultColor,
@@ -415,6 +338,7 @@ class _SearchScreenState extends State<SearchScreen> {
     return Container(
       width: double.infinity,
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -488,10 +412,7 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   _goValidate() {
-    bloc.currentFilter.rayon = _value;
-    bloc.currentFilter.listPlaces.clear();
-    bloc.currentFilter.listPlaces.addAll(currentList);
-    Modular.to.pop();
+    Navigator.pop(context, currentList);
   }
 
   placeSelected(PlacesResponse place) {

@@ -11,6 +11,7 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
@@ -62,18 +63,18 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
     }
     SearchResponse resp = await bloc.searchAnnonces(
         0,
-        SearchRequest(
-            typeVentes: _fakeItem.typeVenteCode,
-            references: "",
-            oidCommunes: _fakeItem.commune.code,
-            departements: "",
+        Recherche(
+            typeVentes: [_fakeItem.typeVenteCode],
+            references: null,
+            oidCommunes: [_fakeItem.commune.code],
+            departements: null,
             rayons: null,
-            typeBiens: _fakeItem.typeBienCode,
-            prix: "",
-            surfaceExterieure: "",
-            surfaceInterieure: "",
-            nbPieces: "",
-            nbChambres: ""),
+            typeBiens: [_fakeItem.typeBienCode],
+            prix: null,
+            surfaceExterieure: null,
+            surfaceInterieure: null,
+            nbPieces: null,
+            nbChambres: null),
         bloc.tri,
         false,
         bloc.currentFilter);

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
+import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
@@ -27,7 +28,7 @@ class HomeBloc extends Disposable {
     return response;
   }
 
-  Future<SearchResponse> searchAnnonces(int pageNumber, SearchRequest request,
+  Future<SearchResponse> searchAnnonces(int pageNumber, Recherche request,
       String sort, bool _saveSearch, FilterModels filterModel) async {
     SearchResponse response = await _searchAnnoncesRepository.searchAnnonces(
         pageNumber, request, sort);

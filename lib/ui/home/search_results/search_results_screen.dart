@@ -81,69 +81,59 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         });
       }
     }
-    //parse bloc elements to searchrequest before sending them
-    String _typeVentesFormatted = "";
-    String _typeVentesLabelFormatted = "";
-    String _references = "";
-    String _oidCommunes = "";
-    String _oidDepartements = "";
-    double _rayons = 0;
-    String _typeBiens = "";
-    String _prix = "";
-    String _surfaceExterieur = "";
-    String _surfaceInterieur = "";
-    String _nbPieces = "";
-    String _nbChambres = "";
+    //parse bloc elements to recherche type before sending them
+    List<String> _oidCommunes = <String>[];
+    List<String> _oidDepartements = <String>[];
+    List<double> _rayons = <double>[];
+    List<double> _prix = <double>[];
+    List<double> _surfaceExterieur = <double>[];
+    List<double> _surfaceInterieur = <double>[];
+    List<double> _nbPieces = <double>[];
+    List<double> _nbChambres = <double>[];
 
-    print(bloc.currentFilter.listtypeDeBien.length.toString() + " la length");
-    bloc.currentFilter.listTypeVente.forEach((element) {
-      _typeVentesFormatted += element.code + ",";
-      _typeVentesLabelFormatted += element.label + ",";
-    });
-    _references = bloc.currentFilter.reference;
+    List<String> _typeBiens =
+        bloc.currentFilter.listtypeDeBien.map((e) => e.code).toList();
+    List<String> _typesVenteLabels =
+        bloc.currentFilter.listTypeVente.map((e) => e.code).toList();
+    List<String> _references = bloc.currentFilter.reference == null
+        ? []
+        : [bloc.currentFilter.reference];
     bloc.currentFilter.listPlaces.forEach((element) {
       if (element.code.length < 5) {
-        _oidDepartements += element.code + ",";
+        _oidDepartements.add(element.code);
       } else {
-        _oidCommunes += element.code + ",";
+        _oidCommunes.add(element.code);
       }
     });
-    _rayons = bloc.currentFilter.rayon;
-    bloc.currentFilter.listtypeDeBien.forEach((element) {
-      _typeBiens += element.code + ",";
-    });
-    _prix = bloc.currentFilter.priceMin.toStringAsFixed(2) +
-        "," +
-        bloc.currentFilter.priceMax.toStringAsFixed(2);
-    _surfaceExterieur = bloc.currentFilter.surExterieurMin.toStringAsFixed(2) +
-        "," +
-        bloc.currentFilter.surExterieurMax.toStringAsFixed(2);
-    _surfaceInterieur = bloc.currentFilter.surInterieurMin.toStringAsFixed(2) +
-        "," +
-        bloc.currentFilter.surInterieurMax.toStringAsFixed(2);
-    _nbPieces = (bloc.currentFilter.piecesMin.toInt()).toString() +
-        "," +
-        (bloc.currentFilter.piecesMax.toInt()).toString();
-    _nbChambres = (bloc.currentFilter.chambresMin.toInt()).toString() +
-        "," +
-        (bloc.currentFilter.chambresMin.toInt()).toString();
+    _rayons.add(bloc.currentFilter.rayon);
+    _prix.addAll([bloc.currentFilter.priceMin, bloc.currentFilter.priceMax]);
+    _surfaceExterieur.addAll([
+      bloc.currentFilter.surExterieurMin,
+      bloc.currentFilter.surExterieurMax
+    ]);
+    _surfaceInterieur.addAll([
+      bloc.currentFilter.surInterieurMin,
+      bloc.currentFilter.surInterieurMax
+    ]);
+    _nbPieces
+        .addAll([bloc.currentFilter.piecesMin, bloc.currentFilter.piecesMax]);
+    _nbChambres.addAll(
+        [bloc.currentFilter.chambresMin, bloc.currentFilter.chambresMin]);
 
     SearchResponse resp = await bloc.searchAnnonces(
         pageNumber,
-        SearchRequest(
-            typeVentes: _typeVentesFormatted,
+        Recherche(
+            typeVentes: _typesVenteLabels,
             references: _references,
             oidCommunes: _oidCommunes,
             departements: _oidDepartements,
-            rayons: _oidCommunes.length == 0 ? null : _rayons,
+            rayons: _oidCommunes.length == 0 ? [] : _rayons,
             typeBiens: _typeBiens,
-            prix: _prix == "0.00,0.00" ? null : _prix,
-            surfaceExterieure:
-                _surfaceExterieur == "0.00,0.00" ? null : _surfaceExterieur,
-            surfaceInterieure:
-                _surfaceInterieur == "0.00,0.00" ? null : _surfaceInterieur,
-            nbPieces: _nbPieces == "0,0" ? null : _nbPieces,
-            nbChambres: _nbChambres == "0,0" ? null : _nbChambres),
+            prix: _prix,
+            surfaceExterieure: _surfaceExterieur,
+            surfaceInterieure: _surfaceInterieur,
+            nbPieces: _nbPieces,
+            nbChambres: _nbChambres),
         bloc.tri,
         true,
         bloc.currentFilter);
@@ -1022,12 +1012,12 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     //We parse the current Filter to create alert request
     CreateAlerteRequest req = CreateAlerteRequest();
     Recherche contenu = Recherche();
-    contenu.rayons = <int>[];
-    contenu.prix = <int>[];
-    contenu.surfaceInterieure = <int>[];
-    contenu.surfaceExterieure = <int>[];
-    contenu.nbPieces = <int>[];
-    contenu.nbChambres = <int>[];
+    contenu.rayons = <double>[];
+    contenu.prix = <double>[];
+    contenu.surfaceInterieure = <double>[];
+    contenu.surfaceExterieure = <double>[];
+    contenu.nbPieces = <double>[];
+    contenu.nbChambres = <double>[];
     contenu.departements = <String>[];
     contenu.oidCommunes = <String>[];
     contenu.typeBiens = <String>[];
@@ -1036,25 +1026,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     req.nom = _nameController.text;
     req.token = "";
     req.commentaire = "";
-    contenu.rayons.add(int.parse(bloc.currentFilter.rayon.toStringAsFixed(0)));
-    contenu.prix.add(int.parse(bloc.currentFilter.priceMin.toStringAsFixed(0)));
-    contenu.prix.add(int.parse(bloc.currentFilter.priceMax.toStringAsFixed(0)));
-    contenu.surfaceInterieure
-        .add(int.parse(bloc.currentFilter.surInterieurMin.toStringAsFixed(0)));
-    contenu.surfaceInterieure
-        .add(int.parse(bloc.currentFilter.surInterieurMax.toStringAsFixed(0)));
-    contenu.surfaceExterieure
-        .add(int.parse(bloc.currentFilter.surExterieurMin.toStringAsFixed(0)));
-    contenu.surfaceExterieure
-        .add(int.parse(bloc.currentFilter.surExterieurMax.toStringAsFixed(0)));
-    contenu.nbPieces
-        .add(int.parse(bloc.currentFilter.piecesMin.toStringAsFixed(0)));
-    contenu.nbPieces
-        .add(int.parse(bloc.currentFilter.piecesMax.toStringAsFixed(0)));
-    contenu.nbChambres
-        .add(int.parse(bloc.currentFilter.chambresMin.toStringAsFixed(0)));
-    contenu.nbChambres
-        .add(int.parse(bloc.currentFilter.chambresMin.toStringAsFixed(0)));
+    contenu.rayons.add(bloc.currentFilter.rayon);
+    contenu.prix.add(bloc.currentFilter.priceMin);
+    contenu.prix.add(bloc.currentFilter.priceMax);
+    contenu.surfaceInterieure.add(bloc.currentFilter.surInterieurMin);
+    contenu.surfaceInterieure.add(bloc.currentFilter.surInterieurMax);
+    contenu.surfaceExterieure.add(bloc.currentFilter.surExterieurMin);
+    contenu.surfaceExterieure.add(bloc.currentFilter.surExterieurMax);
+    contenu.nbPieces.add(bloc.currentFilter.piecesMin);
+    contenu.nbPieces.add(bloc.currentFilter.piecesMax);
+    contenu.nbChambres.add(bloc.currentFilter.chambresMin);
+    contenu.nbChambres.add(bloc.currentFilter.chambresMin);
     bloc.currentFilter.listPlaces.forEach((element) {
       element.code.length == 2
           ? contenu.departements.add(element.code)

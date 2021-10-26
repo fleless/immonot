@@ -16,4 +16,8 @@ class AlertesRepository {
   Future<bool> supprimerAlertes(String idAlerte) async {
     return _apiProvider.supprimerAlertes(idAlerte);
   }
+
+  Future<bool> modifierAlertes(CreateAlerteRequest alerte, num idAlerte) async {
+    return _apiProvider.modifierAlertes(alerte, idAlerte);
+  }
 }

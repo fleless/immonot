@@ -7,6 +7,7 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_bottom_widget.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_caracteristique_widget.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_contact_widget.dart';
@@ -17,6 +18,7 @@ import 'package:immonot/ui/home/details_annonce/widgets/detail_plus_widget.dart'
 import 'package:immonot/ui/home/details_annonce/widgets/detail_proposition_annonces.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_siret_widget.dart';
 import 'package:immonot/ui/home/search_results/honoraires/honoraire_bottom_sheet.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:html/parser.dart' as htmlparser;
@@ -39,6 +41,8 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
   final double heightPadding = 15;
   final bloc = Modular.get<HomeBloc>();
+  final sessionController = Modular.get<SessionController>();
+  final favorisBloc = Modular.get<FavorisBloc>();
   DetailAnnonceResponse annonce = DetailAnnonceResponse();
   bool loading = false;
   bool _suivi = false;

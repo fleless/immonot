@@ -5,41 +5,50 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_tags/flutter_tags.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/enum/type_biens.dart';
 import 'package:immonot/models/enum/type_ventes.dart';
+import 'package:immonot/models/requests/create_alerte_request.dart';
+import 'package:immonot/models/responses/get_alertes_response.dart';
 import 'package:immonot/models/responses/places_response.dart';
-import 'package:immonot/ui/home/search_results/filter_bloc.dart';
+import 'package:immonot/ui/alertes/alertes_bloc.dart';
+import 'package:immonot/ui/alertes/screens/search_places_alertes.dart';
+import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'package:syncfusion_flutter_sliders/sliders.dart';
 
-import '../home_bloc.dart';
+class AddModifAlerteScreen extends StatefulWidget {
+  bool isAjout;
+  Content item;
 
-class FilterSearchWidget extends StatefulWidget {
-  FilterSearchWidget() {}
+  AddModifAlerteScreen(this.isAjout, this.item);
 
   @override
-  State<StatefulWidget> createState() => _FilterSearchWidgetState();
+  State<StatefulWidget> createState() => _AddModifAlerteScreenState();
 }
 
-class _FilterSearchWidgetState extends State<FilterSearchWidget> {
+class _AddModifAlerteScreenState extends State<AddModifAlerteScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _searchController = TextEditingController();
   final _rayonController = TextEditingController();
   final userLocation = Modular.get<UserLocation>();
-  final bloc = Modular.get<FilterBloc>();
-  final homeBloc = Modular.get<HomeBloc>();
+  final alertesBloc = Modular.get<AlertesBloc>();
   final GlobalKey<TagsState> _multitagStateKey = GlobalKey<TagsState>();
-  double _value = 0.0;
+  double _value = 0;
   List<TypeVentesEnumeration> listTypesVentes = <TypeVentesEnumeration>[];
   List<TypeBienEnumeration> listTypeDeBiens = <TypeBienEnumeration>[];
+  List<PlacesResponse> listPlaces = <PlacesResponse>[];
+  bool _loading = false;
 
-  SfRangeValues _priceValues = SfRangeValues(0.0, 0.0);
-  SfRangeValues _surfInterieurValues = SfRangeValues(0.0, 0.0);
-  SfRangeValues _surfExterieureValues = SfRangeValues(0.0, 0.0);
-  SfRangeValues _piecesValues = SfRangeValues(0.0, 0.0);
-  SfRangeValues _chambresValues = SfRangeValues(0.0, 0.0);
-  TextEditingController _referenceController = TextEditingController();
+  bool mailOn = true;
+  bool notifOn = true;
+  SfRangeValues _priceValues = SfRangeValues(0.0, 1000000.0);
+  SfRangeValues _surfInterieurValues = SfRangeValues(0.0, 2000.0);
+  SfRangeValues _surfExterieureValues = SfRangeValues(0.0, 100000.0);
+  SfRangeValues _piecesValues = SfRangeValues(0.0, 6.0);
+  SfRangeValues _chambresValues = SfRangeValues(0.0, 6.0);
+  TextEditingController _nomController = TextEditingController();
+  TextEditingController _commentaireController = TextEditingController();
 
   TextEditingController _minPriceController = TextEditingController();
   TextEditingController _maxPriceController = TextEditingController();
@@ -51,58 +60,84 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   @override
   void initState() {
     super.initState();
-    bloc.filterTagsList.clear();
-    bloc.filterTagsList.addAll(homeBloc.currentFilter.listPlaces);
-    initData();
+    _rayonController.text = "0";
+    _minPriceController.text = "0";
+    _maxPriceController.text = "1000000";
+    _minSurfExtController.text = "0";
+    _maxSurfExtController.text = "2000";
+    _minSurfIntController.text = "0";
+    _maxSurfIntController.text = "100000";
+    if (!widget.isAjout) if (widget.item != null) initData();
   }
 
   initData() {
     setState(() {
-      _referenceController.text = homeBloc.currentFilter.reference != null
-          ? homeBloc.currentFilter.reference
-          : "";
-      homeBloc.currentFilter.listTypeVente.forEach((element) {});
-      listTypesVentes.addAll(homeBloc.currentFilter.listTypeVente);
-      listTypeDeBiens.addAll(homeBloc.currentFilter.listtypeDeBien);
-      _rayonController.text = homeBloc.currentFilter.rayon == null
-          ? "0"
-          : homeBloc.currentFilter.rayon.toStringAsFixed(0);
-      _value = homeBloc.currentFilter.rayon;
-      _referenceController.text = homeBloc.currentFilter.reference;
-      _priceValues = SfRangeValues(
-          homeBloc.currentFilter.priceMin, homeBloc.currentFilter.priceMax);
-      _minPriceController.text = homeBloc.currentFilter.priceMin == null
-          ? "0"
-          : homeBloc.currentFilter.priceMin.toStringAsFixed(0);
-      _maxPriceController.text = homeBloc.currentFilter.priceMax == null
-          ? "0"
-          : homeBloc.currentFilter.priceMax.toStringAsFixed(0);
-      _surfInterieurValues = SfRangeValues(
-          homeBloc.currentFilter.surInterieurMin,
-          homeBloc.currentFilter.surInterieurMax);
-      _minSurfIntController.text =
-          homeBloc.currentFilter.surInterieurMin == null
-              ? "0"
-              : homeBloc.currentFilter.surInterieurMin.toStringAsFixed(0);
-      _maxSurfIntController.text =
-          homeBloc.currentFilter.surInterieurMax == null
-              ? "0"
-              : homeBloc.currentFilter.surInterieurMax.toStringAsFixed(0);
-      _surfExterieureValues = SfRangeValues(
-          homeBloc.currentFilter.surExterieurMin,
-          homeBloc.currentFilter.surExterieurMax);
-      _minSurfExtController.text =
-          homeBloc.currentFilter.surExterieurMin == null
-              ? "0"
-              : homeBloc.currentFilter.surExterieurMin.toStringAsFixed(0);
-      _maxSurfExtController.text =
-          homeBloc.currentFilter.surExterieurMax == null
-              ? "0"
-              : homeBloc.currentFilter.surExterieurMax.toStringAsFixed(0);
-      _piecesValues = SfRangeValues(
-          homeBloc.currentFilter.piecesMin, homeBloc.currentFilter.piecesMax);
-      _chambresValues = SfRangeValues(homeBloc.currentFilter.chambresMin,
-          homeBloc.currentFilter.chambresMax);
+      if (widget.item.nom != null) _nomController.text = widget.item.nom;
+      if (widget.item.commentaire != null)
+        _commentaireController.text = widget.item.commentaire;
+      if (widget.item.push != null) notifOn = widget.item.push ? true : false;
+      if (widget.item.mail != null) mailOn = widget.item.mail ? true : false;
+      if (widget.item.recherche.departements != null) {
+        widget.item.recherche.departements.forEach((element) {
+          listPlaces.add(PlacesResponse(codePostal: element));
+        });
+      }
+      if (widget.item.recherche.oidCommunes != null) {
+        widget.item.recherche.oidCommunes.forEach((element) {
+          listPlaces.add(PlacesResponse(codePostal: element, code: element));
+        });
+      }
+      if (widget.item.recherche.rayons != null) {
+        _value = widget.item.recherche.rayons[0];
+        _rayonController.text = widget.item.recherche.rayons[0].toString();
+      }
+      if (widget.item.recherche.prix != null) {
+        _priceValues = SfRangeValues(
+            widget.item.recherche.prix[0], widget.item.recherche.prix[1]);
+        _minPriceController.text =
+            widget.item.recherche.prix[0].toStringAsFixed(0);
+        _maxPriceController.text =
+            widget.item.recherche.prix[1].toStringAsFixed(0);
+      }
+      if (widget.item.recherche.surfaceExterieure != null) {
+        _surfExterieureValues = SfRangeValues(
+            widget.item.recherche.surfaceExterieure[0],
+            widget.item.recherche.surfaceExterieure[1]);
+        _minSurfExtController.text =
+            widget.item.recherche.surfaceExterieure[0].toStringAsFixed(0);
+        _maxSurfExtController.text =
+            widget.item.recherche.surfaceExterieure[1].toStringAsFixed(0);
+      }
+      if (widget.item.recherche.surfaceInterieure != null) {
+        _surfInterieurValues = SfRangeValues(
+            widget.item.recherche.surfaceInterieure[0],
+            widget.item.recherche.surfaceInterieure[1]);
+        _minSurfIntController.text =
+            widget.item.recherche.surfaceInterieure[0].toStringAsFixed(0);
+        _maxSurfIntController.text =
+            widget.item.recherche.surfaceInterieure[1].toStringAsFixed(0);
+      }
+      if (widget.item.recherche.nbPieces != null) {
+        _piecesValues = SfRangeValues(
+            double.parse(widget.item.recherche.nbPieces[0].toString()),
+            double.parse(widget.item.recherche.nbPieces[1].toString()));
+      }
+      if (widget.item.recherche.nbChambres != null) {
+        _chambresValues = SfRangeValues(
+            double.parse(widget.item.recherche.nbChambres[0].toString()),
+            double.parse(widget.item.recherche.nbChambres[1].toString()));
+      }
+      if (widget.item.recherche.typeVentes != null) {
+        widget.item.recherche.typeVentes.forEach((element) {
+          listTypesVentes
+              .add(TypeVentesEnumeration.findTypeVenteByCode(element));
+        });
+      }
+      if (widget.item.recherche.typeBiens != null) {
+        widget.item.recherche.typeBiens.forEach((element) {
+          listTypeDeBiens.add(TypeBienEnumeration.findTypeBienByCode(element));
+        });
+      }
     });
   }
 
@@ -136,6 +171,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                           mainAxisAlignment: MainAxisAlignment.start,
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            _buildNomRecherche(),
+                            SizedBox(height: 40),
+                            _buildCommentaire(),
+                            SizedBox(height: 40),
+                            _buildNotificationSouhaite(),
+                            SizedBox(height: 40),
                             _buildLocalisation(),
                             SizedBox(height: 40),
                             _buildRayon(),
@@ -153,8 +194,6 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                             _buildPieces(),
                             SizedBox(height: 40),
                             _buildChambres(),
-                            SizedBox(height: 40),
-                            _buildReference(),
                             SizedBox(height: 40),
                           ],
                         ),
@@ -180,7 +219,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
         tileColor: AppColors.white,
         title: Center(
           child: Text(
-            "Modifier la recherche",
+            widget.isAjout ? "Créer une alerte" : "Modifier l'alerte",
             style: AppStyles.titleStyle,
             textAlign: TextAlign.center,
             overflow: TextOverflow.clip,
@@ -222,10 +261,19 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                 children: [
                   Flexible(
                     child: GestureDetector(
-                      onTap: () => {
-                        FocusScope.of(context).requestFocus(new FocusNode()),
-                        Modular.to.pushNamed(Routes.filterSearch,
-                            arguments: {'address': ""}),
+                      onTap: () async {
+                        FocusScope.of(context).requestFocus(new FocusNode());
+                        final result = await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) =>
+                                    SearchPlacesAlertesScreen(listPlaces, "")));
+                        setState(() {
+                          if (result != null) {
+                            listPlaces.clear();
+                            listPlaces.addAll(result);
+                          }
+                        });
                       },
                       child: Container(
                         height: 45,
@@ -261,8 +309,17 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                       String _address;
                       _address = await userLocation.getUserAddress();
                       FocusScope.of(context).requestFocus(new FocusNode());
-                      Modular.to.pushNamed(Routes.search,
-                          arguments: {'address': _address});
+                      final result = await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SearchPlacesAlertesScreen(
+                                  listPlaces, _address)));
+                      setState(() {
+                        if (result != null) {
+                          listPlaces.clear();
+                          listPlaces.addAll(result);
+                        }
+                      });
                     },
                     child: Container(
                       decoration: new BoxDecoration(
@@ -293,9 +350,9 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             child: Tags(
                 key: _multitagStateKey,
                 alignment: WrapAlignment.start,
-                itemCount: bloc.filterTagsList.length,
+                itemCount: listPlaces.length,
                 itemBuilder: (int index) {
-                  final item = bloc.filterTagsList[index];
+                  final item = listPlaces[index];
                   return ItemTags(
                     key: Key(index.toString()),
                     index: index,
@@ -312,17 +369,17 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                     //pressEnabled: false,
                     active: true,
                     title: (item.codePostal == null
-                            ? item.code
+                            ? (item.code == null ? "" : item.code)
                             : item.codePostal) +
                         " " +
-                        item.nom,
+                        (item.nom == null ? "" : item.nom),
                     removeButton: ItemTagsRemoveButton(
                       backgroundColor: AppColors.white,
                       color: AppColors.default_black,
                       size: 16,
                       onRemoved: () {
                         setState(() {
-                          bloc.filterTagsList.removeAt(index);
+                          listPlaces.removeAt(index);
                         });
                         return true;
                       },
@@ -802,14 +859,69 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     );
   }
 
-  Widget _buildReference() {
+  Widget _buildNomRecherche() {
+    return Form(
+      key: _formKey,
+      child: Material(
+        color: AppColors.white,
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("Nom de la recherche",
+                style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+            SizedBox(height: 15),
+            Card(
+              shape: RoundedRectangleBorder(
+                  side: new BorderSide(color: AppColors.hint, width: 0.2),
+                  borderRadius: BorderRadius.circular(4.0)),
+              elevation: 2,
+              shadowColor: AppColors.hint,
+              color: AppColors.white,
+              child: Center(
+                child: TextFormField(
+                  controller: _nomController,
+                  cursorColor: AppColors.defaultColor,
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.hint, width: 1),
+                    ),
+                    errorBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors.alert, width: 1),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide:
+                          BorderSide(color: AppColors.defaultColor, width: 1),
+                    ),
+                    contentPadding: EdgeInsets.only(
+                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                    hintText: "Nom de la recherche",
+                    hintStyle: AppStyles.hintSearch,
+                    errorStyle: TextStyle(height: 0),
+                  ),
+                  validator: (value) {
+                    return value.isEmpty ? "" : null;
+                  },
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCommentaire() {
     return Material(
       color: AppColors.white,
       child: Column(
         mainAxisSize: MainAxisSize.max,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text("Référence",
+          Text("Commentaire",
               style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
           SizedBox(height: 15),
           Card(
@@ -820,18 +932,74 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
             shadowColor: AppColors.hint,
             color: AppColors.white,
             child: Center(
-              child: TextFormField(
-                controller: _referenceController,
-                cursorColor: AppColors.defaultColor,
-                decoration: const InputDecoration(
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.only(
-                      bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
-                  hintText: "Référence",
-                  hintStyle: AppStyles.hintSearch,
+              child: Container(
+                height: 100,
+                child: TextFormField(
+                  controller: _commentaireController,
+                  cursorColor: AppColors.defaultColor,
+                  keyboardType: TextInputType.multiline,
+                  expands: true,
+                  maxLines: null,
+                  decoration: const InputDecoration(
+                    border: InputBorder.none,
+                    contentPadding: EdgeInsets.only(
+                        bottom: 10.0, left: 10.0, right: 10.0, top: 10.0),
+                    hintText: "Commentaire",
+                    hintStyle: AppStyles.hintSearch,
+                  ),
                 ),
               ),
             ),
+          )
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNotificationSouhaite() {
+    return Material(
+      color: AppColors.white,
+      child: Column(
+        mainAxisSize: MainAxisSize.max,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("Notification souhaitée",
+              style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("Notification push",
+                  style: AppStyles.textNormal,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
+              Switch(
+                  activeColor: AppColors.defaultColor,
+                  value: notifOn,
+                  onChanged: (value) {
+                    setState(() {
+                      notifOn = value;
+                    });
+                  })
+            ],
+          ),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text("E-mail",
+                  style: AppStyles.textNormal,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1),
+              Switch(
+                  activeColor: AppColors.defaultColor,
+                  value: mailOn,
+                  onChanged: (value) {
+                    setState(() {
+                      mailOn = value;
+                    });
+                  })
+            ],
           )
         ],
       ),
@@ -848,16 +1016,28 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
-            submitNewFilter();
+            if (!_loading) if (_formKey.currentState.validate()) {
+              widget.isAjout ? _goSaveAlerte() : _goModifAlerte();
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Le nom de la recherche est requis"),
+              ));
+            }
           },
           child: Container(
-            width: MediaQuery.of(context).size.width * 0.35,
-            height: 45,
+            width: MediaQuery.of(context).size.width * 0.7,
+            height: 55,
             child: Center(
-              child: (Text("MODIFIER",
-                  style: AppStyles.buttonTextWhite,
-                  overflow: TextOverflow.clip,
-                  maxLines: 1)),
+              child: _loading
+                  ? Center(
+                      child: CircularProgressIndicator(color: AppColors.white))
+                  : (Text(
+                      widget.isAjout
+                          ? "SAUVEGARDER L'ALERTE"
+                          : "SAUVEGARDER LES MODIFICATIONS",
+                      style: AppStyles.buttonTextWhite,
+                      overflow: TextOverflow.clip,
+                      maxLines: 1)),
             ),
           ),
         ),
@@ -1276,28 +1456,90 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     );
   }
 
-  void submitNewFilter() {
-    homeBloc.currentFilter.listPlaces.clear();
-    homeBloc.currentFilter.listPlaces.addAll(bloc.filterTagsList);
-    homeBloc.currentFilter.listTypeVente.clear();
-    homeBloc.currentFilter.listTypeVente.addAll(listTypesVentes);
-    homeBloc.currentFilter.listtypeDeBien.clear();
-    homeBloc.currentFilter.listtypeDeBien.addAll(listTypeDeBiens);
-    homeBloc.currentFilter.rayon = _value;
-    homeBloc.currentFilter.priceMin = _priceValues.start;
-    homeBloc.currentFilter.priceMax = _priceValues.end;
-    homeBloc.currentFilter.surInterieurMin = _surfInterieurValues.start;
-    homeBloc.currentFilter.surInterieurMax = _surfInterieurValues.end;
-    homeBloc.currentFilter.surExterieurMin = _surfExterieureValues.start;
-    homeBloc.currentFilter.surExterieurMax = _surfExterieureValues.end;
-    homeBloc.currentFilter.piecesMin = _piecesValues.start;
-    homeBloc.currentFilter.piecesMax = _piecesValues.end;
-    homeBloc.currentFilter.chambresMin = _chambresValues.start;
-    homeBloc.currentFilter.chambresMax = _chambresValues.end;
-    _referenceController.text == ""
-        ? homeBloc.currentFilter.reference = null
-        : homeBloc.currentFilter.reference = _referenceController.text;
-    Modular.to.pop();
-    homeBloc.notifChanges();
+  _goSaveAlerte() async {
+    setState(() {
+      _loading = true;
+    });
+    CreateAlerteRequest req = _parseToContent();
+    bool resp = await alertesBloc.addAlerte(req);
+    if (resp) {
+      Modular.to.pop();
+      alertesBloc.changesNotifier.add(true);
+      showSuccessToast(context, "Votre alerte a été sauvegardé");
+    } else {
+      showErrorToast(context, 'Une erreur est survenue');
+    }
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  _goModifAlerte() async {
+    setState(() {
+      _loading = true;
+    });
+    CreateAlerteRequest req = _parseToContent();
+    bool resp = await alertesBloc.modifierAlertes(req, widget.item.id);
+    if (resp) {
+      Modular.to.pop();
+      alertesBloc.changesNotifier.add(true);
+      showSuccessToast(context, "Votre alerte a été sauvegardé");
+    } else {
+      showErrorToast(context, 'Une erreur est survenue');
+    }
+    setState(() {
+      _loading = false;
+    });
+  }
+
+  CreateAlerteRequest _parseToContent() {
+    //We parse the current Filter to create alert request
+    CreateAlerteRequest req = CreateAlerteRequest();
+    Recherche contenu = Recherche();
+    contenu.rayons = <double>[];
+    contenu.prix = <double>[];
+    contenu.surfaceInterieure = <double>[];
+    contenu.surfaceExterieure = <double>[];
+    contenu.nbPieces = <double>[];
+    contenu.nbChambres = <double>[];
+    contenu.departements = <String>[];
+    contenu.oidCommunes = <String>[];
+    contenu.typeBiens = <String>[];
+    contenu.typeVentes = <String>[];
+    req.push = notifOn;
+    req.mail = mailOn;
+    req.nom = _nomController.text;
+    req.token = "";
+    req.commentaire = _commentaireController.text;
+    contenu.rayons.add(_value);
+    contenu.prix.add(_priceValues.start);
+    contenu.prix.add(_priceValues.end);
+    contenu.surfaceInterieure.add(_surfInterieurValues.start);
+    contenu.surfaceInterieure.add(_surfInterieurValues.end);
+    contenu.surfaceExterieure.add(_surfExterieureValues.start);
+    contenu.surfaceExterieure.add(_surfExterieureValues.end);
+    contenu.nbPieces.add(double.parse(_piecesValues.start.toString()));
+    contenu.nbPieces.add(double.parse(_piecesValues.end.toString()));
+    contenu.nbChambres.add(_chambresValues.start);
+    contenu.nbChambres.add(_chambresValues.end);
+    listPlaces.forEach((element) {
+      if (element.code != null) {
+        element.code.length == 2
+            ? contenu.departements.add(element.code)
+            : contenu.oidCommunes.add(element.code);
+      } else if (element.codePostal != null) {
+        element.codePostal.length == 2
+            ? contenu.departements.add(element.codePostal)
+            : contenu.oidCommunes.add(element.codePostal);
+      }
+    });
+    listTypesVentes.forEach((element) {
+      contenu.typeVentes.add(element.code);
+    });
+    listTypeDeBiens.forEach((element) {
+      contenu.typeBiens.add(element.code);
+    });
+    req.recherche = contenu;
+    return req;
   }
 }

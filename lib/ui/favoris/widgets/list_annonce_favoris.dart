@@ -201,7 +201,7 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
                                               child: Container(
                                                 width: double.infinity,
                                                 height: double.infinity,
-                                                color: Colors.red,
+                                                color: AppColors.hint,
                                                 child: Image.network(
                                                     item.annonce.photo
                                                                 .principale ==

@@ -9,6 +9,7 @@ import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/models/responses/places_response.dart';
@@ -74,18 +75,18 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
     }
     SearchResponse resp = await bloc.searchAnnonces(
         0,
-        SearchRequest(
-            typeVentes: "",
-            references: "",
-            oidCommunes: "",
-            departements: _positionToSearch,
+        Recherche(
+            typeVentes: null,
+            references: null,
+            oidCommunes: null,
+            departements: [_positionToSearch],
             rayons: null,
-            typeBiens: "",
-            prix: "",
-            surfaceExterieure: "",
-            surfaceInterieure: "",
-            nbPieces: "",
-            nbChambres: ""),
+            typeBiens: null,
+            prix: null,
+            surfaceExterieure: null,
+            surfaceInterieure: null,
+            nbPieces: null,
+            nbChambres: null),
         bloc.tri,
         false,
         bloc.currentFilter);
@@ -93,18 +94,18 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
     if (resp.numberOfElements == 0) {
       resp = await bloc.searchAnnonces(
           0,
-          SearchRequest(
-              typeVentes: "",
-              references: "",
-              oidCommunes: "",
-              departements: "",
+          Recherche(
+              typeVentes: null,
+              references: null,
+              oidCommunes: null,
+              departements: null,
               rayons: null,
-              typeBiens: "",
-              prix: "",
-              surfaceExterieure: "",
-              surfaceInterieure: "",
-              nbPieces: "",
-              nbChambres: ""),
+              typeBiens: null,
+              prix: null,
+              surfaceExterieure: null,
+              surfaceInterieure: null,
+              nbPieces: null,
+              nbChambres: null),
           bloc.tri,
           false,
           bloc.currentFilter);
