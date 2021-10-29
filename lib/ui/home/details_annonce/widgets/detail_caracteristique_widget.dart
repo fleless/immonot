@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 
 Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
@@ -42,12 +41,11 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
               item.caracteristiques.surfaceTerrain.toString() + " m²"),
       item.caracteristiques.nbPieces == 0
           ? SizedBox.shrink()
-          : _buildColumn(
-              "Pièces", item.caracteristiques.nbPieces.toString() + " m²"),
+          : _buildColumn("Pièces", item.caracteristiques.nbPieces.toString()),
       item.caracteristiques.nbChambres == 0
           ? SizedBox.shrink()
           : _buildColumn(
-              "Chambres", item.caracteristiques.nbChambres.toString() + " m²"),
+              "Chambres", item.caracteristiques.nbChambres.toString()),
       _indexMeuble == -1
           ? SizedBox.shrink()
           : _buildColumn("Meublé",

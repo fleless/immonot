@@ -2,12 +2,13 @@ import 'dart:async';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/models/responses/loginResponse.dart';
 import 'package:immonot/models/responses/newsletter_response.dart';
-import 'package:immonot/network/api/profil_api_provider.dart';
+import 'package:immonot/network/repository/devices_repository.dart';
 import 'package:immonot/network/repository/profil_repository.dart';
 
 class AuthBloc extends Disposable {
   final controller = StreamController();
   final ProfilRepository _profilRepository = ProfilRepository();
+  final DevicesRepository _devicesRepository = DevicesRepository();
 
   Future<NewsLetterResponse> getLastNewsLetter() async {
     NewsLetterResponse response =
@@ -21,6 +22,14 @@ class AuthBloc extends Disposable {
 
   Future<bool> forgottenPassword(String email) async {
     return _profilRepository.forgottenPassword(email);
+  }
+
+  Future<bool> addDevice() async {
+    return _devicesRepository.addDevice();
+  }
+
+  Future<bool> deleteDevice() async {
+    return _devicesRepository.deleteDevice();
   }
 
   dispose() {

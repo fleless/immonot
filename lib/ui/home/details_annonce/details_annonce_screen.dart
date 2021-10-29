@@ -5,6 +5,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
+import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
@@ -18,6 +19,7 @@ import 'package:immonot/ui/home/details_annonce/widgets/detail_plus_widget.dart'
 import 'package:immonot/ui/home/details_annonce/widgets/detail_proposition_annonces.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_siret_widget.dart';
 import 'package:immonot/ui/home/search_results/honoraires/honoraire_bottom_sheet.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:latlong2/latlong.dart';
@@ -61,6 +63,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     setState(() {
       annonce = resp;
       loading = false;
+      if (resp.favori != null) _suivi = resp.favori;
     });
     return resp;
   }
@@ -149,10 +152,10 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
               Switch(
                   activeColor: AppColors.defaultColor,
                   value: _suivi,
-                  onChanged: (value) {
-                    setState(() {
-                      _suivi = value;
-                    });
+                  onChanged: (value) async {
+                    await sessionController.isSessionConnected()
+                        ? _suivrePrixButton()
+                        : _showConnectionDialog(Routes.favoris);
                   }),
               SizedBox(width: 10),
               Text(
@@ -478,5 +481,38 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         ],
       ),
     );
+  }
+
+  _suivrePrixButton() async {
+    if (_suivi) {
+      bool resp = await favorisBloc.deleteFavoris(annonce.oidAnnonce);
+      if (resp) {
+        _getAnnonceInfo();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Une erreur est survenue"),
+        ));
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(annonce.oidAnnonce);
+      if (resp) {
+        _getAnnonceInfo();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Une erreur est survenue"),
+        ));
+      }
+    }
+  }
+
+  _showConnectionDialog(String route) {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
+    ).then((value) async {
+      await sessionController.isSessionConnected() ? _getAnnonceInfo() : null;
+    });
   }
 }

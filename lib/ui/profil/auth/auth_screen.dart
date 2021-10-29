@@ -377,6 +377,7 @@ class _AuthScreenState extends State<AuthScreen> {
         widget.openedAsDialog
             ? Modular.to.pop()
             : Modular.to.popAndPushNamed(Routes.profil);
+        bloc.addDevice();
       }
     }
     print("not validate");

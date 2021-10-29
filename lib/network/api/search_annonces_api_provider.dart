@@ -56,6 +56,24 @@ class SearchAnnoncesApiProvider {
         body.references.clear();
       }
     }
+    //prevent 0 in max and maximize it
+    if (body.nbPieces != null) {
+      if (body.nbPieces[1] == 0.0) body.nbPieces[1] = 6.0;
+    }
+    if (body.nbChambres != null) {
+      if (body.nbChambres[1] == 0.0) body.nbChambres[1] = 6.0;
+    }
+    if (body.surfaceInterieure != null) {
+      if (body.surfaceInterieure[1] == 0.0) body.surfaceInterieure[1] = 2000.0;
+    }
+    if (body.surfaceExterieure != null) {
+      if (body.surfaceExterieure[1] == 0.0)
+        body.surfaceExterieure[1] = 100000.0;
+    }
+    if (body.prix != null) {
+      if (body.prix[1] == 0.0) body.prix[1] = 1000000.0;
+    }
+
     try {
       bool connected = await sessionController.isSessionConnected();
       Map<String, String> header = connected

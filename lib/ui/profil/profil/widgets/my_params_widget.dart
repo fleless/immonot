@@ -86,6 +86,7 @@ class _MyParamsWidgetState extends State<MyParamsWidget> {
                       AppColors.defaultColor.withOpacity(0.2)),
                 ),
                 onPressed: () {
+                  bloc.deleteDevice();
                   sharedPref.remove(AppConstants.TOKEN_KEY);
                   sharedPref.remove(AppConstants.EMAIL_KEY);
                   sharedPref.remove(AppConstants.PASSWORD_KEY);

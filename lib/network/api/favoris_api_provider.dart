@@ -97,7 +97,7 @@ class FavorisApiProvider {
     Map<String, String> header = await sessionController.getHeader();
     var params = {
       "idAnnonce": idAnnonce,
-      "alertePrix": false,
+      "alertePrix": true,
     };
     try {
       Response response = await _dio.post(addFavorisEndPoint,
