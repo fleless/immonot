@@ -33,11 +33,10 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView> {
 
   @override
   void initState() {
-    print(widget.url);
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
-    super.initState();
     _nomController.text = widget.nom;
     _villeController.text = widget.ville;
+    super.initState();
   }
 
   @override
@@ -132,7 +131,7 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView> {
         decoration: const InputDecoration(
           border: InputBorder.none,
           contentPadding:
-              EdgeInsets.only(bottom: 15.0, left: 10.0, right: 10.0, top: 15.0),
+              EdgeInsets.only(bottom: 15.0, left: 10.0, right: 10.0, top: 13.0),
           hintText: "Nom de votre notaire",
           hintStyle: AppStyles.hintSearch,
         ),
@@ -158,8 +157,8 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView> {
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.only(
-                    bottom: 15.0, left: 10.0, right: 10.0, top: 15.0),
-                hintText: "Ville, département, code postal",
+                    bottom: 15.0, left: 10.0, right: 10.0, top: 13.0),
+                hintText: "Villes, départements, code postal",
                 hintStyle: AppStyles.hintSearch,
               ),
             ),
@@ -198,12 +197,13 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
             setState(() {
               controller.loadUrl(Endpoints.ANNUAIRE_WEB_VIEW +
                   "?nom=" +
-                  _nomController.text +
+                  _nomController.text.trim().replaceAll(" ", "%20") +
                   "&ville=" +
-                  _villeController.text);
+                  _villeController.text.trim().replaceAll(" ", "%20"));
             });
           },
           child: Container(

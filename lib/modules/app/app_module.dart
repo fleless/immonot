@@ -27,6 +27,7 @@ import 'package:immonot/ui/profil/auth/password_forgotten.dart';
 import 'package:immonot/ui/profil/profil/profil_bloc.dart';
 import 'package:immonot/ui/profil/profil/profil_screen.dart';
 import 'package:immonot/ui/splash/splash_screen.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/utils/user_location.dart';
@@ -46,6 +47,7 @@ class AppModule extends MainModule {
         Bind((_) => ProfilBloc()),
         Bind((_) => SharedPref()),
         Bind((_) => SessionController()),
+        Bind((_) => FormatterController()),
       ];
 
   // Provide all the routes for your module
@@ -55,7 +57,7 @@ class AppModule extends MainModule {
           transition: TransitionType.defaultTransition,
           routes: [
             ModularRouter(Routes.photoView,
-                child: (_, args) => PhotoViewScreenWidget(args.data['image'])),
+                child: (_, args) => PhotoViewScreenWidget(args.data['image'],args.data['index'])),
           ],
         ),
         ...ModularRouter.group(
@@ -94,7 +96,8 @@ class AppModule extends MainModule {
                 child: (_, args) => AuthScreen(args.data['openedAsDialog'])),
             ModularRouter(Routes.profil, child: (_, args) => ProfilScreen()),
             ModularRouter(Routes.infoConseilWebView,
-                child: (_, args) => InfoConseilWebView(args.data['url'])),
+                child: (_, args) =>
+                    InfoConseilWebView(args.data['url'], args.data['tags'])),
             ModularRouter(Routes.annuaireWebView,
                 child: (_, args) => AnnuaireWebView(
                     args.data['url'], args.data['ville'], args.data['nom'])),

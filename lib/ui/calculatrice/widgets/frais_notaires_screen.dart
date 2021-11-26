@@ -8,6 +8,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/calculatrice/widgets/pie_chart.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 import 'package:immonot/utils/launchUrl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -21,6 +22,7 @@ class FraisNotairesScreenWidget extends StatefulWidget {
 
 class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
   final bloc = Modular.get<CalculatriceBloc>();
+  final _formatterController = Modular.get<FormatterController>();
   TextEditingController _amountController = TextEditingController();
   bool _amountError = false;
   String _departement;
@@ -313,6 +315,8 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.euroSign,
                     color: AppColors.defaultColor, size: 20),
@@ -356,7 +360,7 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
-                                    bottom: 0.0,
+                                    bottom: 7.0,
                                     left: 10.0,
                                     right: 0.0,
                                     top: 0.0),
@@ -383,6 +387,8 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.mapMarkerAlt,
                     color: AppColors.defaultColor, size: 20),
@@ -490,10 +496,12 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
             text: TextSpan(
               children: [
                 TextSpan(
-                    text: "Montant de l'acquisiton : ",
+                    text: "Montant de l'acquisition : ",
                     style: AppStyles.mediumTitleStyle),
                 TextSpan(
-                    text: _amountController.text + " €",
+                    text: _formatterController
+                            .formatNumberWithSpaces(_amountController.text) +
+                        " €",
                     style: AppStyles.textNormal),
               ],
             ),
@@ -509,8 +517,9 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                     text: "Évaluation des frais d'acte : ",
                     style: AppStyles.mediumTitleStyle),
                 TextSpan(
-                    text: bloc.fraisNotairesResponse.fraisActe
-                            .toStringAsFixed(2) +
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .fraisNotairesResponse.fraisActe
+                            .toStringAsFixed(2)) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -896,5 +905,4 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
       ),
     );
   }
-
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../app_colors.dart';
@@ -12,16 +13,25 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData themeData = ThemeData(
-    primaryColor: AppColors.appBackground,
-    backgroundColor: AppColors.appBackground,
-    scaffoldBackgroundColor: Colors.white,
-    visualDensity: VisualDensity.adaptivePlatformDensity,
-    textTheme: GoogleFonts.titilliumWebTextTheme(AppTextTheme.textTheme),
-    bottomAppBarTheme: AppBottomNavBarTheme.bottomAppBarTheme,
-    floatingActionButtonTheme: AppFABTheme.fABTheme,
-    iconTheme: const IconThemeData(),
-    primarySwatch: MaterialColor(0xFF00D975, AppColors.colorCodes),
-    accentColor: AppColors.default_black,
-    cursorColor: AppColors.defaultColor
-  );
+      primaryColor: AppColors.appBackground,
+      backgroundColor: AppColors.appBackground,
+      scaffoldBackgroundColor: AppColors.white,
+      appBarTheme: AppBarTheme(
+        systemOverlayStyle: SystemUiOverlayStyle(
+          systemNavigationBarColor: Colors.black,
+          systemNavigationBarDividerColor: Colors.black,
+          systemNavigationBarIconBrightness: Brightness.dark,
+          statusBarColor: Colors.black,
+          statusBarBrightness: Brightness.dark,
+          statusBarIconBrightness: Brightness.dark,
+        ),
+      ),
+      visualDensity: VisualDensity.adaptivePlatformDensity,
+      textTheme: GoogleFonts.titilliumWebTextTheme(AppTextTheme.textTheme),
+      bottomAppBarTheme: AppBottomNavBarTheme.bottomAppBarTheme,
+      floatingActionButtonTheme: AppFABTheme.fABTheme,
+      iconTheme: const IconThemeData(),
+      primarySwatch: MaterialColor(0xFF00D975, AppColors.colorCodes),
+      accentColor: AppColors.default_black,
+      cursorColor: AppColors.defaultColor);
 }

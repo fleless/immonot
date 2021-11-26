@@ -102,7 +102,8 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
                 onTap: () {
                   Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
                     "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
-                        _rechercheController.text
+                        _rechercheController.text.trim().replaceAll(" ", "%20"),
+                    "tag": _rechercheController.text.trim(),
                   });
                 },
                 child: Card(
@@ -140,7 +141,8 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
               onTap: () => {
                 Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
                   "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
-                      (index > 6 ? (index + 1).toString() : index.toString())
+                      (index > 6 ? (index + 1).toString() : index.toString()),
+                  "tag": hashTagsList[index],
                 })
               }, //changeSelectionTypeDeBien(index),
               child: Center(

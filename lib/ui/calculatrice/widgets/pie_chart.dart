@@ -7,6 +7,7 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/frais_notaires_response.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 import 'package:pie_chart/pie_chart.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -22,6 +23,8 @@ class PieChartWidget extends StatefulWidget {
 }
 
 class _PieChartWidgetState extends State<PieChartWidget> {
+  final _formatterController = Modular.get<FormatterController>();
+
   Map<String, double> dataMap = {
     "Trésor public ": 15148,
     "Débours ": 1893.6,
@@ -133,9 +136,9 @@ class _PieChartWidgetState extends State<PieChartWidget> {
                 child: Column(
                   children: [
                     _buildIndicator(
-                          AppColors.firstChartColor,
-                          "Trésor public :",
-                          widget.fraisNotaires.fraisTresorPublic),
+                        AppColors.firstChartColor,
+                        "Trésor public :",
+                        widget.fraisNotaires.fraisTresorPublic),
                     _buildIndicator(AppColors.secondChartColor, "Débours :",
                         widget.fraisNotaires.fraisDebours),
                     _buildIndicator(AppColors.thirdChartColor, "Notaire :",
@@ -159,35 +162,39 @@ class _PieChartWidgetState extends State<PieChartWidget> {
             child: Column(
               children: [
                 Container(
-                    color: couleur,
-                    padding: EdgeInsets.all(20),
-                    height: 17,
-                    width: 30,
-                  ),
+                  color: couleur,
+                  padding: EdgeInsets.all(20),
+                  height: 17,
+                  width: 30,
+                ),
               ],
             ),
           ),
           SizedBox(width: 15),
           Expanded(
-              child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Text(name,
-                    style: AppStyles.smallTitleStyleBlack,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    maxLines: 1),
-              ),
-              Expanded(
-                child: Text(prize.toStringAsFixed(2) + " €",
-                    style: AppStyles.subTitleStyle,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: TextAlign.start,
-                    maxLines: 1),
-              )
-            ],
-          ),),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Text(name,
+                      style: AppStyles.smallTitleStyleBlack,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      maxLines: 1),
+                ),
+                Expanded(
+                  child: Text(
+                      _formatterController.formatNumberWithSpaces(
+                              prize.toStringAsFixed(2)) +
+                          " €",
+                      style: AppStyles.subTitleStyle,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.start,
+                      maxLines: 1),
+                )
+              ],
+            ),
+          ),
         ],
       ),
     );
@@ -200,11 +207,17 @@ class _PieChartWidgetState extends State<PieChartWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text("Montant de l'acquisition", style: AppStyles.titleStyleH2),
-          Text(widget.fraisNotaires.prix.toStringAsFixed(2) + " €",
+          Text(
+              _formatterController.formatNumberWithSpaces(
+                      widget.fraisNotaires.prix.toStringAsFixed(2)) +
+                  " €",
               style: AppStyles.textNormal),
           SizedBox(height: 15),
           Text("Évaluation des frais d'acte", style: AppStyles.titleStyleH2),
-          Text(widget.fraisNotaires.fraisActe.toStringAsFixed(2) + " €",
+          Text(
+              _formatterController.formatNumberWithSpaces(
+                      widget.fraisNotaires.fraisActe.toStringAsFixed(2)) +
+                  " €",
               style: AppStyles.textNormal),
           SizedBox(height: 40),
           RichText(

@@ -5,6 +5,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../calculatrice_bloc.dart';
@@ -18,6 +19,7 @@ class CapaciteEmpruntScreenWidget extends StatefulWidget {
 class _CapaciteEmpruntScreenWidgetState
     extends State<CapaciteEmpruntScreenWidget> {
   final bloc = Modular.get<CalculatriceBloc>();
+  final _formatterController = Modular.get<FormatterController>();
   TextEditingController _mensualiteController = TextEditingController();
   bool _mensualiteError = false;
   TextEditingController _tauxController = TextEditingController();
@@ -117,6 +119,8 @@ class _CapaciteEmpruntScreenWidgetState
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.percent,
                     color: AppColors.defaultColor, size: 20),
@@ -160,7 +164,7 @@ class _CapaciteEmpruntScreenWidgetState
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
-                                    bottom: 0.0,
+                                    bottom: 7.0,
                                     left: 10.0,
                                     right: 0.0,
                                     top: 0.0),
@@ -187,6 +191,8 @@ class _CapaciteEmpruntScreenWidgetState
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.euroSign,
                     color: AppColors.defaultColor, size: 20),
@@ -230,7 +236,7 @@ class _CapaciteEmpruntScreenWidgetState
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
-                                    bottom: 0.0,
+                                    bottom: 7.0,
                                     left: 10.0,
                                     right: 0.0,
                                     top: 0.0),
@@ -305,11 +311,12 @@ class _CapaciteEmpruntScreenWidgetState
                     text: "Capital sur 10 ans : ",
                     style: AppStyles.mediumTitleStyle),
                 TextSpan(
-                    text: bloc.capaciteEmpruntResponse.montantsPret
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .capaciteEmpruntResponse.montantsPret
                             .where((element) => element.dureeEnAnnee == 10)
                             .first
                             .montant
-                            .toStringAsFixed(2) +
+                            .toStringAsFixed(2)) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -325,11 +332,15 @@ class _CapaciteEmpruntScreenWidgetState
                 TextSpan(
                     text: "Capital sur 15 ans : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: bloc.capaciteEmpruntResponse.montantsPret
-                    .where((element) => element.dureeEnAnnee == 15)
-                    .first
-                    .montant
-                    .toStringAsFixed(2) + " €", style: AppStyles.textNormal),
+                TextSpan(
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .capaciteEmpruntResponse.montantsPret
+                            .where((element) => element.dureeEnAnnee == 15)
+                            .first
+                            .montant
+                            .toStringAsFixed(2)) +
+                        " €",
+                    style: AppStyles.textNormal),
               ],
             ),
           ),
@@ -343,11 +354,15 @@ class _CapaciteEmpruntScreenWidgetState
                 TextSpan(
                     text: "Capital sur 25 ans : ",
                     style: AppStyles.mediumTitleStyle),
-                TextSpan(text: bloc.capaciteEmpruntResponse.montantsPret
-                    .where((element) => element.dureeEnAnnee == 25)
-                    .first
-                    .montant
-                    .toStringAsFixed(2) + " €", style: AppStyles.textNormal),
+                TextSpan(
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .capaciteEmpruntResponse.montantsPret
+                            .where((element) => element.dureeEnAnnee == 25)
+                            .first
+                            .montant
+                            .toStringAsFixed(2)) +
+                        " €",
+                    style: AppStyles.textNormal),
               ],
             ),
           ),

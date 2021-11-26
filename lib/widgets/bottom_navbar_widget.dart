@@ -33,17 +33,18 @@ class _BottomNavbarState extends State<BottomNavbar> {
   @override
   Widget build(BuildContext context) {
     return BottomAppBar(
-      color: Colors.transparent,
+      color: AppColors.appBackground,
       child: Material(
         child: Container(
           height: 70,
           padding: const EdgeInsets.only(bottom: 10),
           decoration: const BoxDecoration(
-            color: Colors.white,
+            color: AppColors.appBackground,
             borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(10), topRight: Radius.circular(10)),
             boxShadow: [
               BoxShadow(
+                color: AppColors.appBackground,
                 blurRadius: 15.0,
                 offset: Offset(0, 10),
               )

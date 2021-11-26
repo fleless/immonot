@@ -144,7 +144,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text(annonce.titre ?? "", style: AppStyles.titleNormal),
+          Text((annonce.titre ?? "")+ ", ref:"+"en attente du ref from backend", style: AppStyles.titleNormal),
           SizedBox(height: heightPadding),
           annonce.affichePrix ? _showPrize() : SizedBox.shrink(),
           Row(

@@ -250,7 +250,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                 child: Container(
                   height: 33,
                   margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
                   decoration: new BoxDecoration(
                     color: bloc.currentFilter.listtypeDeBien
                             .contains(typeBiens[index])
@@ -316,10 +316,10 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                       textAlignVertical: TextAlignVertical.center,
                       cursorColor: AppColors.defaultColor,
                       decoration: InputDecoration(
-                        hintText: "Ville, départements, code postal",
+                        hintText: "Villes, départements, code postal",
                         hintStyle: AppStyles.hintSearch,
                         border: InputBorder.none,
-                        contentPadding: EdgeInsets.only(left: 8.0, top: -30.0),
+                        contentPadding: EdgeInsets.only(left: 8.0, top: -32.0),
                       ),
                     ),
                   ),

@@ -9,6 +9,7 @@ import 'package:immonot/constants/routes.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:page_indicator/page_indicator.dart';
+import 'package:share_plus/share_plus.dart';
 
 class DetailHeaderWidget extends StatefulWidget {
   DetailAnnonceResponse fake;
@@ -52,15 +53,23 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
                     ? 1
                     : _fakeItem.photo.galerie.length,
                 itemBuilder: (context, index) {
-                  return Container(
-                    height: double.infinity,
-                    width: double.infinity,
-                    child: _fakeItem.photo.galerie.isEmpty
-                        ? Image.network(
-                            "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
-                            fit: BoxFit.cover)
-                        : Image.network(_fakeItem.photo.galerie[index].img,
-                            fit: BoxFit.cover),
+                  return GestureDetector(
+                    onTap: () => Modular.to
+                        .pushNamed(Routes.photoView, arguments: {
+                      'image':
+                          _fakeItem.photo.galerie.map((e) => e.img).toList(),
+                      'index': index
+                    }),
+                    child: Container(
+                      height: double.infinity,
+                      width: double.infinity,
+                      child: _fakeItem.photo.galerie.isEmpty
+                          ? Image.network(
+                              "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
+                              fit: BoxFit.cover)
+                          : Image.network(_fakeItem.photo.galerie[index].img,
+                              fit: BoxFit.cover),
+                    ),
                   );
                 }),
             align: IndicatorAlign.bottom,
@@ -76,14 +85,9 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
             right: 20.0,
             child: InkWell(
               onTap: () {
-                //bug to select first image without swiping first time controller null
-                /*print(double.parse(
-                    key.currentState.currentPage.toStringAsFixed(0)));
-                int ind =
-                    int.parse(key.currentState.currentPage.toStringAsFixed(0));*/
-                Modular.to.pushNamed(Routes.photoView, arguments: {
-                  'image': _fakeItem.photo.galerie[controller.page.toInt()].img
-                });
+                Share.share(
+                    'testing the share functionality of immonot the link is https://www.woolha.com/media/2021/04/flutter-set-status-bar-color-brightness-transparency-1200x627.jpg ',
+                    subject: 'subject test');
               },
               child: Container(
                 width: 40,

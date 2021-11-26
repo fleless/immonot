@@ -40,7 +40,7 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
           ),
           SizedBox(height: 5),
           Text(
-              "Trouvez votre Notaire parmi près de 9 000 notaires et plus de 4 500 offices notariaux répartis sur l’ensemble du térritoire.",
+              "Trouvez votre Notaire parmi près de 9 000 notaires et plus de 4 500 offices notariaux répartis sur l’ensemble du territoire.",
               overflow: TextOverflow.ellipsis,
               maxLines: 5,
               style: AppStyles.subTitleStyle),
@@ -80,7 +80,7 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
         decoration: const InputDecoration(
           border: InputBorder.none,
           contentPadding:
-              EdgeInsets.only(bottom: 15.0, left: 10.0, right: 10.0, top: 15.0),
+              EdgeInsets.only(bottom: 15.0, left: 10.0, right: 10.0, top: 13.0),
           hintText: "Nom de votre notaire",
           hintStyle: AppStyles.hintSearch,
         ),
@@ -106,8 +106,8 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
               decoration: const InputDecoration(
                 border: InputBorder.none,
                 contentPadding: EdgeInsets.only(
-                    bottom: 15.0, left: 10.0, right: 10.0, top: 15.0),
-                hintText: "Ville, département, code postal",
+                    bottom: 15.0, left: 10.0, right: 10.0, top: 13.0),
+                hintText: "Villes, départements, code postal",
                 hintStyle: AppStyles.hintSearch,
               ),
             ),
@@ -146,14 +146,15 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
         color: Colors.transparent,
         child: InkWell(
           onTap: () {
+            FocusScope.of(context).requestFocus(FocusNode());
             Modular.to.pushNamed(Routes.annuaireWebView, arguments: {
               "url": Endpoints.ANNUAIRE_WEB_VIEW +
                   "?nom=" +
-                  _nomController.text +
+                  _nomController.text.trim().replaceAll(" ", "%20") +
                   "&ville=" +
-                  _villeController.text,
-              "ville": _villeController.text,
-              "nom": _nomController.text
+                  _villeController.text.trim().replaceAll(" ", "%20"),
+              "ville": _villeController.text.trim(),
+              "nom": _nomController.text.trim()
             });
           },
           child: Container(

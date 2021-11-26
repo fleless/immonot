@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_theme.dart';
@@ -19,8 +20,15 @@ class _AppWidgetState extends State<AppWidget> {
   void initState() {
     super.initState();
     initPlatformState();
-    SystemChrome.setSystemUIOverlayStyle(
-        const SystemUiOverlayStyle(statusBarColor: Colors.black));
+    Future.delayed(Duration(milliseconds: 1)).then(
+        (value) => SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+              systemNavigationBarColor: Colors.black,
+              systemNavigationBarDividerColor: Colors.black,
+              systemNavigationBarIconBrightness: Brightness.dark,
+              statusBarColor: Colors.black,
+              statusBarBrightness: Brightness.light,
+              statusBarIconBrightness: Brightness.dark,
+            )));
   }
 
   @override
@@ -28,6 +36,7 @@ class _AppWidgetState extends State<AppWidget> {
     return MaterialApp(
       navigatorKey: Modular.navigatorKey,
       title: AppConstants.title,
+      color: AppColors.white,
       theme: AppTheme.themeData,
       supportedLocales: AppLocalizations.supportedLocales(),
       localizationsDelegates: const [

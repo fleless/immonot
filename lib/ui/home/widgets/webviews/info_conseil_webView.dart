@@ -11,8 +11,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 
 class InfoConseilWebView extends StatefulWidget {
   String url;
+  String tag;
 
-  InfoConseilWebView(this.url);
+  InfoConseilWebView(this.url, this.tag);
 
   @override
   State<StatefulWidget> createState() => _InfoConseilWebViewState();
@@ -28,6 +29,7 @@ class _InfoConseilWebViewState extends State<InfoConseilWebView> {
   @override
   void initState() {
     if (Platform.isAndroid) WebView.platform = SurfaceAndroidWebView();
+    _rechercheController.text = widget.tag;
     super.initState();
   }
 
@@ -133,8 +135,11 @@ class _InfoConseilWebViewState extends State<InfoConseilWebView> {
                 child: InkWell(
                   splashColor: AppColors.white,
                   onTap: () {
+                    FocusScope.of(context).requestFocus(FocusNode());
                     controller.loadUrl(Endpoints.INFO_CONSEIL_WEB_VIEW +
-                        _rechercheController.text);
+                        _rechercheController.text
+                            .trim()
+                            .replaceAll(" ", "%20"));
                   },
                   child: Card(
                     shape: RoundedRectangleBorder(

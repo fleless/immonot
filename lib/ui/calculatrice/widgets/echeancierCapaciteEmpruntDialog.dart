@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/capacite_emprunt_response.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 
 class EcheancierCapaciteEmpruntDialog extends StatefulWidget {
   List<MontantsPret> lista = <MontantsPret>[];
@@ -19,6 +20,8 @@ class EcheancierCapaciteEmpruntDialog extends StatefulWidget {
 
 class _EcheancierCapaciteEmpruntDialogState
     extends State<EcheancierCapaciteEmpruntDialog> {
+  final _formatterController = Modular.get<FormatterController>();
+
   @override
   void initState() {
     super.initState();
@@ -133,17 +136,17 @@ class _EcheancierCapaciteEmpruntDialogState
   Widget _buildTableRow(int index) {
     return index % 2 == 1
         ? Container(
-      height: 45,
-      width: double.infinity,
-      color: AppColors.white,
-      child: _buildRowDetails(index),
-    )
+            height: 45,
+            width: double.infinity,
+            color: AppColors.white,
+            child: _buildRowDetails(index),
+          )
         : Container(
-      height: 45,
-      width: double.infinity,
-      color: AppColors.rowTableColor,
-      child: _buildRowDetails(index),
-    );
+            height: 45,
+            width: double.infinity,
+            color: AppColors.rowTableColor,
+            child: _buildRowDetails(index),
+          );
   }
 
   Widget _buildRowDetails(int index) {
@@ -158,7 +161,9 @@ class _EcheancierCapaciteEmpruntDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              "Capacité sur "+widget.lista[index].dureeEnAnnee.toString()+" Ans",
+              "Capacité sur " +
+                  widget.lista[index].dureeEnAnnee.toString() +
+                  " Ans",
               textAlign: TextAlign.center,
               style: AppStyles.smallTitleStyleBlack,
               maxLines: 1,
@@ -172,7 +177,9 @@ class _EcheancierCapaciteEmpruntDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              widget.lista[index].montant.toStringAsFixed(2) + " €",
+              _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].montant.toStringAsFixed(2)) +
+                  " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
               maxLines: 1,

@@ -4,6 +4,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/montant_mensualite_response.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 
 class EcheancierMontantMensualiteDialog extends StatefulWidget {
   List<TableauAmortissement> lista = <TableauAmortissement>[];
@@ -19,6 +20,8 @@ class EcheancierMontantMensualiteDialog extends StatefulWidget {
 
 class _EcheancierMontantMensualiteDialogState
     extends State<EcheancierMontantMensualiteDialog> {
+  final _formatterController = Modular.get<FormatterController>();
+
   @override
   void initState() {
     super.initState();
@@ -28,24 +31,33 @@ class _EcheancierMontantMensualiteDialogState
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Container(
-        height: MediaQuery.of(context).size.height * 0.92,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 3),
-              color: AppColors.white,
-              child: _buildTitle(),
-            ),
-            Expanded(
-              child: Container(
-                height: double.infinity,
-                width: double.infinity,
-                child: _buildList(),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.92,
+          // scrolling width depending of smartphone resolution
+          width: MediaQuery.of(context).size.width < 400
+              ? MediaQuery.of(context).size.width * 1.3
+              : MediaQuery.of(context).size.width < 500
+                  ? MediaQuery.of(context).size.width * 1.2
+                  : MediaQuery.of(context).size.width,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 3),
+                color: AppColors.white,
+                child: _buildTitle(),
               ),
-            ),
-          ],
+              Expanded(
+                child: Container(
+                  height: double.infinity,
+                  width: double.infinity,
+                  child: _buildList(),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -200,7 +212,9 @@ class _EcheancierMontantMensualiteDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              "N°"+widget.lista[index].echeance.toString(),
+              "N°" +
+                  _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].echeance.toString()),
               textAlign: TextAlign.center,
               style: AppStyles.smallTitleStyleBlack,
               maxLines: 1,
@@ -214,7 +228,9 @@ class _EcheancierMontantMensualiteDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              widget.lista[index].mensualite.toStringAsFixed(2) + " €",
+              _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].mensualite.toStringAsFixed(2)) +
+                  " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
               maxLines: 1,
@@ -228,7 +244,9 @@ class _EcheancierMontantMensualiteDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              widget.lista[index].capitalRembourse.toStringAsFixed(2) + " €",
+              _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].capitalRembourse.toStringAsFixed(2)) +
+                  " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
               maxLines: 1,
@@ -242,7 +260,9 @@ class _EcheancierMontantMensualiteDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              widget.lista[index].interet.toStringAsFixed(2) + " €",
+              _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].interet.toStringAsFixed(2)) +
+                  " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
               maxLines: 1,
@@ -256,7 +276,9 @@ class _EcheancierMontantMensualiteDialogState
             padding: EdgeInsets.symmetric(horizontal: 2),
             alignment: Alignment.center,
             child: Text(
-              widget.lista[index].capitalRestant.toStringAsFixed(2) + " €",
+              _formatterController.formatNumberWithSpaces(
+                      widget.lista[index].capitalRestant.toStringAsFixed(2)) +
+                  " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
               maxLines: 1,

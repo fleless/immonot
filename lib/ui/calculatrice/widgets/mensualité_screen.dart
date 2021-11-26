@@ -8,6 +8,7 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/ui/calculatrice/widgets/echeancierMontantMensualit%C3%A9Dialog.dart';
 import 'package:immonot/ui/home/search_results/filter_screen.dart';
+import 'package:immonot/utils/formatter_utils.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 import '../calculatrice_bloc.dart';
@@ -19,6 +20,7 @@ class MensualiteScreenWidget extends StatefulWidget {
 
 class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
   final bloc = Modular.get<CalculatriceBloc>();
+  final _formatterController = Modular.get<FormatterController>();
   String _dureePret = "15";
   TextEditingController _capitalController = TextEditingController();
   bool _capitalError = false;
@@ -92,6 +94,8 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.euroSign,
                     color: AppColors.defaultColor, size: 20),
@@ -135,7 +139,7 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
-                                    bottom: 0.0,
+                                    bottom: 7.0,
                                     left: 10.0,
                                     right: 0.0,
                                     top: 0.0),
@@ -162,6 +166,8 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.percent,
                     color: AppColors.defaultColor, size: 20),
@@ -205,7 +211,7 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                               decoration: const InputDecoration(
                                 border: InputBorder.none,
                                 contentPadding: EdgeInsets.only(
-                                    bottom: 0.0,
+                                    bottom: 7.0,
                                     left: 10.0,
                                     right: 0.0,
                                     top: 0.0),
@@ -232,6 +238,8 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
             children: [
               Container(
                 height: 50,
+                width: 10,
+                padding: EdgeInsets.only(bottom: 6),
                 alignment: Alignment.bottomLeft,
                 child: FaIcon(FontAwesomeIcons.hourglassStart,
                     color: AppColors.defaultColor, size: 20),
@@ -371,7 +379,9 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                 TextSpan(
                     text: "Montant du prêt : ", style: AppStyles.textNormal),
                 TextSpan(
-                    text: _capitalController.text + " €",
+                    text: _formatterController
+                            .formatNumberWithSpaces(_capitalController.text) +
+                        " €",
                     style: AppStyles.mediumTitleStyle),
               ],
             ),
@@ -401,8 +411,9 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                     text: "Votre remboursement mensuel sera de : \n",
                     style: AppStyles.textNormal),
                 TextSpan(
-                    text: bloc.montantMensualiteResponse.remboursementMensuel
-                            .toStringAsFixed(2) +
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .montantMensualiteResponse.remboursementMensuel
+                            .toStringAsFixed(2)) +
                         " € (Mensualité hors assurance)",
                     style: AppStyles.mediumTitleStyle),
               ],
@@ -433,8 +444,9 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                     text: "Intérêt totaux si le prêt est mené à terme :  \n",
                     style: AppStyles.textNormal),
                 TextSpan(
-                    text: bloc.montantMensualiteResponse.coutTotalEmprunt
-                            .toStringAsFixed(2) +
+                    text: _formatterController.formatNumberWithSpaces(bloc
+                            .montantMensualiteResponse.coutTotalEmprunt
+                            .toStringAsFixed(2)) +
                         " €",
                     style: AppStyles.mediumTitleStyle),
               ],
