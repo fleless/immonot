@@ -22,6 +22,14 @@ class UserLocation extends Disposable {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
       Geolocator.openLocationSettings();
+      Fluttertoast.showToast(
+          msg: "Veuillez activer vos services de localisation",
+          toastLength: Toast.LENGTH_LONG,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: AppColors.default_black,
+          textColor: AppColors.white,
+          fontSize: 16.0);
       return Future.error('Location services are disabled.');
     }
 
