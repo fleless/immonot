@@ -346,13 +346,21 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d+\.?\d?\d?)')),
+                                    RegExp(r'(^\d+[\.\,]?\d?\d?)')),
                               ],
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               onChanged: (value) {
                                 setState(() {
                                   _visibleResults = false;
                                   _amountError = false;
+                                  _amountController.text = _amountController
+                                      .text
+                                      .replaceAll('.', ',');
+                                  _amountController.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset:
+                                              _amountController.text.length));
                                 });
                               },
                               controller: _amountController,
@@ -500,7 +508,8 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                     style: AppStyles.mediumTitleStyle),
                 TextSpan(
                     text: _formatterController
-                            .formatNumberWithSpaces(_amountController.text) +
+                            .formatNumberWithSpaces(_amountController.text)
+                            .replaceAll('.', ',') +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -519,7 +528,8 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
                 TextSpan(
                     text: _formatterController.formatNumberWithSpaces(bloc
                             .fraisNotairesResponse.fraisActe
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2)
+                            .replaceAll('.', ',')) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -562,10 +572,11 @@ class _FraisNotairesScreenWidgetState extends State<FraisNotairesScreenWidget> {
       _visibleResults = false;
       _amountError = false;
     });
-    double amount = double.tryParse(_amountController.text) ?? 0.0;
+    double amount =
+        double.tryParse(_amountController.text.replaceAll(',', '.')) ?? 0.0;
     if ((amount < 1000) ||
         (amount > 2000000) ||
-        (_amountController.text.endsWith("."))) {
+        (_amountController.text.endsWith(","))) {
       setState(() {
         _amountError = true;
       });

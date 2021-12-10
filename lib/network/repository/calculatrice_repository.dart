@@ -12,7 +12,7 @@ class CalculatriceRepository {
   }
 
   Future<CapaciteEmpruntResponse> calculCapaciteEmprunt(
-      double interet, int mensualite) {
+      double interet, double mensualite) {
     return _apiProvider.calculCapaciteEmprunt(interet, mensualite);
   }
 

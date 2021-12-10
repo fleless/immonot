@@ -7,4 +7,12 @@ class PlacesRepository {
   Future<List<PlacesResponse>> searchPlaces(String item) {
     return _apiProvider.searchPlaces(item);
   }
+
+  Future<PlacesResponse> searchDepartment(String codeDep) async {
+    return _apiProvider.searchDepartment(codeDep);
+  }
+
+  Future<PlacesResponse> searchCommune(String oidCommune) async {
+    return _apiProvider.searchCommune(oidCommune);
+  }
 }

@@ -7,7 +7,9 @@ import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/models/responses/places_response.dart';
+import 'package:immonot/models/responses/themes_response.dart';
 import 'package:immonot/network/repository/places_repository.dart';
+import 'package:immonot/network/repository/profil_repository.dart';
 import 'package:immonot/network/repository/search_annonces_repository.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:rxdart/rxdart.dart';
@@ -15,13 +17,20 @@ import 'package:rxdart/rxdart.dart';
 class HomeBloc extends Disposable {
   final controller = StreamController();
   final PlacesRepository _placesRepository = PlacesRepository();
+  final ProfilRepository _profilRepository = ProfilRepository();
   final SearchAnnoncesRepository _searchAnnoncesRepository =
       SearchAnnoncesRepository();
   FilterModels currentFilter = FilterModels();
   final changesNotifier = PublishSubject<bool>();
+
+  // to notify when saving alert
+  // ths purpose is updating widgetsx
+  final detailChangesNotifier = PublishSubject<bool>();
   final triNotifier = PublishSubject<String>();
-  String tri;
+  String tri = "";
   final SharedPref sharedPref = SharedPref();
+  List<ThemeResponse> themesList = <ThemeResponse>[];
+  final themesNotifier = PublishSubject<bool>();
 
   Future<List<PlacesResponse>> searchPlaces(String item) async {
     List<PlacesResponse> response = await _placesRepository.searchPlaces(item);
@@ -50,6 +59,11 @@ class HomeBloc extends Disposable {
     return response;
   }
 
+  Future<List<ThemeResponse>> getThemes() async {
+    themesList = await _profilRepository.getThemes();
+    themesNotifier.add(true);
+  }
+
   notifChanges() {
     changesNotifier.add(true);
   }
@@ -58,10 +72,16 @@ class HomeBloc extends Disposable {
     triNotifier.add(value);
   }
 
+  notifyDetailChanges(bool favorite) {
+    detailChangesNotifier.add(favorite);
+  }
+
   dispose() {
     controller.close();
     changesNotifier.close();
     triNotifier.close();
+    detailChangesNotifier.close();
+    themesNotifier.close();
   }
 
   reinitCurrentFilter() {

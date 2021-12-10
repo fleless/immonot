@@ -13,6 +13,7 @@ import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/responses/get_alertes_response.dart';
+import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/ui/alertes/alertes_bloc.dart';
 import 'package:immonot/ui/alertes/screens/add_modif_alerte.dart';
 import 'package:immonot/ui/home/home_bloc.dart';
@@ -149,7 +150,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
                                   ? SizedBox.shrink()
                                   : InkWell(
                                       onTap: () => {_lancerRecherche(item)},
-                                      child: item.recherche == SizedBox.shrink()
+                                      child: item.recherche == null
                                           ? null
                                           : Column(
                                               children: [
@@ -653,6 +654,9 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
 
     if (item.recherche.rayons != null) {
       if (item.recherche.rayons.length > 0) {
+        if (item.recherche.rayons[0] == null) {
+          item.recherche.rayons[0] = 0.0;
+        }
         homeBloc.currentFilter.rayon =
             double.parse(item.recherche.rayons[0].toString());
       }
@@ -693,7 +697,39 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
             double.parse(item.recherche.nbChambres[1].toString());
       }
     }
-    Modular.to.pushNamed(Routes.searchResults);
+    List<PlacesResponse> lista = <PlacesResponse>[];
+    if (item.recherche.departements == null) {
+      item.recherche.departements = <String>[];
+    }
+    if (item.recherche.oidCommunes == null) {
+      item.recherche.oidCommunes = <String>[];
+    }
+    int lengthOfDeps = item.recherche.departements == null
+        ? 0
+        : item.recherche.departements.length;
+    int lengthOfCommunes = item.recherche.oidCommunes == null
+        ? 0
+        : item.recherche.oidCommunes.length;
+    if (lengthOfCommunes + lengthOfDeps == 0) {
+      Modular.to.pushNamed(Routes.searchResults);
+    } else {
+      item.recherche.oidCommunes.forEach((element) async {
+        PlacesResponse resp = await alertesBloc.searchCommune(element);
+        lista.add(resp);
+        if (lista.length == lengthOfCommunes + lengthOfDeps) {
+          homeBloc.currentFilter.listPlaces.addAll(lista);
+          Modular.to.pushNamed(Routes.searchResults);
+        }
+      });
+      item.recherche.departements.forEach((element) async {
+        PlacesResponse resp = await alertesBloc.searchDepartment(element);
+        lista.add(resp);
+        if (lista.length == lengthOfCommunes + lengthOfDeps) {
+          homeBloc.currentFilter.listPlaces.addAll(lista);
+          Modular.to.pushNamed(Routes.searchResults);
+        }
+      });
+    }
   }
 
   _showNotifDialog(Content item) {

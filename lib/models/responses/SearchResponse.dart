@@ -76,6 +76,7 @@ class Content {
   String typeVente;
   String typeVenteCode;
   bool coupDeCoeur;
+  bool suiviPrix;
   bool prixEnBaisse;
   bool favori;
   String typeBien;
@@ -96,6 +97,7 @@ class Content {
       this.typeVente,
       this.typeVenteCode,
       this.coupDeCoeur,
+      this.suiviPrix,
       this.prixEnBaisse,
       this.typeBien,
       this.favori,
@@ -124,6 +126,7 @@ class Content {
     prixLigne2 = json['prixLigne2'];
     prixLigne3 = json['prixLigne3'];
     coupDeCoeur = json['coupDeCoeur'];
+    suiviPrix = json['suiviPrix'];
     afficheCommune = json['afficheCommune'];
     contact =
         json['contact'] != null ? new Contactt.fromJson(json['contact']) : null;
@@ -150,6 +153,7 @@ class Content {
     data['prixLigne2'] = this.prixLigne2;
     data['prixLigne3'] = this.prixLigne3;
     data['coupDeCoeur'] = this.coupDeCoeur;
+    data['suiviPrix'] = this.suiviPrix;
     data['afficheCommune'] = this.afficheCommune;
     if (this.contact != null) {
       data['contact'] = this.contact.toJson();
@@ -306,16 +310,19 @@ class Sort {
 
 class Contactt {
   String nom;
+  bool hasBareme;
 
-  Contactt({this.nom});
+  Contactt({this.nom, this.hasBareme});
 
   Contactt.fromJson(Map<String, dynamic> json) {
     nom = json['nom'];
+    hasBareme = json['hasBareme'] == null ? false : json['hasBareme'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['nom'] = this.nom;
+    data['hasBareme'] = this.hasBareme;
     return data;
   }
 }

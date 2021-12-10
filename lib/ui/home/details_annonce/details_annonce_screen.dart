@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
+import 'package:immonot/constants/endpoints.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
@@ -52,6 +54,13 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   @override
   void initState() {
     _getAnnonceInfo();
+    bloc.detailChangesNotifier.listen((value) {
+      if (mounted) {
+        setState(() {
+          _suivi = value;
+        });
+      }
+    });
     super.initState();
   }
 
@@ -144,9 +153,59 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          Text((annonce.titre ?? "")+ ", ref:"+"en attente du ref from backend", style: AppStyles.titleNormal),
+          Text(
+              (annonce.titre ?? "") +
+                  (annonce.refClient != null
+                      ? (", ref: " + annonce.refClient)
+                      : ""),
+              style: AppStyles.titleNormal),
           SizedBox(height: heightPadding),
           annonce.affichePrix ? _showPrize() : SizedBox.shrink(),
+          Padding(
+            padding: EdgeInsets.only(left: 25),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                annonce.prixLigne2 == null
+                    ? SizedBox.shrink()
+                    : Text(
+                        annonce.prixLigne2.toString().replaceAll("&euro;", "€"),
+                        style: AppStyles.smallTitleStyleBlack,
+                        overflow: TextOverflow.clip,
+                        maxLines: 3),
+                SizedBox(height: 3),
+                annonce.prixLigne3 == null
+                    ? SizedBox.shrink()
+                    : Text(
+                        annonce.prixLigne3.toString().replaceAll("&euro;", "€"),
+                        style: AppStyles.locationAnnonces,
+                        overflow: TextOverflow.clip,
+                        maxLines: 3),
+                SizedBox(height: 3),
+                if (annonce.contact.hasBareme)
+                  GestureDetector(
+                    onTap: () {
+                      if (annonce.oidNotaire != null)
+                        Modular.to
+                            .pushNamed(Routes.annuaireWebView, arguments: {
+                          "url": Endpoints.ANNUAIRE_WEB_VIEW_DETAIL +
+                              "/" +
+                              annonce.oidNotaire.trim().replaceAll(" ", "%20") +
+                              "#info-baremes",
+                          "ville": null,
+                          "nom": annonce.contact.nom.trim()
+                        });
+                    },
+                    child: Text(" Barème des honoraires de négociation",
+                        maxLines: 7,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppStyles.pinkTwelveNormalStyle),
+                  ),
+              ],
+            ),
+          ),
           Row(
             children: [
               Switch(
@@ -217,43 +276,57 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         SizedBox(height: heightPadding),
         Text("Localisation", style: AppStyles.titleStyle),
         SizedBox(height: heightPadding),
-        Container(
-          height: 200,
-          width: double.infinity,
-          child: FlutterMap(
-            options: MapOptions(
-              interactiveFlags: InteractiveFlag.pinchZoom,
-              center:
-                  LatLng(annonce.commune.latitude, annonce.commune.longitude),
-              enableMultiFingerGestureRace: false,
-              adaptiveBoundaries: false,
-              allowPanning: false,
-              slideOnBoundaries: false,
-              zoom: 13.0,
-            ),
-            layers: [
-              TileLayerOptions(
-                urlTemplate:
-                    "https://tiles.notariat.services/osm/{z}/{x}/{y}.png",
-              ),
-              MarkerLayerOptions(
-                markers: [
-                  Marker(
-                    point: LatLng(
-                        annonce.commune.latitude, annonce.commune.longitude),
-                    builder: (ctx) => Container(
-                      child: FaIcon(
-                        FontAwesomeIcons.mapMarkerAlt,
-                        color: AppColors.defaultColor,
-                        size: 20,
+        Stack(
+          children: [
+            Container(
+              height: 200,
+              width: double.infinity,
+              child: FlutterMap(
+                options: MapOptions(
+                  interactiveFlags: InteractiveFlag.pinchZoom,
+                  center: LatLng(
+                      annonce.commune.latitude, annonce.commune.longitude),
+                  enableMultiFingerGestureRace: false,
+                  adaptiveBoundaries: false,
+                  allowPanning: false,
+                  slideOnBoundaries: false,
+                  zoom: 13.0,
+                ),
+                layers: [
+                  TileLayerOptions(
+                    urlTemplate:
+                        "https://tiles.notariat.services/osm/{z}/{x}/{y}.png",
+                  ),
+                  MarkerLayerOptions(
+                    markers: [
+                      Marker(
+                        point: LatLng(annonce.commune.latitude,
+                            annonce.commune.longitude),
+                        builder: (ctx) => Container(
+                          child: FaIcon(
+                            FontAwesomeIcons.mapMarkerAlt,
+                            color: AppColors.defaultColor,
+                            size: 20,
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ],
               ),
-            ],
-          ),
-        ),
+            ),
+            GestureDetector(
+              onTap: () {
+                showLocalisationFullSizeDialog();
+              },
+              child: Container(
+                color: Colors.transparent,
+                height: 200,
+                width: double.infinity,
+              ),
+            ),
+          ],
+        )
       ],
     );
   }
@@ -267,7 +340,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
           children: [
             Text(
               annonce.prixLigne1 == null
-                  ? ""
+                  ? "Nous consulter"
                   : annonce.prixLigne1.replaceAll("&euro;", "€"),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,
@@ -289,14 +362,14 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
             InkWell(
               onTap: () {
                 _showHonoraire(
+                    annonce,
                     annonce.prixLigne1,
                     annonce.prixLigne2,
                     annonce.prixLigne3,
                     annonce.typeVente,
                     annonce.contact.nom,
-                    annonce.prixEnBaisse == null
-                        ? false
-                        : annonce.prixEnBaisse);
+                    annonce.prixEnBaisse == null ? false : annonce.prixEnBaisse,
+                    annonce.oidNotaire);
               },
               child: Image(
                 image: AssetImage(AppIcons.info),
@@ -313,7 +386,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                 ? SizedBox.shrink()
                 : Text(annonce.prixLigne3, style: AppStyles.locationAnnonces)
             : SizedBox.shrink(),
-        SizedBox(height: heightPadding),
+        SizedBox(height: heightPadding / 2),
       ],
     );
   }
@@ -386,14 +459,21 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     );
   }
 
-  _showHonoraire(String ligne1, String ligne2, String ligne3, String type,
-      String nom, bool prixEnBaisse) {
+  _showHonoraire(
+      DetailAnnonceResponse annonce,
+      String ligne1,
+      String ligne2,
+      String ligne3,
+      String type,
+      String nom,
+      bool prixEnBaisse,
+      String oidNotaire) {
     showBarModalBottomSheet(
         context: context,
         expand: false,
         enableDrag: true,
-        builder: (context) => HonorairesBottomSheetWidget(
-            ligne1, ligne2, ligne3, type, nom, prixEnBaisse));
+        builder: (context) => HonorairesBottomSheetWidget(annonce, ligne1,
+            ligne2, ligne3, type, nom, prixEnBaisse, oidNotaire));
   }
 
   Widget _bienCopropriete() {
@@ -487,7 +567,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     if (_suivi) {
       bool resp = await favorisBloc.deleteFavoris(annonce.oidAnnonce);
       if (resp) {
-        _getAnnonceInfo();
+        bloc.detailChangesNotifier.add(false);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Une erreur est survenue"),
@@ -496,7 +576,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     } else {
       bool resp = await favorisBloc.addFavoris(annonce.oidAnnonce);
       if (resp) {
-        _getAnnonceInfo();
+        bloc.detailChangesNotifier.add(true);
       } else {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text("Une erreur est survenue"),
@@ -514,5 +594,94 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     ).then((value) async {
       await sessionController.isSessionConnected() ? _getAnnonceInfo() : null;
     });
+  }
+
+  void showLocalisationFullSizeDialog() {
+    showGeneralDialog(
+      barrierLabel: "Barrier",
+      barrierDismissible: true,
+      barrierColor: Colors.black.withOpacity(0.5),
+      transitionDuration: Duration(milliseconds: 700),
+      context: context,
+      pageBuilder: (_, __, ___) {
+        return Dialog(
+          child: Stack(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  height: MediaQuery.of(context).size.height * 0.8,
+                  width: MediaQuery.of(context).size.width * 0.8,
+                  child: FlutterMap(
+                    options: MapOptions(
+                      interactiveFlags: InteractiveFlag.all,
+                      center: LatLng(
+                          annonce.commune.latitude, annonce.commune.longitude),
+                      enableMultiFingerGestureRace: true,
+                      adaptiveBoundaries: false,
+                      allowPanning: true,
+                      slideOnBoundaries: true,
+                      zoom: 13.0,
+                    ),
+                    layers: [
+                      TileLayerOptions(
+                        urlTemplate:
+                            "https://tiles.notariat.services/osm/{z}/{x}/{y}.png",
+                      ),
+                      MarkerLayerOptions(
+                        markers: [
+                          Marker(
+                            point: LatLng(annonce.commune.latitude,
+                                annonce.commune.longitude),
+                            builder: (ctx) => Container(
+                              child: FaIcon(
+                                FontAwesomeIcons.mapMarkerAlt,
+                                color: AppColors.defaultColor,
+                                size: 20,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                top: 25.0,
+                right: 20.0,
+                child: InkWell(
+                  onTap: () {
+                    Modular.to.pop();
+                  },
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(6.0),
+                        color: AppColors.default_black.withOpacity(0.4)),
+                    child: Center(
+                      child: FaIcon(
+                        FontAwesomeIcons.times,
+                        color: AppColors.white,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+      transitionBuilder: (_, anim, __, child) {
+        return SlideTransition(
+          position: Tween(begin: Offset(0, 1), end: Offset(0, 0)).animate(anim),
+          child: child,
+        );
+      },
+    );
   }
 }

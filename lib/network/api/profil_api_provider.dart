@@ -9,6 +9,7 @@ import 'package:immonot/models/responses/get_profile_response.dart';
 import 'package:immonot/models/responses/loginResponse.dart';
 import 'package:immonot/models/responses/newsletter_response.dart';
 import 'package:immonot/models/responses/places_response.dart';
+import 'package:immonot/models/responses/themes_response.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
@@ -31,6 +32,7 @@ class ProfilApiProvider {
       Endpoints.CORE_URL + "immonot/internaute/profile/edit";
   final String deleteAccountEndPoint =
       Endpoints.CORE_URL + "immonot/internaute/";
+  final String getThemesEndPoint = Endpoints.CORE_URL + "edito/themes?depth=0";
   Dio _dio;
 
   ProfilApiProvider() {
@@ -253,6 +255,30 @@ class ProfilApiProvider {
       }
     } on DioError catch (e) {
       return false;
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<List<ThemeResponse>> getThemes() async {
+    try {
+      Response response = await _dio.get(
+        getThemesEndPoint,
+        options: Options(responseType: ResponseType.json, headers: {
+          HttpHeaders.contentTypeHeader: "application/json",
+        }),
+      );
+      if (response.data.length == 0) {
+        List<ThemeResponse> vide = <ThemeResponse>[];
+        return vide;
+      } else {
+        print("hello guys");
+        var res = response.data as List;
+        return res.map((x) => ThemeResponse.fromJson(x)).toList();
+      }
+    } on DioError catch (e) {
+      List<ThemeResponse> vide = <ThemeResponse>[];
+      return vide;
     } catch (e) {
       throw e.toString();
     }

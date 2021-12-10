@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
@@ -11,8 +13,6 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/enum/type_biens.dart';
 import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/models/fake/filtersModel.dart';
-import 'package:immonot/models/requests/search_request.dart';
-import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/utils/user_location.dart';
 
@@ -55,8 +55,14 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
     }
   }
 
-  _reprendreRechercheButton() {
+  _reprendreRechercheButton() async {
+    await _loadLastSearchFilters();
     _launchPrecedentSearch(req);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
@@ -70,8 +76,9 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       decoration: new BoxDecoration(
         image: new DecorationImage(
           colorFilter: new ColorFilter.mode(
-              Colors.black.withOpacity(0.6), BlendMode.darken),
-          image: new AssetImage(AppImages.printemps),
+              Colors.black.withOpacity(0.5), BlendMode.darken),
+          image: NetworkImage(
+              'https://core-immonot.notariat.services/api/v1/params?project=immonot&key=banniere'),
           fit: BoxFit.cover,
         ),
       ),
@@ -238,47 +245,69 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
 
   Widget _buildHomeFilters() {
     return Container(
-      height: 50,
-      child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: typeBiens.length,
-          shrinkWrap: true,
-          itemBuilder: (context, index) {
-            return InkWell(
-              onTap: () => changeSelectionTypeDeBien(index),
-              child: Center(
-                child: Container(
-                  height: 33,
-                  margin: const EdgeInsets.symmetric(horizontal: 5.0),
-                  padding: const EdgeInsets.symmetric(vertical: 3.0, horizontal: 8.0),
-                  decoration: new BoxDecoration(
-                    color: bloc.currentFilter.listtypeDeBien
-                            .contains(typeBiens[index])
-                        ? AppColors.defaultColor
-                        : AppColors.white.withOpacity(0.3),
-                    borderRadius: BorderRadius.circular(5.0),
-                    border: Border.all(
-                        color: bloc.currentFilter.listtypeDeBien
-                                .contains(typeBiens[index])
-                            ? AppColors.defaultColor
-                            : AppColors.white),
-                  ),
-                  child: Align(
-                    alignment: Alignment.center,
-                    child: Text(
-                      typeBiens[index].label,
-                      style: bloc.currentFilter.listtypeDeBien
-                              .contains(typeBiens[index])
-                          ? AppStyles.selectionedItemText
-                          : AppStyles.notSelectionedItemText,
-                      textAlign: TextAlign.center,
+        height: 50,
+        child: Stack(
+          children: [
+            ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: typeBiens.length,
+                shrinkWrap: true,
+                itemBuilder: (context, index) {
+                  return InkWell(
+                    onTap: () => changeSelectionTypeDeBien(index),
+                    child: Center(
+                      child: Container(
+                        height: 33,
+                        margin: const EdgeInsets.symmetric(horizontal: 5.0),
+                        padding: const EdgeInsets.symmetric(
+                            vertical: 3.0, horizontal: 8.0),
+                        decoration: new BoxDecoration(
+                          color: bloc.currentFilter.listtypeDeBien
+                                  .contains(typeBiens[index])
+                              ? AppColors.defaultColor
+                              : AppColors.white.withOpacity(0.3),
+                          borderRadius: BorderRadius.circular(5.0),
+                          border: Border.all(
+                              color: bloc.currentFilter.listtypeDeBien
+                                      .contains(typeBiens[index])
+                                  ? AppColors.defaultColor
+                                  : AppColors.white),
+                        ),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            typeBiens[index].label,
+                            style: bloc.currentFilter.listtypeDeBien
+                                    .contains(typeBiens[index])
+                                ? AppStyles.selectionedItemText
+                                : AppStyles.notSelectionedItemText,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
+            //Blur effect on right
+            Positioned(
+              right: 0,
+              top: 0,
+              bottom: 0,
+              child: Container(
+                height: 10,
+                width: 10,
+                child: ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(sigmaX: 0, sigmaY: 0.0),
+                    child: Container(
+                      color: AppColors.defaultColor.withOpacity(0.04),
                     ),
                   ),
                 ),
               ),
-            );
-          }),
-    );
+            ),
+          ],
+        ));
   }
 
   Widget _buildSearch() {
@@ -316,7 +345,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
                       textAlignVertical: TextAlignVertical.center,
                       cursorColor: AppColors.defaultColor,
                       decoration: InputDecoration(
-                        hintText: "Villes, départements, code postal",
+                        hintText: "Villes, départements, codes postaux",
                         hintStyle: AppStyles.hintSearch,
                         border: InputBorder.none,
                         contentPadding: EdgeInsets.only(left: 8.0, top: -32.0),

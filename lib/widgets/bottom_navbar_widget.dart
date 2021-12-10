@@ -23,11 +23,25 @@ class BottomNavbar extends StatefulWidget {
 class _BottomNavbarState extends State<BottomNavbar> {
   final sessionController = Modular.get<SessionController>();
   final double iconSize = 22;
+  bool isConnected = true;
 
   void _navigateTo(String route, [Object args]) {
     if (ModalRoute.of(context).settings.name != route) {
       Modular.to.pushNamed(route, arguments: args);
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _checkIfConnected();
+  }
+
+  _checkIfConnected() async {
+    bool check = await sessionController.isSessionConnected();
+    setState(() {
+      isConnected = check;
+    });
   }
 
   @override
@@ -115,7 +129,7 @@ class _BottomNavbarState extends State<BottomNavbar> {
                 children: [
                   _buildProfileIcon(widget.route == Routes.auth),
                   Text(
-                    'Mon compte',
+                    isConnected ? "Mon compte" : 'Connexion',
                     style: widget.route == Routes.auth
                         ? AppStyles.bottomNavTextStyle
                         : AppStyles.bottomNavTextNotSelectedStyle,

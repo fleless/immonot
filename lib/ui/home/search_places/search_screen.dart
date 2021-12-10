@@ -1,8 +1,10 @@
 import 'package:awesome_loader/awesome_loader.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_tags/flutter_tags.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
@@ -29,9 +31,6 @@ class _SearchScreenState extends State<SearchScreen> {
   final _searchController = TextEditingController();
   final userLocation = Modular.get<UserLocation>();
   final bloc = Modular.get<HomeBloc>();
-  List<PlacesResponse> villesList = <PlacesResponse>[];
-  List<PlacesResponse> departementsList = <PlacesResponse>[];
-  bool isSearching = false;
   final _rayonController = TextEditingController();
   double _value = 0.0;
   final List<PlacesResponse> currentList = <PlacesResponse>[];
@@ -57,23 +56,16 @@ class _SearchScreenState extends State<SearchScreen> {
     _searchDetails(address);
   }
 
-  _searchDetails(String item) async {
-    setState(() {
-      isSearching = true;
-      _clearLists();
-    });
+  Future<List<PlacesResponse>> _searchDetails(String item) async {
     List<PlacesResponse> resp = await bloc.searchPlaces(item);
-    setState(() {
-      currentList.forEach((element) {
-        resp.removeWhere((element2) =>
-            (element.type == element2.type) &&
-            (element.code == element2.code) &&
-            (element.nom == element2.nom));
-      });
-      villesList = resp.where((e) => e.type.startsWith("C")).toList();
-      departementsList = resp.where((e) => e.type.startsWith("D")).toList();
-      isSearching = false;
+    List<PlacesResponse> filteredSearch = <PlacesResponse>[];
+    resp.forEach((element) {
+      List<String> lista = currentList.map((e) => e.code).toList();
+      if (!lista.contains(element.code)) {
+        filteredSearch.add(element);
+      }
     });
+    return filteredSearch == null ? null : filteredSearch;
   }
 
   @override
@@ -83,35 +75,33 @@ class _SearchScreenState extends State<SearchScreen> {
       resizeToAvoidBottomInset: false,
       backgroundColor: AppColors.appBackground,
       //drawer: DrawerWidget(),
-      body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 30),
-          child: Container(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTitle(),
-                SizedBox(height: 15),
-                _buildSearch(),
-                SizedBox(height: 10),
-                _buildRayon(),
-                SizedBox(height: 5),
-                _buildTags(),
-                SizedBox(height: 15),
-                currentList.length > 0
-                    ? Container(color: AppColors.dividerColor, height: 1)
-                    : SizedBox.shrink(),
-                SizedBox(height: 15),
-                Expanded(
-                    child: isSearching
-                        ? _buildLoader()
-                        : villesList.length + departementsList.length == 0
-                            ? SizedBox.shrink()
-                            : _buildLists()),
-                SizedBox(height: 15),
-                _buildBValidationutton(),
-                SizedBox(height: 15),
-              ],
+      body: SingleChildScrollView(
+        child: GestureDetector(
+          onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+          child: SafeArea(
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 15, vertical: 30),
+              child: Container(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildTitle(),
+                    SizedBox(height: 15),
+                    _buildSearch(),
+                    SizedBox(height: 10),
+                    _buildTags(),
+                    SizedBox(height: 15),
+                    _buildRayon(),
+                    SizedBox(height: 5),
+                    currentList.length > 0
+                        ? Container(color: AppColors.dividerColor, height: 1)
+                        : SizedBox.shrink(),
+                    SizedBox(height: 15),
+                    _buildBValidationutton(),
+                    SizedBox(height: 15),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -144,80 +134,112 @@ class _SearchScreenState extends State<SearchScreen> {
   }
 
   Widget _buildSearch() {
-    return Padding(
-      padding: EdgeInsets.only(right: 0),
-      child: Card(
-        elevation: 4,
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            // If you want align text to left
-            mainAxisSize: MainAxisSize.max,
-            children: [
-              Flexible(
-                child: GestureDetector(
-                  onTap: () => {},
-                  child: Container(
-                    height: 45,
-                    decoration: new BoxDecoration(
-                      color: AppColors.white,
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(5),
-                          bottomLeft: Radius.circular(5)),
-                      border: Border.all(color: AppColors.white),
-                    ),
-                    child: Center(
-                      child: TextField(
-                        controller: _searchController,
-                        onChanged: (item) {
-                          _searchDetails(item);
-                        },
-                        autofocus: true,
-                        enabled: true,
-                        style: AppStyles.textNormal,
-                        textAlign: TextAlign.left,
-                        textAlignVertical: TextAlignVertical.center,
-                        cursorColor: AppColors.defaultColor,
-                        decoration: InputDecoration(
-                          hintText: "Ville, départements, code postal",
-                          hintStyle: AppStyles.hintSearch,
+    return Card(
+      elevation: 4,
+      child: Center(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          // If you want align text to left
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Expanded(
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10),
+                child: TypeAheadField<PlacesResponse>(
+                  textFieldConfiguration: TextFieldConfiguration(
+                      controller: _searchController,
+                      cursorColor: AppColors.defaultColor,
+                      autofocus: false,
+                      style: AppStyles.textNormal,
+                      decoration: InputDecoration(
                           border: InputBorder.none,
-                          contentPadding:
-                              EdgeInsets.only(left: 8.0, top: -30.0),
+                          hintText: 'Villes, départements, codes postaux',
+                          hintStyle: AppStyles.hintSearch)),
+                  suggestionsCallback: (pattern) => _searchDetails(pattern),
+                  loadingBuilder: (context) {
+                    return Container(
+                      child: Center(
+                        child: CircularProgressIndicator.adaptive(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                              AppColors.defaultColor),
                         ),
                       ),
-                    ),
+                    );
+                  },
+                  suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                    constraints: BoxConstraints(maxHeight: 300),
+                  ),
+                  itemBuilder: (context, suggestion) {
+                    return Container(
+                      padding: EdgeInsets.all(10),
+                      child: Row(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(2),
+                            decoration: BoxDecoration(
+                              color:
+                                  AppColors.firstChartColor.withOpacity(0.15),
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                            ),
+                            child: Text(
+                                suggestion.codePostal == null
+                                    ? suggestion.code ?? ""
+                                    : suggestion.codePostal ?? "",
+                                style: AppStyles.smallTitleStyleBlack),
+                          ),
+                          SizedBox(width: 10),
+                          Expanded(
+                              child: Text(suggestion.nom ?? "",
+                                  style: AppStyles.subTitleStyle))
+                        ],
+                      ),
+                    );
+                  },
+                  noItemsFoundBuilder: (value) {
+                    return Container(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      child: Text("Aucune adresse trouvée",
+                          style: AppStyles.hintSearch),
+                    );
+                  },
+                  onSuggestionSelected: (suggestion) {
+                    placeSelected(suggestion);
+                    setState(() {
+                      _searchController.text = "";
+                    });
+                  },
+                ),
+              ),
+            ),
+            InkWell(
+              onTap: () async {
+                String _address;
+                _address = await userLocation.getUserAddress();
+                _changeSearchToCurrentPosition(_address);
+              },
+              child: Container(
+                decoration: new BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(5),
+                      bottomRight: Radius.circular(5)),
+                  border: Border.all(color: AppColors.white),
+                ),
+                width: 45,
+                height: 45,
+                child: Center(
+                  child: FaIcon(
+                    FontAwesomeIcons.crosshairs,
+                    color: AppColors.defaultColor,
+                    size: 20,
                   ),
                 ),
               ),
-              InkWell(
-                onTap: () async {
-                  String _address;
-                  _address = await userLocation.getUserAddress();
-                  _changeSearchToCurrentPosition(_address);
-                },
-                child: Container(
-                  decoration: new BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(5),
-                        bottomRight: Radius.circular(5)),
-                    border: Border.all(color: AppColors.white),
-                  ),
-                  width: 45,
-                  height: 45,
-                  child: Center(
-                    child: FaIcon(
-                      FontAwesomeIcons.crosshairs,
-                      color: AppColors.defaultColor,
-                      size: 20,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -251,9 +273,11 @@ class _SearchScreenState extends State<SearchScreen> {
                       height: double.infinity,
                       width: double.infinity,
                       alignment: Alignment.center,
+                      padding: EdgeInsets.only(bottom: 5),
                       child: TextField(
                         textAlign: TextAlign.center,
                         enabled: false,
+                        decoration: InputDecoration(border: InputBorder.none),
                         controller: _rayonController,
                         style: AppStyles.textNormal,
                       ),
@@ -332,137 +356,6 @@ class _SearchScreenState extends State<SearchScreen> {
     );
   }
 
-  Widget _buildLoader() {
-    return Container(
-      height: 133,
-      child: Center(
-        child: AwesomeLoader(
-          loaderType: AwesomeLoader.AwesomeLoader3,
-          color: AppColors.defaultColor,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLists() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      mainAxisAlignment: MainAxisAlignment.start,
-      children: [
-        departementsList.length == 0
-            ? SizedBox.shrink()
-            : Flexible(child: _buildDepartementsList()),
-        departementsList.length == 0 ? SizedBox.shrink() : SizedBox(height: 20),
-        villesList.length == 0
-            ? SizedBox.shrink()
-            : Flexible(child: _buildVillesList())
-      ],
-    );
-  }
-
-  Widget _buildVillesList() {
-    return Container(
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("Villes", style: AppStyles.titleStyleH2),
-          SizedBox(height: 15),
-          Flexible(
-            child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                      color: AppColors.dividerColor,
-                      height: 30,
-                    ),
-                itemCount: villesList.length,
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () => placeSelected(villesList[index]),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            text: TextSpan(
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: villesList[index].codePostal,
-                                    style: AppStyles.smallTitleStyleBlack),
-                                TextSpan(
-                                    text: "  " + villesList[index].nom,
-                                    style: AppStyles.subTitleStyle),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDepartementsList() {
-    return Container(
-      width: double.infinity,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text("Départements", style: AppStyles.titleStyleH2),
-          SizedBox(height: 15),
-          Flexible(
-            child: ListView.separated(
-                separatorBuilder: (context, index) => Divider(
-                      color: AppColors.dividerColor,
-                      height: 30,
-                    ),
-                itemCount: departementsList.length,
-                scrollDirection: Axis.vertical,
-                shrinkWrap: true,
-                itemBuilder: (context, index) {
-                  return InkWell(
-                    onTap: () => placeSelected(departementsList[index]),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 10),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          RichText(
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            text: TextSpan(
-                              children: <TextSpan>[
-                                TextSpan(
-                                    text: departementsList[index].code,
-                                    style: AppStyles.smallTitleStyleBlack),
-                                TextSpan(
-                                    text: "  " + departementsList[index].nom,
-                                    style: AppStyles.subTitleStyle),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
-                }),
-          ),
-        ],
-      ),
-    );
-  }
-
   _buildBValidationutton() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.35,
@@ -499,16 +392,10 @@ class _SearchScreenState extends State<SearchScreen> {
     setState(() {
       if (currentList.length < 10) {
         _searchController.text = "";
-        _clearLists();
         currentList.add(place);
       } else {
         Fluttertoast.showToast(msg: "Vous pouvez séléctionner 10 au maximum");
       }
     });
-  }
-
-  _clearLists() {
-    departementsList.clear();
-    villesList.clear();
   }
 }

@@ -12,4 +12,5 @@ class AppImages {
   static String get appLogo => 'assets/images/immonot_logo.jpeg';
   static String get leftArrow => 'assets/images/leftArrow.png';
   static String get handIcon => 'assets/images/handIcon.png';
+  static String get noElement => 'assets/images/noelement.png';
 }

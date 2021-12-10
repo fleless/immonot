@@ -229,7 +229,7 @@ class _EcheancierMontantMensualiteDialogState
             alignment: Alignment.center,
             child: Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.lista[index].mensualite.toStringAsFixed(2)) +
+                      widget.lista[index].mensualite.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
@@ -245,7 +245,7 @@ class _EcheancierMontantMensualiteDialogState
             alignment: Alignment.center,
             child: Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.lista[index].capitalRembourse.toStringAsFixed(2)) +
+                      widget.lista[index].capitalRembourse.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
@@ -261,7 +261,7 @@ class _EcheancierMontantMensualiteDialogState
             alignment: Alignment.center,
             child: Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.lista[index].interet.toStringAsFixed(2)) +
+                      widget.lista[index].interet.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,
@@ -277,7 +277,7 @@ class _EcheancierMontantMensualiteDialogState
             alignment: Alignment.center,
             child: Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.lista[index].capitalRestant.toStringAsFixed(2)) +
+                      widget.lista[index].capitalRestant.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,

@@ -150,13 +150,19 @@ class _CapaciteEmpruntScreenWidgetState
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d+\.?\d?\d?)')),
+                                    RegExp(r'(^\d+[\.\,]?\d?\d?)')),
                               ],
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               onChanged: (value) {
                                 setState(() {
                                   _visibleResults = false;
                                   _tauxError = false;
+                                  _tauxController.text =
+                                      _tauxController.text.replaceAll('.', ',');
+                                  _tauxController.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset: _tauxController.text.length));
                                 });
                               },
                               controller: _tauxController,
@@ -222,15 +228,23 @@ class _CapaciteEmpruntScreenWidgetState
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d+)')),
+                                    RegExp(r'(^\d+[\.\,]?\d?\d?)')),
                               ],
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               onChanged: (value) {
                                 setState(() {
                                   _visibleResults = false;
                                   _mensualiteError = false;
+                                  _mensualiteController.text =
+                                      _mensualiteController.text
+                                          .replaceAll('.', ',');
+                                  _mensualiteController.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset: _mensualiteController
+                                              .text.length));
                                 });
                               },
-                              keyboardType: TextInputType.number,
                               controller: _mensualiteController,
                               cursorColor: AppColors.defaultColor,
                               decoration: const InputDecoration(
@@ -316,7 +330,7 @@ class _CapaciteEmpruntScreenWidgetState
                             .where((element) => element.dureeEnAnnee == 10)
                             .first
                             .montant
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2).replaceAll('.', ',')) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -338,7 +352,7 @@ class _CapaciteEmpruntScreenWidgetState
                             .where((element) => element.dureeEnAnnee == 15)
                             .first
                             .montant
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2).replaceAll('.', ',')) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -360,7 +374,7 @@ class _CapaciteEmpruntScreenWidgetState
                             .where((element) => element.dureeEnAnnee == 25)
                             .first
                             .montant
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2).replaceAll('.', ',')) +
                         " €",
                     style: AppStyles.textNormal),
               ],
@@ -397,9 +411,13 @@ class _CapaciteEmpruntScreenWidgetState
       _tauxError = false;
       _mensualiteError = false;
     });
-    int mens = int.tryParse(_mensualiteController.text) ?? 0;
-    double taux = double.tryParse(_tauxController.text) ?? 0.0;
-    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith("."))) {
+    print("la mensualité est " + _mensualiteController.text);
+    double mens =
+        double.tryParse(_mensualiteController.text.replaceAll(',', '.')) ?? 0.0;
+    print("la mensualité est " + mens.toString());
+    double taux =
+        double.tryParse(_tauxController.text.replaceAll(',', '.')) ?? 0.0;
+    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith(","))) {
       setState(() {
         _tauxError = true;
       });

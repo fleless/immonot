@@ -8,9 +8,11 @@ class Endpoints {
   static const String CORE_URL =
       "https://core-immonot.notariat.services/api/v1/";
   static const String INFO_CONSEIL_WEB_VIEW =
-      "https://core-immonot.notariat.services/mobileapp/edito/liste?search=";
+      "https://core-immonot.notariat.services/mobileapp/edito/liste?";
   static const String INFO_CONSEIL_WEB_TAG =
-      "https://core-immonot.notariat.services/mobileapp/edito/liste?themes=";
+      "https://core-immonot.notariat.services/mobileapp/edito/liste?";
   static const String ANNUAIRE_WEB_VIEW =
       "https://core-immonot.notariat.services/mobileapp/annuaire/liste";
+  static const String ANNUAIRE_WEB_VIEW_DETAIL =
+      "https://core-immonot.notariat.services/mobileapp/annuaire/detail";
 }

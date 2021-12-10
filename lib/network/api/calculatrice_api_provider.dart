@@ -60,7 +60,7 @@ class CalculatriceApiProvider {
   }
 
   Future<CapaciteEmpruntResponse> calculCapaciteEmprunt(
-      double interet, int mensualite) async {
+      double interet, double mensualite) async {
     try {
       Response response = await _dio.get(
         capaciteEmpruntEndPoint +

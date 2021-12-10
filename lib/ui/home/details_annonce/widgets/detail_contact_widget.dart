@@ -30,7 +30,7 @@ class DetailContactWidget extends StatefulWidget {
 class _DetailContactWidgetState extends State<DetailContactWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
   DetailAnnonceResponse _fakeItem;
-  double widthLeftBox = 100;
+  double widthLeftBox = 70;
 
   @override
   void initState() {
@@ -99,7 +99,8 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
         ),
         child: Center(
           child: Card(
-            elevation: 18.0,
+            shadowColor: AppColors.white,
+            elevation: 10.0,
             shape: CircleBorder(),
             child: Center(
               child:
@@ -161,6 +162,7 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
                         ? Container(
                             width: double.infinity,
                             child: ListTile(
+                              contentPadding: EdgeInsets.all(0),
                               minLeadingWidth: 10,
                               leading: Container(
                                   width: 10,
@@ -253,44 +255,35 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
           decoration: BoxDecoration(
               color: AppColors.appBackground,
               borderRadius: BorderRadius.all(Radius.circular(8))),
-          child: ElevatedButton(
-            child: RichText(
-              textAlign: TextAlign.left,
-              maxLines: 10,
-              overflow: TextOverflow.clip,
-              text: TextSpan(
-                children: [
-                  WidgetSpan(
-                    alignment: ui.PlaceholderAlignment.middle,
-                    child: Icon(
-                      Icons.send,
-                      color: AppColors.defaultColor,
-                    ),
-                  ),
-                  TextSpan(
-                      text: "   CONTACTER L'OFFICE NOTARIAL",
-                      style: AppStyles.smallTitleStylePink),
-                ],
+          child: ElevatedButton.icon(
+              style: ElevatedButton.styleFrom(
+                  elevation: 3,
+                  onPrimary: AppColors.defaultColor,
+                  primary: AppColors.white,
+                  side: BorderSide(color: AppColors.defaultColor),
+                  padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                  textStyle:
+                      TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+              onPressed: () {
+                showCupertinoModalBottomSheet(
+                  context: context,
+                  expand: false,
+                  enableDrag: true,
+                  builder: (context) =>
+                      SendContactMessageDialog(_fakeItem.oidAnnonce),
+                );
+              },
+              icon: Icon(
+                Icons.send,
+                color: AppColors.defaultColor,
               ),
-            ),
-            onPressed: () {
-              showCupertinoModalBottomSheet(
-                context: context,
-                expand: false,
-                enableDrag: true,
-                builder: (context) =>
-                    SendContactMessageDialog(_fakeItem.oidAnnonce),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-                elevation: 3,
-                onPrimary: AppColors.defaultColor,
-                primary: AppColors.white,
-                side: BorderSide(color: AppColors.defaultColor),
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                textStyle:
-                    TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-          ),
+              label: Text(
+                "   CONTACTER L'OFFICE NOTARIAL",
+                style: AppStyles.smallTitleStylePink,
+                textAlign: TextAlign.center,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              )),
         ),
         SizedBox(height: 15),
       ],

@@ -37,6 +37,8 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
 
   @override
   void initState() {
+    _messageController.text =
+        "Bonjour,\n\nJe souhaite avoir des informations complémentaires concernant le bien que vous proposez sur Immonot.com :";
     super.initState();
   }
 
@@ -52,49 +54,52 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
       resizeToAvoidBottomInset: true,
       backgroundColor: AppColors.appBackground,
       //drawer: DrawerWidget(),
-      body: Container(
-        child: Column(mainAxisSize: MainAxisSize.max, children: [
-          Container(
-            color: AppColors.appBackground,
-            child: _buildTitle(),
-          ),
-          Divider(color: AppColors.hint),
-          Expanded(
-            child: SingleChildScrollView(
-              scrollDirection: Axis.vertical,
-              primary: true,
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                child: Container(
-                  width: double.infinity,
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        SizedBox(height: 10),
-                        _buildNom(),
-                        SizedBox(height: 20),
-                        _buildPrenom(),
-                        SizedBox(height: 20),
-                        _buildPhone(),
-                        SizedBox(height: 20),
-                        _buildEmail(),
-                        SizedBox(height: 20),
-                        _buildMessage(),
-                        SizedBox(height: 20),
-                        _buildSwitcher(),
-                        SizedBox(height: 20),
-                        buildRGPD(),
-                        SizedBox(height: 20),
-                        _buildButton(),
-                      ],
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+        child: Container(
+          child: Column(mainAxisSize: MainAxisSize.max, children: [
+            Container(
+              color: AppColors.appBackground,
+              child: _buildTitle(),
+            ),
+            Divider(color: AppColors.hint),
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.vertical,
+                primary: true,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                  child: Container(
+                    width: double.infinity,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          SizedBox(height: 10),
+                          _buildNom(),
+                          SizedBox(height: 20),
+                          _buildPrenom(),
+                          SizedBox(height: 20),
+                          _buildPhone(),
+                          SizedBox(height: 20),
+                          _buildEmail(),
+                          SizedBox(height: 20),
+                          _buildMessage(),
+                          SizedBox(height: 20),
+                          _buildSwitcher(),
+                          SizedBox(height: 20),
+                          buildRGPD(),
+                          SizedBox(height: 20),
+                          _buildButton(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
-          ),
-        ]),
+          ]),
+        ),
       ),
     );
   }
@@ -155,7 +160,7 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
                     errorBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.alert)),
                     contentPadding: EdgeInsets.only(
-                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                        bottom: 5.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
                     hintText: "Nom",
                     hintStyle: AppStyles.hintSearch,
@@ -201,7 +206,7 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.only(
-                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                        bottom: 5.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
                     hintText: "Prénom",
                     hintStyle: AppStyles.hintSearch,
@@ -247,7 +252,7 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
                   decoration: const InputDecoration(
                     border: InputBorder.none,
                     contentPadding: EdgeInsets.only(
-                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                        bottom: 5.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
                     hintText: "Tél",
                     hintStyle: AppStyles.hintSearch,
@@ -293,7 +298,7 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
                     errorBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.alert)),
                     contentPadding: EdgeInsets.only(
-                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                        bottom: 5.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
                     hintText: "Email",
                     hintStyle: AppStyles.hintSearch,
@@ -345,10 +350,8 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
                     errorBorder: OutlineInputBorder(
                         borderSide: BorderSide(color: AppColors.alert)),
                     contentPadding: EdgeInsets.only(
-                        bottom: 0.0, left: 10.0, right: 0.0, top: 0.0),
+                        bottom: 5.0, left: 10.0, right: 0.0, top: 0.0),
                     errorStyle: TextStyle(height: 0),
-                    hintText:
-                        "Bonjour,\n\nJe souhaite avoir des informations complémentaires concernant le bien que vous proposez sur Immonot.com :",
                     hintStyle: AppStyles.hintSearch,
                   ),
                   validator: (String value) {
@@ -468,50 +471,43 @@ class _SendContactMessageDialog extends State<SendContactMessageDialog> {
 
   Widget _buildButton() {
     return Container(
-      width: MediaQuery.of(context).size.width * 0.7,
-      child: ElevatedButton(
-        child: _loading
-            ? Center(
-                child: CircularProgressIndicator(color: AppColors.white),
-              )
-            : RichText(
-                textAlign: TextAlign.left,
-                maxLines: 10,
-                overflow: TextOverflow.clip,
-                text: TextSpan(
-                  children: [
-                    WidgetSpan(
-                      alignment: ui.PlaceholderAlignment.middle,
-                      child: Icon(
-                        Icons.send,
-                        color: AppColors.white,
-                      ),
-                    ),
-                    TextSpan(
-                        text: "   ENVOYER VOTRE MESSAGE",
-                        style: AppStyles.buttonTextWhite),
-                  ],
-                ),
-              ),
-        onPressed: () {
-          FocusScope.of(context).unfocus();
-          _loading
-              ? null
-              : !_accepting
+        width: MediaQuery.of(context).size.width * 0.7,
+        child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+                elevation: 3,
+                alignment: Alignment.center,
+                onPrimary: AppColors.defaultColor,
+                primary: _accepting ? AppColors.defaultColor : AppColors.grey,
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                textStyle:
+                    TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
+            onPressed: () {
+              FocusScope.of(context).unfocus();
+              _loading
                   ? null
-                  : _formKey.currentState.validate()
-                      ? _goSend()
-                      : null;
-        },
-        style: ElevatedButton.styleFrom(
-            elevation: 3,
-            alignment: Alignment.center,
-            onPrimary: AppColors.defaultColor,
-            primary: _accepting ? AppColors.defaultColor : AppColors.grey,
-            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-            textStyle: TextStyle(fontSize: 30, fontWeight: FontWeight.bold)),
-      ),
-    );
+                  : !_accepting
+                      ? null
+                      : _formKey.currentState.validate()
+                          ? _goSend()
+                          : null;
+            },
+            icon: _loading
+                ? SizedBox(height: 1)
+                : Icon(
+                    Icons.send,
+                    color: AppColors.white,
+                  ),
+            label: _loading
+                ? Center(
+                    child: CircularProgressIndicator(color: AppColors.white),
+                  )
+                : Text(
+                    "   CONTACTER L'OFFICE NOTARIAL",
+                    style: AppStyles.buttonTextWhite,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  )));
   }
 
   _goSend() async {

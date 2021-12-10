@@ -7,6 +7,8 @@ import 'package:immonot/constants/endpoints.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 
+import '../home_bloc.dart';
+
 class HomeInfoConseilWidget extends StatefulWidget {
   @override
   State<StatefulWidget> createState() => _HomeInfoConseilWidgetState();
@@ -14,17 +16,15 @@ class HomeInfoConseilWidget extends StatefulWidget {
 
 class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
   TextEditingController _rechercheController = TextEditingController();
-  final List<String> hashTagsList = [
-    "Je m'informe sur l'immobilier",
-    "J'achète",
-    "Je vends",
-    "Je rénove",
-    "Je prépare l'avenir",
-    "Je veux des infos pratiques",
-    "J'investis",
-    "Interview de notaires",
-    "Interview de personnalités"
-  ];
+  final bloc = Modular.get<HomeBloc>();
+
+  @override
+  void initState() {
+    bloc.themesNotifier.listen((value) {
+      setState(() {});
+    });
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -102,7 +102,11 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
                 onTap: () {
                   Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
                     "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
-                        _rechercheController.text.trim().replaceAll(" ", "%20"),
+                        "titres=*" +
+                        _rechercheController.text
+                            .trim()
+                            .replaceAll(" ", "%20") +
+                        "*",
                     "tag": _rechercheController.text.trim(),
                   });
                 },
@@ -134,15 +138,16 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
       height: 50,
       child: ListView.builder(
           scrollDirection: Axis.horizontal,
-          itemCount: hashTagsList.length,
+          itemCount: bloc.themesList.length,
           shrinkWrap: true,
           itemBuilder: (context, index) {
             return InkWell(
               onTap: () => {
                 Modular.to.pushNamed(Routes.infoConseilWebView, arguments: {
                   "url": Endpoints.INFO_CONSEIL_WEB_VIEW +
-                      (index > 6 ? (index + 1).toString() : index.toString()),
-                  "tag": hashTagsList[index],
+                      "themes=" +
+                      bloc.themesList[index].id.toString(),
+                  "tag": "",
                 })
               }, //changeSelectionTypeDeBien(index),
               child: Center(
@@ -158,7 +163,7 @@ class _HomeInfoConseilWidgetState extends State<HomeInfoConseilWidget> {
                   child: Align(
                     alignment: Alignment.center,
                     child: Text(
-                      "#" + hashTagsList[index],
+                      "#" + bloc.themesList[index].libelle.toLowerCase(),
                       style: AppStyles.selectionedItemText,
                       textAlign: TextAlign.center,
                     ),

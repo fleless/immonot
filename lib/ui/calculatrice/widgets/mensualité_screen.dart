@@ -125,13 +125,21 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d+\.?\d?\d?)')),
+                                    RegExp(r'(^\d+[\.\,]?\d?\d?)')),
                               ],
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               onChanged: (value) {
                                 setState(() {
                                   _visibleResults = false;
                                   _capitalError = false;
+                                  _capitalController.text = _capitalController
+                                      .text
+                                      .replaceAll('.', ',');
+                                  _capitalController.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset:
+                                              _capitalController.text.length));
                                 });
                               },
                               controller: _capitalController,
@@ -197,13 +205,19 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                             child: TextFormField(
                               inputFormatters: <TextInputFormatter>[
                                 FilteringTextInputFormatter.allow(
-                                    RegExp(r'(^\d+\.?\d?\d?)')),
+                                    RegExp(r'(^\d+[\.\,]?\d?\d?)')),
                               ],
-                              keyboardType: TextInputType.number,
+                              keyboardType: TextInputType.numberWithOptions(
+                                  decimal: true),
                               onChanged: (value) {
                                 setState(() {
                                   _visibleResults = false;
                                   _tauxError = false;
+                                  _tauxController.text =
+                                      _tauxController.text.replaceAll('.', ',');
+                                  _tauxController.selection =
+                                      TextSelection.fromPosition(TextPosition(
+                                          offset: _tauxController.text.length));
                                 });
                               },
                               controller: _tauxController,
@@ -413,7 +427,8 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                 TextSpan(
                     text: _formatterController.formatNumberWithSpaces(bloc
                             .montantMensualiteResponse.remboursementMensuel
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2)
+                            .replaceAll('.', ',')) +
                         " € (Mensualité hors assurance)",
                     style: AppStyles.mediumTitleStyle),
               ],
@@ -446,7 +461,8 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
                 TextSpan(
                     text: _formatterController.formatNumberWithSpaces(bloc
                             .montantMensualiteResponse.coutTotalEmprunt
-                            .toStringAsFixed(2)) +
+                            .toStringAsFixed(2)
+                            .replaceAll('.', ',')) +
                         " €",
                     style: AppStyles.mediumTitleStyle),
               ],
@@ -483,16 +499,18 @@ class _MensualiteScreenWidgetState extends State<MensualiteScreenWidget> {
       _capitalError = false;
       _tauxError = false;
     });
-    double cap = double.tryParse(_capitalController.text) ?? 0;
-    double taux = double.tryParse(_tauxController.text) ?? 0.0;
+    double cap =
+        double.tryParse(_capitalController.text.replaceAll(',', '.')) ?? 0;
+    double taux =
+        double.tryParse(_tauxController.text.replaceAll(',', '.')) ?? 0.0;
     if ((cap < 1000) ||
         (cap > 2000000) ||
-        (_capitalController.text.endsWith("."))) {
+        (_capitalController.text.endsWith(","))) {
       setState(() {
         _capitalError = true;
       });
     }
-    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith("."))) {
+    if ((taux < 0.1) || (taux > 100) || (_tauxController.text.endsWith(","))) {
       setState(() {
         _tauxError = true;
       });

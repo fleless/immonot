@@ -2,6 +2,7 @@ import 'package:immonot/models/requests/create_account_request.dart';
 import 'package:immonot/models/responses/get_profile_response.dart';
 import 'package:immonot/models/responses/loginResponse.dart';
 import 'package:immonot/models/responses/newsletter_response.dart';
+import 'package:immonot/models/responses/themes_response.dart';
 import 'package:immonot/network/api/profil_api_provider.dart';
 
 class ProfilRepository {
@@ -52,5 +53,9 @@ class ProfilRepository {
 
   Future<bool> deleteAccount(String internauteOid) async {
     return _apiProvider.deleteAccount(internauteOid);
+  }
+
+  Future<List<ThemeResponse>> getThemes() async {
+    return _apiProvider.getThemes();
   }
 }

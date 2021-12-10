@@ -16,7 +16,6 @@ import 'package:immonot/ui/home/home_bloc.dart';
 import 'package:immonot/ui/home/home_screen.dart';
 import 'package:immonot/ui/home/search_places/search_screen.dart';
 import 'package:immonot/ui/home/search_results/filter_bloc.dart';
-import 'package:immonot/ui/home/search_results/search_place_filter_screen.dart';
 import 'package:immonot/ui/home/search_results/search_results_screen.dart';
 import 'package:immonot/ui/home/widgets/webviews/annuaire_webView.dart';
 import 'package:immonot/ui/home/widgets/webviews/info_conseil_webView.dart';
@@ -65,8 +64,6 @@ class AppModule extends MainModule {
           routes: [
             ModularRouter(Routes.search,
                 child: (_, args) => SearchScreen(args.data['address'])),
-            ModularRouter(Routes.filterSearch,
-                child: (_, args) => SearchFilterScreen(args.data['address'])),
           ],
         ),
         ...ModularRouter.group(
@@ -97,7 +94,7 @@ class AppModule extends MainModule {
             ModularRouter(Routes.profil, child: (_, args) => ProfilScreen()),
             ModularRouter(Routes.infoConseilWebView,
                 child: (_, args) =>
-                    InfoConseilWebView(args.data['url'], args.data['tags'])),
+                    InfoConseilWebView(args.data['url'], args.data['tag'])),
             ModularRouter(Routes.annuaireWebView,
                 child: (_, args) => AnnuaireWebView(
                     args.data['url'], args.data['ville'], args.data['nom'])),

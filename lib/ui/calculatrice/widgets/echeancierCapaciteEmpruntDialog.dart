@@ -178,7 +178,7 @@ class _EcheancierCapaciteEmpruntDialogState
             alignment: Alignment.center,
             child: Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.lista[index].montant.toStringAsFixed(2)) +
+                      widget.lista[index].montant.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               textAlign: TextAlign.center,
               style: AppStyles.filterSubStyle,

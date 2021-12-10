@@ -185,7 +185,7 @@ class _PieChartWidgetState extends State<PieChartWidget> {
                 Expanded(
                   child: Text(
                       _formatterController.formatNumberWithSpaces(
-                              prize.toStringAsFixed(2)) +
+                              prize.toStringAsFixed(2).replaceAll('.', ',')) +
                           " €",
                       style: AppStyles.subTitleStyle,
                       overflow: TextOverflow.ellipsis,
@@ -209,14 +209,14 @@ class _PieChartWidgetState extends State<PieChartWidget> {
           Text("Montant de l'acquisition", style: AppStyles.titleStyleH2),
           Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.fraisNotaires.prix.toStringAsFixed(2)) +
+                      widget.fraisNotaires.prix.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               style: AppStyles.textNormal),
           SizedBox(height: 15),
           Text("Évaluation des frais d'acte", style: AppStyles.titleStyleH2),
           Text(
               _formatterController.formatNumberWithSpaces(
-                      widget.fraisNotaires.fraisActe.toStringAsFixed(2)) +
+                      widget.fraisNotaires.fraisActe.toStringAsFixed(2).replaceAll('.', ',')) +
                   " €",
               style: AppStyles.textNormal),
           SizedBox(height: 40),

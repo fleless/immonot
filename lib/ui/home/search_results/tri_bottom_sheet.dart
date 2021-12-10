@@ -13,7 +13,8 @@ class TriBottomSheetWidget extends StatefulWidget {
 }
 
 class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
-  String _singleValue = "";
+  final bloc = Modular.get<HomeBloc>();
+  String _singleValue;
   final MaterialColor kPrimaryColor = const MaterialColor(
     0xFFC91773,
     const <int, Color>{
@@ -29,10 +30,10 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
       900: const Color(0xFFC91773),
     },
   );
-  final bloc = Modular.get<HomeBloc>();
 
   @override
   void initState() {
+    _singleValue = bloc.tri;
     super.initState();
   }
 
@@ -54,117 +55,43 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
               children: [
                 Text("Trier par", style: AppStyles.titleStyleH2),
                 SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Date de publication",
-                        style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "dateAnn,ASC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Prix croissant", style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "prix,ASC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Prix décroissant", style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "prix,DESC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Commune", style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "commune,ASC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Type de bien", style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "typeBien,ASC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Surface croissant", style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "surfaceHabitable,ASC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Surface décroissant",
-                        style: AppStyles.filterSubStyle),
-                    RadioButton(
-                      description: "",
-                      value: "surfaceHabitable,DESC",
-                      groupValue: _singleValue,
-                      onChanged: (value) => setState(
-                        () => _goChange(value),
-                      ),
-                      textPosition: RadioButtonTextPosition.left,
-                    ),
-                  ],
-                ),
+                _buildRow("Date de publication", "dateAnn,ASC"),
+                _buildRow("Prix croissant", "prix,ASC"),
+                _buildRow("Prix décroissant", "prix,DESC"),
+                _buildRow("Commune", "commune,ASC"),
+                _buildRow("Type de bien", "typeBien,ASC"),
+                _buildRow("Surface croissant", "surfaceHabitable,ASC"),
+                _buildRow("Surface décroissant", "surfaceHabitable,DESC"),
                 SizedBox(height: 20),
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  _buildRow(String text, String value) {
+    return InkWell(
+      onTap: () => _goChange(value),
+      splashColor: AppColors.defaultColor.withOpacity(0.3),
+      highlightColor: AppColors.defaultColor.withOpacity(0.1),
+      child: Container(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(text, style: AppStyles.filterSubStyle),
+            RadioButton(
+              activeColor: AppColors.defaultColor,
+              description: "",
+              value: value,
+              groupValue: _singleValue,
+              onChanged: (value) => setState(
+                () => _goChange(value),
+              ),
+              textPosition: RadioButtonTextPosition.left,
+            ),
+          ],
         ),
       ),
     );

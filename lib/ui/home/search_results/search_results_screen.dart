@@ -1,13 +1,16 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
+import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
 import 'package:immonot/ui/alertes/alertes_bloc.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
@@ -53,21 +56,28 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     _controller.addListener(_scrollListener);
     _searchController.text = _searchDetails();
     bloc.changesNotifier.listen((value) {
-      _goSearch(0);
+      print("heeey");
+      _goSearch(0, false);
+      _searchController.text = _searchDetails();
     });
+
     bloc.triNotifier.listen((value) {
       _goTri();
     });
-    _goSearch(0);
+
+    _goSearch(0, false);
+
     filterBloc.filterTagsList.clear();
+
     super.initState();
   }
 
   _goTri() async {
-    _goSearch(0);
+    _goSearch(0, true);
   }
 
-  _goSearch(int pageNumber) async {
+  _goSearch(int pageNumber, bool sorted) async {
+    if (!sorted) bloc.tri = "";
     if (pageNumber == 0) {
       if (mounted) {
         setState(() {
@@ -137,7 +147,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         bloc.tri,
         true,
         bloc.currentFilter);
-    bloc.tri = null;
     if (pageNumber == 0) {
       _firstSearh(resp);
     } else {
@@ -165,9 +174,17 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   String _searchDetails() {
     String str = "";
-    bloc.currentFilter.listPlaces.forEach((element) {
-      str = str + element.nom + " (" + element.code + "), ";
-    });
+    if (bloc.currentFilter.listPlaces.length == 0) {
+      str += "Toute la france";
+    } else {
+      bloc.currentFilter.listPlaces.forEach((element) {
+        str = str +
+            (element.nom == null ? "" : element.nom) +
+            " (" +
+            element.code +
+            "), ";
+      });
+    }
     return str;
   }
 
@@ -187,7 +204,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         !_controller.position.outOfRange) {
       if (_searchResponse.number != _searchResponse.totalPages) {
         setState(() {
-          _goSearch(_searchResponse.number + 1);
+          _goSearch(_searchResponse.number + 1, bloc.tri != "" ? true : false);
         });
         //_searchResponse = await _goSearch();
       }
@@ -247,9 +264,36 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
           ),
           SizedBox(height: 10),
           Expanded(
-            child: loading ? buildShimmerSearchAnnonces() : _buildList(),
+            child: loading
+                ? buildShimmerSearchAnnonces()
+                : (searchList == null
+                    ? _buildNoItemWidget()
+                    : searchList.isEmpty
+                        ? _buildNoItemWidget()
+                        : _buildList()),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNoItemWidget() {
+    return Container(
+      height: double.infinity,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(AppImages.noElement),
+            Padding(
+              padding: EdgeInsets.all(30),
+              child: Text(
+                  "Nous n'avons trouvé aucune annonce pour votre recherche immobilière",
+                  style: AppStyles.textNormal,
+                  textAlign: TextAlign.center),
+            )
+          ],
+        ),
       ),
     );
   }
@@ -350,7 +394,14 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             child: Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                _searchResponse.totalElements.toString() + " Résultats",
+                _searchResponse.totalElements == null
+                    ? "Aucun réusltat"
+                    : (_searchResponse.totalElements.toString() +
+                        (_searchResponse.totalElements == null
+                            ? " Résultat"
+                            : _searchResponse.totalElements < 2
+                                ? " Résultat"
+                                : " Résultats")),
                 style: AppStyles.subTitleStyle,
                 textAlign: TextAlign.left,
               ),
@@ -631,6 +682,11 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                       InkWell(
                         onTap: () {
                           _showHonoraire(
+                              DetailAnnonceResponse(
+                                  oidAnnonce: fake.oidAnnonce,
+                                  favori: fake.favori,
+                                  contact: Contact(
+                                      hasBareme: fake.contact.hasBareme)),
                               fake.prixLigne1,
                               fake.prixLigne2,
                               fake.prixLigne3,
@@ -642,7 +698,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                                   : "Nom du notaire",
                               fake.prixEnBaisse != null
                                   ? fake.prixEnBaisse
-                                  : false);
+                                  : false,
+                              fake.oidNotaire);
                         },
                         child: Image(
                           image: AssetImage(AppIcons.info),
@@ -862,7 +919,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
               child: Center(
                 child: RichText(
                   overflow: TextOverflow.clip,
-                  maxLines: 1,
+                  maxLines: 2,
                   textAlign: TextAlign.center,
                   text: TextSpan(
                     children: [
@@ -1070,13 +1127,20 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  _showHonoraire(String ligne1, String ligne2, String ligne3, String type,
-      String nom, bool prixEnBaisse) {
+  _showHonoraire(
+      DetailAnnonceResponse annonce,
+      String ligne1,
+      String ligne2,
+      String ligne3,
+      String type,
+      String nom,
+      bool prixEnBaisse,
+      String oidNotaire) {
     showBarModalBottomSheet(
         context: context,
         expand: false,
         enableDrag: true,
-        builder: (context) => HonorairesBottomSheetWidget(
-            ligne1, ligne2, ligne3, type, nom, prixEnBaisse));
+        builder: (context) => HonorairesBottomSheetWidget(annonce, ligne1,
+            ligne2, ligne3, type, nom, prixEnBaisse, oidNotaire));
   }
 }

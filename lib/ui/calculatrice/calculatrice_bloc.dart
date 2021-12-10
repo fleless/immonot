@@ -23,7 +23,7 @@ class CalculatriceBloc extends Disposable {
   }
 
   Future<CapaciteEmpruntResponse> calculCapaciteEmprunt(
-      double interet, int mensualite) async {
+      double interet, double mensualite) async {
     CapaciteEmpruntResponse response = await _calculatriceRepository
         .calculCapaciteEmprunt(interet, mensualite);
     capaciteEmpruntResponse = response;

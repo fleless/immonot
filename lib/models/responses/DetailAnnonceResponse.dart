@@ -7,7 +7,10 @@ class DetailAnnonceResponse {
   String typeBienCode;
   String titre;
   String descriptif;
+  String refClient;
+  String lienImmonot;
   bool favori;
+  bool suiviPrix;
   bool coupDeCoeur;
   bool prixEnBaisse;
   bool affichePrix;
@@ -30,9 +33,12 @@ class DetailAnnonceResponse {
       this.typeBien,
       this.typeBienCode,
       this.titre,
+      this.refClient,
+      this.lienImmonot,
       this.favori,
       this.descriptif,
       this.coupDeCoeur,
+      this.suiviPrix,
       this.prixEnBaisse,
       this.affichePrix,
       this.prixLigne1,
@@ -52,10 +58,13 @@ class DetailAnnonceResponse {
     typeVenteCode = json['typeVenteCode'];
     typeBien = json['typeBien'];
     typeBienCode = json['typeBienCode'];
+    refClient = json['refClient'];
+    lienImmonot = json['lienImmonot'];
     titre = json['titre'];
     favori = json['favori'];
     descriptif = json['descriptif'];
     coupDeCoeur = json['coupDeCoeur'];
+    suiviPrix = json['suiviPrix'];
     prixEnBaisse = json['prixEnBaisse'];
     affichePrix = json['affichePrix'];
     prixLigne1 = json['prixLigne1'];
@@ -89,6 +98,9 @@ class DetailAnnonceResponse {
     data['favori'] = this.favori;
     data['descriptif'] = this.descriptif;
     data['coupDeCoeur'] = this.coupDeCoeur;
+    data['suiviPrix'] = this.suiviPrix;
+    data['refClient'] = this.refClient;
+    data['lienImmonot'] = this.lienImmonot;
     data['prixEnBaisse'] = this.prixEnBaisse;
     data['affichePrix'] = this.affichePrix;
     data['prixLigne1'] = this.prixLigne1;
@@ -314,6 +326,7 @@ class Contact {
   String website;
   String siret;
   String tvaIntraCommunautaire;
+  bool hasBareme;
 
   Contact(
       {this.nom,
@@ -323,7 +336,8 @@ class Contact {
       this.tel,
       this.website,
       this.siret,
-      this.tvaIntraCommunautaire});
+      this.tvaIntraCommunautaire,
+      this.hasBareme});
 
   Contact.fromJson(Map<String, dynamic> json) {
     nom = json['nom'];
@@ -334,6 +348,7 @@ class Contact {
     website = json['website'];
     siret = json['siret'];
     tvaIntraCommunautaire = json['tvaIntraCommunautaire'];
+    hasBareme = json['hasBareme'] == null ? false : json['hasBareme'];
   }
 
   Map<String, dynamic> toJson() {
@@ -346,6 +361,7 @@ class Contact {
     data['website'] = this.website;
     data['siret'] = this.siret;
     data['tvaIntraCommunautaire'] = this.tvaIntraCommunautaire;
+    data['hasBareme'] = this.hasBareme;
     return data;
   }
 }

@@ -3,10 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/app_icons.dart';
-import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
@@ -38,6 +35,13 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
   @override
   void initState() {
     _item = widget.fake;
+    bloc.detailChangesNotifier.listen((value) {
+      if (mounted) {
+        setState(() {
+          _item.favori = value;
+        });
+      }
+    });
     super.initState();
   }
 
@@ -163,6 +167,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
     if (isFavoris) {
       bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
       if (resp) {
+        bloc.notifyDetailChanges(false);
         setState(() {
           item.favori = false;
         });
@@ -170,6 +175,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
     } else {
       bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
       if (resp) {
+        bloc.notifyDetailChanges(true);
         setState(() {
           item.favori = true;
         });

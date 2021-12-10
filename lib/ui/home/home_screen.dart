@@ -32,6 +32,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Future<void> initState() {
     super.initState();
+    bloc.getThemes();
     widget.scrollToAnnuaire
         ? _scrollController = ScrollController(initialScrollOffset: 15000.0)
         : null;

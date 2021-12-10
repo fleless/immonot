@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_tags/flutter_tags.dart';
+import 'package:flutter_typeahead/flutter_typeahead.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/routes.dart';
@@ -110,65 +112,67 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: true,
-      body: Container(
-        height: MediaQuery.of(context).size.height * 0.92,
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            Container(
-              color: AppColors.white,
-              child: _buildTitle(),
-            ),
-            Divider(color: AppColors.hint),
-            Expanded(
-              child: SingleChildScrollView(
-                scrollDirection: Axis.vertical,
-                primary: true,
-                child: Column(
-                  children: [
-                    Padding(
-                      padding:
-                          EdgeInsets.symmetric(horizontal: 15, vertical: 20),
-                      child: Container(
-                        width: double.infinity,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.max,
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLocalisation(),
-                            SizedBox(height: 40),
-                            _buildRayon(),
-                            SizedBox(height: 40),
-                            _buildTransaction(),
-                            SizedBox(height: 40),
-                            _buildTypeDeBien(),
-                            SizedBox(height: 40),
-                            _buildPrice(),
-                            SizedBox(height: 40),
-                            _buildSurfaceInterieur(),
-                            SizedBox(height: 40),
-                            _buildSurfaceExterieure(),
-                            SizedBox(height: 40),
-                            _buildPieces(),
-                            SizedBox(height: 40),
-                            _buildChambres(),
-                            SizedBox(height: 40),
-                            _buildReference(),
-                            SizedBox(height: 40),
-                          ],
+      floatingActionButton: _buildSubmitButton(),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: GestureDetector(
+        onTap: () => FocusScope.of(context).requestFocus(new FocusNode()),
+        child: Container(
+          height: MediaQuery.of(context).size.height * 0.92,
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Container(
+                color: AppColors.white,
+                child: _buildTitle(),
+              ),
+              Divider(color: AppColors.hint),
+              Expanded(
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.vertical,
+                  primary: true,
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+                        child: Container(
+                          width: double.infinity,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.max,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLocalisation(),
+                              SizedBox(height: 40),
+                              _buildRayon(),
+                              SizedBox(height: 40),
+                              _buildTransaction(),
+                              SizedBox(height: 40),
+                              _buildTypeDeBien(),
+                              SizedBox(height: 40),
+                              _buildPrice(),
+                              SizedBox(height: 40),
+                              _buildSurfaceInterieur(),
+                              SizedBox(height: 40),
+                              _buildSurfaceExterieure(),
+                              SizedBox(height: 40),
+                              _buildPieces(),
+                              SizedBox(height: 40),
+                              _buildChambres(),
+                              SizedBox(height: 40),
+                              _buildReference(),
+                              SizedBox(height: 40),
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                    Divider(color: AppColors.hint),
-                    SizedBox(height: 10),
-                    _buildSubmitButton(),
-                    SizedBox(height: 10),
-                  ],
+                      SizedBox(height: 50),
+                    ],
+                  ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -201,6 +205,150 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
     );
   }
 
+  _changeSearchToCurrentPosition(String address) {
+    _searchController.text = address;
+    _searchDetails(address);
+  }
+
+  Future<List<PlacesResponse>> _searchDetails(String item) async {
+    List<PlacesResponse> resp = await bloc.searchPlaces(item);
+    List<PlacesResponse> filteredSearch = <PlacesResponse>[];
+    resp.forEach((element) {
+      List<String> lista = bloc.filterTagsList.map((e) => e.code).toList();
+      print("la liste est : " + filteredSearch.length.toString());
+      if (!lista.contains(element.code)) {
+        filteredSearch.add(element);
+      }
+    });
+    return filteredSearch == null ? null : filteredSearch;
+  }
+
+  placeSelected(PlacesResponse place) {
+    setState(() {
+      if (bloc.filterTagsList.length < 10) {
+        _searchController.text = "";
+        bloc.filterTagsList.add(place);
+      } else {
+        Fluttertoast.showToast(msg: "Vous pouvez séléctionner 10 au maximum");
+      }
+    });
+  }
+
+  Widget _buildSearch() {
+    return Padding(
+      padding: EdgeInsets.only(right: 0),
+      child: Card(
+        elevation: 4,
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            // If you want align text to left
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.symmetric(horizontal: 10),
+                  child: TypeAheadField<PlacesResponse>(
+                    textFieldConfiguration: TextFieldConfiguration(
+                        controller: _searchController,
+                        cursorColor: AppColors.defaultColor,
+                        autofocus: false,
+                        style: AppStyles.textNormal,
+                        decoration: InputDecoration(
+                            border: InputBorder.none,
+                            hintText: 'Villes, départements, codes postaux',
+                            hintStyle: AppStyles.hintSearch)),
+                    suggestionsCallback: (pattern) => _searchDetails(pattern),
+                    loadingBuilder: (context) {
+                      return Container(
+                        child: Center(
+                          child: CircularProgressIndicator.adaptive(
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                                AppColors.defaultColor),
+                          ),
+                        ),
+                      );
+                    },
+                    suggestionsBoxDecoration: SuggestionsBoxDecoration(
+                      constraints: BoxConstraints(maxHeight: 300),
+                    ),
+                    itemBuilder: (context, suggestion) {
+                      return Container(
+                        padding: EdgeInsets.all(10),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color:
+                                    AppColors.firstChartColor.withOpacity(0.15),
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(5)),
+                              ),
+                              child: Text(
+                                  suggestion.codePostal == null
+                                      ? suggestion.code ?? ""
+                                      : suggestion.codePostal ?? "",
+                                  style: AppStyles.smallTitleStyleBlack),
+                            ),
+                            SizedBox(width: 10),
+                            Expanded(
+                                child: Text(suggestion.nom ?? "",
+                                    style: AppStyles.subTitleStyle))
+                          ],
+                        ),
+                      );
+                    },
+                    noItemsFoundBuilder: (value) {
+                      return Container(
+                        padding:
+                            EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                        child: Text("Aucune adresse trouvée",
+                            style: AppStyles.hintSearch),
+                      );
+                    },
+                    onSuggestionSelected: (suggestion) {
+                      placeSelected(suggestion);
+                      setState(() {
+                        _searchController.text = "";
+                      });
+                    },
+                  ),
+                ),
+              ),
+              InkWell(
+                onTap: () async {
+                  String _address;
+                  _address = await userLocation.getUserAddress();
+                  _changeSearchToCurrentPosition(_address);
+                },
+                child: Container(
+                  decoration: new BoxDecoration(
+                    color: AppColors.white,
+                    borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(5),
+                        bottomRight: Radius.circular(5)),
+                    border: Border.all(color: AppColors.white),
+                  ),
+                  width: 45,
+                  height: 45,
+                  child: Center(
+                    child: FaIcon(
+                      FontAwesomeIcons.crosshairs,
+                      color: AppColors.defaultColor,
+                      size: 20,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildLocalisation() {
     return Material(
       color: AppColors.white,
@@ -211,82 +359,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Text("Localisation",
               style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
           SizedBox(height: 10),
-          Card(
-            elevation: 3,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                // If you want align text to left
-                mainAxisSize: MainAxisSize.max,
-                children: [
-                  Flexible(
-                    child: GestureDetector(
-                      onTap: () => {
-                        FocusScope.of(context).requestFocus(new FocusNode()),
-                        Modular.to.pushNamed(Routes.filterSearch,
-                            arguments: {'address': ""}),
-                      },
-                      child: Container(
-                        height: 45,
-                        decoration: new BoxDecoration(
-                          color: AppColors.white,
-                          borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(5),
-                              bottomLeft: Radius.circular(5)),
-                          border: Border.all(color: AppColors.white),
-                        ),
-                        child: Center(
-                          child: TextField(
-                            controller: _searchController,
-                            enabled: false,
-                            style: AppStyles.textNormal,
-                            textAlign: TextAlign.left,
-                            textAlignVertical: TextAlignVertical.center,
-                            cursorColor: AppColors.defaultColor,
-                            decoration: InputDecoration(
-                              hintText: "Ville, départements, code postal",
-                              hintStyle: AppStyles.hintSearch,
-                              border: InputBorder.none,
-                              contentPadding:
-                                  EdgeInsets.only(left: 8.0, top: -30.0),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  InkWell(
-                    onTap: () async {
-                      String _address;
-                      _address = await userLocation.getUserAddress();
-                      FocusScope.of(context).requestFocus(new FocusNode());
-                      Modular.to.pushNamed(Routes.search,
-                          arguments: {'address': _address});
-                    },
-                    child: Container(
-                      decoration: new BoxDecoration(
-                        color: AppColors.white,
-                        borderRadius: BorderRadius.only(
-                            topRight: Radius.circular(5),
-                            bottomRight: Radius.circular(5)),
-                        border: Border.all(color: AppColors.white),
-                      ),
-                      width: 45,
-                      height: 45,
-                      child: Center(
-                        child: FaIcon(
-                          FontAwesomeIcons.crosshairs,
-                          color: AppColors.defaultColor,
-                          size: 20,
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          _buildSearch(),
           SizedBox(height: 10),
           Align(
             alignment: Alignment.centerLeft,
@@ -323,6 +396,7 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
                       onRemoved: () {
                         setState(() {
                           bloc.filterTagsList.removeAt(index);
+                          _searchDetails(_searchController.text);
                         });
                         return true;
                       },
@@ -406,10 +480,10 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Text("Transaction",
               style: AppStyles.titleStyleH2, textAlign: TextAlign.left),
           SizedBox(height: 10),
+          _buildCheckBoxTransactions(typeVentes[3]),
           _buildCheckBoxTransactions(typeVentes[0]),
           _buildCheckBoxTransactions(typeVentes[1]),
           _buildCheckBoxTransactions(typeVentes[2]),
-          _buildCheckBoxTransactions(typeVentes[3]),
           //_buildCheckBoxTransactions(typeVentes[4]),
         ],
       ),
@@ -576,12 +650,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_priceValues.start.toStringAsFixed(0),
+              Text(_priceValues.start.toStringAsFixed(0) + " €",
                   style: AppStyles.textNormal, textAlign: TextAlign.left),
               Text(
                   _priceValues.end != 1000000.0
-                      ? _priceValues.end.toStringAsFixed(0)
-                      : "1000000 +",
+                      ? _priceValues.end.toStringAsFixed(0) + " €"
+                      : "1000000 €+",
                   style: AppStyles.textNormal,
                   textAlign: TextAlign.right),
             ],
@@ -625,12 +699,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_surfInterieurValues.start.toStringAsFixed(0),
+              Text(_surfInterieurValues.start.toStringAsFixed(0) + " m²",
                   style: AppStyles.textNormal, textAlign: TextAlign.left),
               Text(
                   _surfInterieurValues.end != 2000.0
-                      ? _surfInterieurValues.end.toStringAsFixed(0)
-                      : "2000 +",
+                      ? _surfInterieurValues.end.toStringAsFixed(0) + " m²"
+                      : "2000 m²+",
                   style: AppStyles.textNormal,
                   textAlign: TextAlign.right),
             ],
@@ -674,12 +748,12 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(_surfExterieureValues.start.toStringAsFixed(0),
+              Text(_surfExterieureValues.start.toStringAsFixed(0) + " m²",
                   style: AppStyles.textNormal, textAlign: TextAlign.left),
               Text(
                   _surfExterieureValues.end != 100000.0
-                      ? _surfExterieureValues.end.toStringAsFixed(0)
-                      : "100000 +",
+                      ? _surfExterieureValues.end.toStringAsFixed(0) + " m²"
+                      : "100000 m²+",
                   style: AppStyles.textNormal,
                   textAlign: TextAlign.right),
             ],

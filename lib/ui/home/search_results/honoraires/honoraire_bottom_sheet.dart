@@ -1,14 +1,22 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_modular/flutter_modular.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/app_images.dart';
+import 'package:immonot/constants/endpoints.dart';
+import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fakeResults.dart';
 import "dart:ui" as ui;
 
-import 'package:immonot/models/responses/SearchResponse.dart';
+import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
+import 'package:immonot/ui/favoris/favoris_bloc.dart';
+import 'package:immonot/ui/home/home_bloc.dart';
+import 'package:immonot/ui/profil/auth/auth_screen.dart';
+import 'package:immonot/utils/session_controller.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
 class HonorairesBottomSheetWidget extends StatefulWidget {
   String ligne1;
@@ -17,9 +25,18 @@ class HonorairesBottomSheetWidget extends StatefulWidget {
   String typeVente;
   String nomNotaire;
   bool prixEnBaisse;
+  String oidNotaire;
+  DetailAnnonceResponse annonce;
 
-  HonorairesBottomSheetWidget(this.ligne1, this.ligne2, this.ligne3,
-      this.typeVente, this.nomNotaire, this.prixEnBaisse);
+  HonorairesBottomSheetWidget(
+      this.annonce,
+      this.ligne1,
+      this.ligne2,
+      this.ligne3,
+      this.typeVente,
+      this.nomNotaire,
+      this.prixEnBaisse,
+      this.oidNotaire);
 
   @override
   State<StatefulWidget> createState() => _HonorairesBottomSheetWidgetState();
@@ -27,6 +44,10 @@ class HonorairesBottomSheetWidget extends StatefulWidget {
 
 class _HonorairesBottomSheetWidgetState
     extends State<HonorairesBottomSheetWidget> {
+  final favorisBloc = Modular.get<FavorisBloc>();
+  final sessionController = Modular.get<SessionController>();
+  final bloc = Modular.get<HomeBloc>();
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -190,18 +211,44 @@ class _HonorairesBottomSheetWidgetState
             ),
             SizedBox(width: 20),
             Expanded(
-              child: Text(widget.nomNotaire,
-                  maxLines: 7,
-                  overflow: TextOverflow.ellipsis,
-                  style: AppStyles.underlinedNotaireText),
+              child: GestureDetector(
+                onTap: () {
+                  if (widget.oidNotaire != null)
+                    Modular.to.pushNamed(Routes.annuaireWebView, arguments: {
+                      "url": Endpoints.ANNUAIRE_WEB_VIEW_DETAIL +
+                          "/" +
+                          widget.oidNotaire.trim().replaceAll(" ", "%20"),
+                      "ville": null,
+                      "nom": widget.nomNotaire.trim()
+                    });
+                },
+                child: Text(widget.nomNotaire,
+                    maxLines: 7,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppStyles.underlinedNotaireText),
+              ),
             ),
           ],
         ),
         SizedBox(height: 25),
-        Text("Barème des honoraires de négociation",
-            maxLines: 7,
-            overflow: TextOverflow.ellipsis,
-            style: AppStyles.underlinedBaremeHonoraireStyle),
+        if (widget.annonce.contact.hasBareme)
+          GestureDetector(
+            onTap: () {
+              if (widget.oidNotaire != null)
+                Modular.to.pushNamed(Routes.annuaireWebView, arguments: {
+                  "url": Endpoints.ANNUAIRE_WEB_VIEW_DETAIL +
+                      "/" +
+                      widget.oidNotaire.trim().replaceAll(" ", "%20") +
+                      "#info-baremes",
+                  "ville": null,
+                  "nom": widget.nomNotaire.trim()
+                });
+            },
+            child: Text("Barème des honoraires de négociation",
+                maxLines: 7,
+                overflow: TextOverflow.ellipsis,
+                style: AppStyles.underlinedBaremeHonoraireStyle),
+          ),
         SizedBox(height: 25),
         Center(
           child: Container(
@@ -212,7 +259,20 @@ class _HonorairesBottomSheetWidgetState
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {},
+                onTap: () async {
+                  if (widget.annonce.favori) {
+                    Fluttertoast.showToast(
+                        msg: "Vous suivez déjà le prix de cette annonce");
+                  } else {
+                    await sessionController.isSessionConnected()
+                        ? _addOrDeleteFavori(
+                            widget.annonce,
+                            widget.annonce.favori == null
+                                ? false
+                                : widget.annonce.favori)
+                        : _showConnectionDialog();
+                  }
+                },
                 child: Container(
                   width: MediaQuery.of(context).size.width * 0.65,
                   height: 45,
@@ -241,6 +301,35 @@ class _HonorairesBottomSheetWidgetState
           ),
         ),
       ],
+    );
+  }
+
+  _addOrDeleteFavori(DetailAnnonceResponse item, bool isFavoris) async {
+    if (isFavoris) {
+      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
+      if (resp) {
+        bloc.notifyDetailChanges(false);
+        setState(() {
+          item.favori = false;
+        });
+      }
+    } else {
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      if (resp) {
+        bloc.notifyDetailChanges(true);
+        setState(() {
+          item.favori = true;
+        });
+      }
+    }
+  }
+
+  _showConnectionDialog() {
+    return showCupertinoModalBottomSheet(
+      context: context,
+      expand: false,
+      enableDrag: true,
+      builder: (context) => AuthScreen(true),
     );
   }
 }
