@@ -492,6 +492,8 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
       _rayon = 0.0;
     }
     // we clear the filters
+    bloc.currentFilter.oidNotaires = <String>[];
+    bloc.currentFilter.oidNotaires.clear();
     bloc.currentFilter.priceMin = 0.0;
     bloc.currentFilter.priceMax = 0.0;
     bloc.currentFilter.piecesMax = 0.0;
@@ -513,6 +515,7 @@ class _HomeHeaderWidgetState extends State<HomeHeaderWidget> {
         : selectionType == 1
             ? bloc.currentFilter.listTypeVente.add(typeVentes[0])
             : null;
+    bloc.currentFilter.oidNotaires.clear();
     Modular.to.pushNamed(Routes.searchResults);
   }
 

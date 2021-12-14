@@ -1351,6 +1351,8 @@ class _FilterSearchWidgetState extends State<FilterSearchWidget> {
   }
 
   void submitNewFilter() {
+    homeBloc.currentFilter.oidNotaires = <String>[];
+    homeBloc.currentFilter.oidNotaires.clear();
     homeBloc.currentFilter.listPlaces.clear();
     homeBloc.currentFilter.listPlaces.addAll(bloc.filterTagsList);
     homeBloc.currentFilter.listTypeVente.clear();

@@ -16,6 +16,8 @@ import 'package:page_indicator/page_indicator.dart';
 import 'package:url_launcher/url_launcher.dart';
 import "dart:ui" as ui;
 
+import '../../home_bloc.dart';
+
 class DetailContactWidget extends StatefulWidget {
   DetailAnnonceResponse fake;
 
@@ -31,6 +33,7 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
   GlobalKey<PageContainerState> key = GlobalKey();
   DetailAnnonceResponse _fakeItem;
   double widthLeftBox = 70;
+  final bloc = Modular.get<HomeBloc>();
 
   @override
   void initState() {
@@ -204,6 +207,10 @@ class _DetailContactWidgetState extends State<DetailContactWidget> {
     return Align(
       alignment: FractionalOffset.bottomCenter,
       child: InkWell(
+        onTap: () {
+          bloc.currentFilter.oidNotaires.add(_fakeItem.oidNotaire);
+          Modular.to.pushNamed(Routes.searchResults);
+        },
         child: Card(
           clipBehavior: Clip.antiAliasWithSaveLayer,
           shape: RoundedRectangleBorder(

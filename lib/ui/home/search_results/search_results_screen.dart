@@ -8,6 +8,7 @@ import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
@@ -56,7 +57,6 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     _controller.addListener(_scrollListener);
     _searchController.text = _searchDetails();
     bloc.changesNotifier.listen((value) {
-      print("heeey");
       _goSearch(0, false);
       _searchController.text = _searchDetails();
     });
@@ -143,7 +143,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
             surfaceExterieure: _surfaceExterieur,
             surfaceInterieure: _surfaceInterieur,
             nbPieces: _nbPieces,
-            nbChambres: _nbChambres),
+            nbChambres: _nbChambres,
+            oidNotaires: bloc.currentFilter.oidNotaires),
         bloc.tri,
         true,
         bloc.currentFilter);
@@ -463,8 +464,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                     )
                   : SizedBox.shrink()
               : InkWell(
-                  onTap: () => Modular.to.pushNamed(Routes.detailsAnnonce,
-                      arguments: {'id': item.oidAnnonce}),
+                  onTap: () => _moveToDetails(item.oidAnnonce),
                   child: Container(
                       //height: 222,
                       child: Padding(
@@ -489,6 +489,19 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         },
       ),
     );
+  }
+
+  /// this function allow the push to details section with callback if the item was bookmarked
+  _moveToDetails(String oidAnnonce) async {
+    final information = await Navigator.pushNamed(
+        context, Routes.detailsAnnonce,
+        arguments: {'id': oidAnnonce});
+    setState(() {
+      searchList
+          .where((element) => element.oidAnnonce == oidAnnonce)
+          .first
+          .favori = information;
+    });
   }
 
   _buildImage(Content fake) {

@@ -23,6 +23,7 @@ class FilterModels {
   bool notificationsOn;
   bool emailOn;
   bool vendeur;
+  List<String> oidNotaires;
 
   FilterModels() {
     this.nom = "";
@@ -45,6 +46,7 @@ class FilterModels {
     this.notificationsOn = true;
     this.emailOn = true;
     this.vendeur = false;
+    this.oidNotaires = <String>[];
   }
 
   clear() {
@@ -68,6 +70,7 @@ class FilterModels {
     this.notificationsOn = true;
     this.emailOn = true;
     this.vendeur = false;
+    this.oidNotaires = <String>[];
   }
 
   FilterModels.fromJson(Map<String, dynamic> json) {
@@ -100,6 +103,9 @@ class FilterModels {
         }
       });
     }
+    if (json['oidNotaires'] != null) {
+      oidNotaires = json['oidNotaires'];
+    }
     if (json['listPlaces'] != null) {
       listPlaces = <PlacesResponse>[];
       json['listPlaces'].forEach((v) {
@@ -124,6 +130,7 @@ class FilterModels {
     data['piecesMax'] = this.piecesMax;
     data['piecesMin'] = this.piecesMin;
     data['reference'] = this.reference;
+    data['oidNotaires'] = this.oidNotaires;
     if (this.listtypeDeBien != null) {
       data['listtypeDeBien'] =
           this.listtypeDeBien.map((v) => v.toJson()).toList();

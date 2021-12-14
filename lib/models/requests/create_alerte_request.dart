@@ -51,6 +51,7 @@ class Recherche {
   List<num> surfaceExterieure;
   List<num> nbPieces;
   List<num> nbChambres;
+  List<String> oidNotaires;
 
   Recherche(
       {this.references,
@@ -63,7 +64,8 @@ class Recherche {
       this.surfaceInterieure,
       this.surfaceExterieure,
       this.nbPieces,
-      this.nbChambres});
+      this.nbChambres,
+      this.oidNotaires});
 
   Recherche.fromJson(Map<String, dynamic> json) {
     references =
@@ -88,6 +90,8 @@ class Recherche {
         json["typeBiens"] == null ? null : json['typeBiens'].cast<String>();
     oidCommunes =
         json["oidCommunes"] == null ? null : json['oidCommunes'].cast<String>();
+    oidNotaires =
+        json["oidNotaires"] == null ? null : json['oidNotaires'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -103,6 +107,7 @@ class Recherche {
     data['surfaceExterieure'] = this.surfaceExterieure;
     data['nbPieces'] = this.nbPieces;
     data['nbChambres'] = this.nbChambres;
+    data['oidNotaires'] = this.oidNotaires;
     return data;
   }
 }
