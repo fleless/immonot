@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "190008404170",
+    "project_id": "immonot-flutter",
+    "storage_bucket": "immonot-flutter.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:190008404170:android:2f62c39979877df5316c33",
+        "android_client_info": {
+          "package_name": "com.immonot.android"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "190008404170-a8dnnfhjtl02se6d1c88r4mebtfi8o3a.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.immonot.android",
+            "certificate_hash": "5cd0328abb9b02e44e634b9259f1a220fffdd806"
+          }
+        },
+        {
+          "client_id": "190008404170-ugiilukotmamu5jhc9nk5ehj44mn92hg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-gNmIkvTbnbSIROLp5WBs8mT-qlw6VTQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "190008404170-ugiilukotmamu5jhc9nk5ehj44mn92hg.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "190008404170-2ug9ihc95b8jlcmaakugrl6h8rjk9nki.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.exedim.immonot",
+                "app_store_id": "409992237"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
