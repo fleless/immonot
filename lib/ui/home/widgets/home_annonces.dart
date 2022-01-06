@@ -335,6 +335,7 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
           item.favori = true;
         });
       }
+
     }
   }
 
