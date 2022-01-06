@@ -177,10 +177,7 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
           itemBuilder: (context, index) {
             var item = searchList[index];
             return InkWell(
-              onTap: () => {
-                Modular.to.pushNamed(Routes.detailsAnnonce,
-                    arguments: {'id': item.oidAnnonce})
-              },
+              onTap: () => _moveToDetails(item.oidAnnonce),
               child: Container(
                 width: 190,
                 child: Column(
@@ -349,5 +346,18 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
       builder: (context) => AuthScreen(true),
     ).then((value) async =>
         await sessionController.isSessionConnected() ? _loadAnnonces() : null);
+  }
+
+  /// this function allow the push to details section with callback if the item was bookmarked
+  _moveToDetails(String oidAnnonce) async {
+    final information = await Navigator.pushNamed(
+        context, Routes.detailsAnnonce,
+        arguments: {'id': oidAnnonce});
+    setState(() {
+      searchList
+          .where((element) => element.oidAnnonce == oidAnnonce)
+          .first
+          .favori = information;
+    });
   }
 }

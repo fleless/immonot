@@ -82,33 +82,41 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     super.dispose();
   }
 
+  Future<bool> _onWillPop() async {
+    Navigator.pop(context, annonce.favori);
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      key: _scaffoldKey,
-      resizeToAvoidBottomInset: true,
-      backgroundColor: AppColors.appBackground,
-      //drawer: DrawerWidget(),
-      body: loading
-          ? Center(
-              child: Container(
-                height: 50,
-                width: 50,
-                child: CircularProgressIndicator(
-                  color: AppColors.defaultColor,
+    return WillPopScope(
+      onWillPop: _onWillPop,
+      child: Scaffold(
+        key: _scaffoldKey,
+        resizeToAvoidBottomInset: true,
+        backgroundColor: AppColors.appBackground,
+        //drawer: DrawerWidget(),
+        body: loading
+            ? Center(
+                child: Container(
+                  height: 50,
+                  width: 50,
+                  child: CircularProgressIndicator(
+                    color: AppColors.defaultColor,
+                  ),
+                ),
+              )
+            : Container(
+                child: Stack(
+                  children: [
+                    SingleChildScrollView(
+                      child: _buildContent(annonce),
+                    ),
+                    DetailBotttomWidget(annonce),
+                  ],
                 ),
               ),
-            )
-          : Container(
-              child: Stack(
-                children: [
-                  SingleChildScrollView(
-                    child: _buildContent(annonce),
-                  ),
-                  DetailBotttomWidget(annonce),
-                ],
-              ),
-            ),
+      ),
     );
   }
 

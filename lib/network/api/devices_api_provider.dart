@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:device_info/device_info.dart';
 import 'package:dio/dio.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/endpoints.dart';
@@ -49,11 +51,21 @@ class DevicesApiProvider {
     String identifier = Platform.isAndroid
         ? await deviceInfo.androidInfo.then((value) => value.id)
         : await deviceInfo.iosInfo.then((value) => value.identifierForVendor);
+
+    /// getting tht token of FCM
+    String fbToken = "";
+    if (defaultTargetPlatform == TargetPlatform.iOS ||
+        defaultTargetPlatform == TargetPlatform.macOS) {
+      fbToken = await FirebaseMessaging.instance.getAPNSToken();
+    } else {
+      fbToken = await FirebaseMessaging.instance.getToken();
+    }
+
     var params = {
       "name": model,
       "version": version,
       "identifier": identifier,
-      "token": await sharedPred.read(AppConstants.TOKEN_KEY)
+      "token": fbToken
     };
     try {
       Response response = await _dio.post(addDeviceEndPoint,

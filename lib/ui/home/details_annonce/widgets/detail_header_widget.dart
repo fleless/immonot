@@ -125,7 +125,7 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
             left: 20.0,
             child: InkWell(
               onTap: () {
-                Modular.to.pop();
+                Navigator.pop(context, widget.fake.favori);
               },
               child: Container(
                 width: 40,

@@ -31,10 +31,9 @@ class _AppWidgetState extends State<AppWidget> {
               statusBarBrightness: Brightness.light,
               statusBarIconBrightness: Brightness.dark,
             )));
-
+    initialize(context);
     /// handling push notifications functions
     _initFlutterDownloaderPackage();
-    initialize(context);
   }
 
   _initFlutterDownloaderPackage() async {
