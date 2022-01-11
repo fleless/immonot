@@ -4,13 +4,8 @@ Immonot developed within Nexton Company.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🚀 Deployment status
+|Branch|Status|
+|-|-|
+|Production|[![Codemagic build status](https://api.codemagic.io/apps/61d7145bd70044d5cd98cb70/61dc29a5344ed8a802cf0e11/status_badge.svg)](https://codemagic.io/apps/61d7145bd70044d5cd98cb70/61dc29a5344ed8a802cf0e11/latest_build)|
+|Internal test|[![Codemagic build status](https://api.codemagic.io/apps/61d7145bd70044d5cd98cb70/61d7145bd70044d5cd98cb6f/status_badge.svg)](https://codemagic.io/apps/61d7145bd70044d5cd98cb70/61d7145bd70044d5cd98cb6f/latest_build?color=b&label=hello&logo=null&logoColor=)|
