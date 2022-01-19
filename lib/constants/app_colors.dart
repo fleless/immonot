@@ -27,15 +27,22 @@ class AppColors {
   static Color clipperWaveColor = Color(0xFF999999).withOpacity(0.15);
   static Color faceBookColor = Color(0xFF3B5998);
   static const Color alert = Color(0xFFF50029);
-
-  static const Color dpeA = Color(0xFF00FF02);
-  static const Color dpeB = Color(0xFF4EFF00);
-  static const Color dpeC = Color(0xFFAFFF02);
-  static const Color dpeD = Color(0xFFFEFF02);
-  static const Color dpeE = Color(0xFFFDB402);
-  static const Color dpeF = Color(0xFFFE4D00);
-  static const Color dpeG = Color(0xFFFE0000);
-  static const Color gesColor = Color(0xFF8A18DF);
+  static const Color splashStartColor = Color(0xFFc91773);
+  static const Color splashEndColor = Color(0xFFc9175e);
+  static const Color dpeA = Color(0xFF00a06c);
+  static const Color dpeB = Color(0xFF50b154);
+  static const Color dpeC = Color(0xFFa4cc73);
+  static const Color dpeD = Color(0xFFf2e71b);
+  static const Color dpeE = Color(0xFFf1b519);
+  static const Color dpeF = Color(0xFFed8335);
+  static const Color dpeG = Color(0xFFd71d20);
+  static const Color gesA = Color(0xFFa4dbf9);
+  static const Color gesB = Color(0xFF8cb5d3);
+  static const Color gesC = Color(0xFF7693b3);
+  static const Color gesD = Color(0xFF5f6e8d);
+  static const Color gesE = Color(0xFF4d506f);
+  static const Color gesF = Color(0xFF393651);
+  static const Color gesG = Color(0xFF271a34);
 
   static Map<int, Color> colorCodes = {
     50: const Color.fromRGBO(201, 23, 115, .1),
@@ -50,5 +57,6 @@ class AppColors {
     900: const Color.fromRGBO(201, 23, 115, 1),
   }; // Opacity 20%
 
-  static MaterialColor defaultColorMaterial = MaterialColor(0xFFC91773, colorCodes);
+  static MaterialColor defaultColorMaterial =
+      MaterialColor(0xFFC91773, colorCodes);
 }

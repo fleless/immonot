@@ -8,6 +8,7 @@ import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/models/responses/loginResponse.dart';
 import 'package:immonot/ui/profil/auth/auth_bloc.dart';
+import 'package:immonot/ui/splash/splash_gradient.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 
@@ -46,11 +47,22 @@ class _SplashScreenWidgetState extends State<SplashScreenWidget> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.defaultColor,
-      body: Container(
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
-        child: Image.asset(AppImages.splash),
+      backgroundColor: AppColors.white,
+      body: Stack(
+        children: [
+          Container(
+            decoration: BoxDecoration(gradient: SplashGradient()),
+            width: MediaQuery.of(context).size.width,
+            height: MediaQuery.of(context).size.height,
+          ),
+          Center(
+            child: Container(
+              height: 100,
+              width: 200,
+              child: Image.asset(AppImages.splash),
+            ),
+          )
+        ],
       ),
     );
   }

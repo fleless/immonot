@@ -218,7 +218,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
             children: [
               Switch(
                   activeColor: AppColors.defaultColor,
-                  value: _suivi,
+                  value: annonce.suiviPrix,
                   onChanged: (value) async {
                     await sessionController.isSessionConnected()
                         ? _suivrePrixButton()
@@ -260,12 +260,13 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
           SizedBox(height: heightPadding),
           Divider(color: AppColors.hint),
           SizedBox(height: heightPadding),
-          Text("Diagnostics", style: AppStyles.titleStyle),
-          SizedBox(height: heightPadding),
-          SizedBox(height: heightPadding),
-          DetailDpeWidget(annonce),
-          SizedBox(height: heightPadding),
-          DetailGesWidget(annonce),
+
+          /// ne pas afficher ce bloc quand l annonce n'a pas données
+          /// vierge et exempte false mais pas de données
+          if (!((annonce.energie.energieNote == null) &&
+              (!annonce.energie.vierge) &&
+              (!annonce.energie.exempte)))
+            _buildEnergy(),
           //TODO: Add this think when we get VENC and everything about bidding clear
           /*_fakeItem.genre == "VENTE AUX ENCHÈRES EN LIGNE"
               ? DetailEnchereHorairesWidget(_fakeItem, heightPadding)
@@ -273,6 +274,106 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                   ? DetailEnchereHorairesWidget(_fakeItem, heightPadding)
                   : SizedBox.shrink(),*/
         ]);
+  }
+
+  _buildEnergy() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text("Diagnostics", style: AppStyles.titleStyle),
+          ],
+        ),
+        SizedBox(height: heightPadding),
+        SizedBox(height: heightPadding),
+        DetailDpeWidget(annonce),
+        SizedBox(height: heightPadding),
+        DetailGesWidget(annonce),
+        SizedBox(height: heightPadding),
+        if (annonce.energie.coutEnergieMention != null)
+          Center(
+            child: Text(
+              annonce.energie.coutEnergieMention,
+              style: AppStyles.energyMentionStyle,
+              maxLines: 5,
+              textAlign: TextAlign.center,
+            ),
+          ),
+        if ((annonce.energie.coutEnergieMin != null) &&
+            (annonce.energie.coutEnergieMax != null))
+          if ((!annonce.energie.vierge) &&
+              (!annonce.energie.exempte) &&
+              (annonce.energie.coutEnergieMin > 0) &&
+              (annonce.energie.coutEnergieMax > 0))
+            _buildEnergyComplementBloc(),
+      ],
+    );
+  }
+
+  _buildEnergyComplementBloc() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+            color: AppColors.defaultColor,
+            child: Text(
+              "Estimation annuelle des coûts d'énergie du logement",
+              style: AppStyles.buttonTextWhite,
+              maxLines: 5,
+            ),
+          ),
+          SizedBox(height: 15),
+          Text(
+              "Les coûts sont estimés en fonction des caractéristiques de votre logement et pour une situation standard sur 5 usages (chauffage, eau chaude sanitaire, climatisation, éclairage, auxiliaires).",
+              style: AppStyles.locationAnnonces,
+              maxLines: 10),
+          SizedBox(height: 15),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              Image.asset(
+                AppIcons.piggy,
+                width: 50,
+              ),
+              SizedBox(width: 10),
+              Expanded(
+                child: Center(
+                  child: RichText(
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    text: TextSpan(
+                      children: <TextSpan>[
+                        TextSpan(
+                            text: "Entre  ", style: AppStyles.subTitleStyle),
+                        TextSpan(
+                            text: annonce.energie.coutEnergieMin
+                                    .toStringAsFixed(0) +
+                                " €",
+                            style: AppStyles.titleStyleH2),
+                        TextSpan(
+                            text: "  et  ", style: AppStyles.subTitleStyle),
+                        TextSpan(
+                            text: annonce.energie.coutEnergieMax
+                                    .toStringAsFixed(0) +
+                                " €",
+                            style: AppStyles.titleStyleH2),
+                        TextSpan(
+                            text: "  par an", style: AppStyles.subTitleStyle),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildLocalization() {
@@ -572,7 +673,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   }
 
   _suivrePrixButton() async {
-    if (_suivi) {
+    if (annonce.suiviPrix) {
       bool resp = await favorisBloc.deleteFavoris(annonce.oidAnnonce);
       if (resp) {
         bloc.detailChangesNotifier.add(false);
@@ -582,7 +683,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         ));
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(annonce.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(annonce.oidAnnonce, true);
       if (resp) {
         bloc.detailChangesNotifier.add(true);
       } else {

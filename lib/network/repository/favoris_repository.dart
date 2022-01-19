@@ -16,7 +16,7 @@ class FavorisRepository {
     return _apiProvider.deleteFavoris(idAnnonce);
   }
 
-  Future<bool> addFavoris(String idAnnonce) async {
-    return _apiProvider.addFavoris(idAnnonce);
+  Future<bool> addFavoris(String idAnnonce, bool suivrePrix) async {
+    return _apiProvider.addFavoris(idAnnonce, suivrePrix);
   }
 }

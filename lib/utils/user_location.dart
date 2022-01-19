@@ -96,6 +96,15 @@ class UserLocation extends Disposable {
     return address;
   }
 
+  Future<String> getUserDepartmentCode() async {
+    Position position = await determinePosition();
+    List<Placemark> placemarks =
+    await placemarkFromCoordinates(position.latitude, position.longitude);
+    String address = placemarks.first.locality;
+    print(address);
+    return address;
+  }
+
   Future<bool> checkIfGPSEnabled() async {
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {

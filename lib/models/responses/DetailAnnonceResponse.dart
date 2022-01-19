@@ -278,6 +278,9 @@ class Energie {
   num ges;
   String gesNote;
   String gesEtiquette;
+  num coutEnergieMin;
+  num coutEnergieMax;
+  String coutEnergieMention;
 
   Energie(
       {this.diagnosticEtabli,
@@ -288,7 +291,10 @@ class Energie {
       this.energieEtiquette,
       this.ges,
       this.gesNote,
-      this.gesEtiquette});
+      this.gesEtiquette,
+      this.coutEnergieMin,
+      this.coutEnergieMax,
+      this.coutEnergieMention});
 
   Energie.fromJson(Map<String, dynamic> json) {
     diagnosticEtabli = json['diagnosticEtabli'];
@@ -300,6 +306,9 @@ class Energie {
     ges = json['ges'];
     gesNote = json['gesNote'];
     gesEtiquette = json['gesEtiquette'];
+    coutEnergieMin = json['coutEnergieMin'];
+    coutEnergieMax = json['coutEnergieMax'];
+    coutEnergieMention = json['coutEnergieMention'];
   }
 
   Map<String, dynamic> toJson() {
@@ -313,6 +322,9 @@ class Energie {
     data['ges'] = this.ges;
     data['gesNote'] = this.gesNote;
     data['gesEtiquette'] = this.gesEtiquette;
+    data['coutEnergieMin'] = this.coutEnergieMin;
+    data['coutEnergieMax'] = this.coutEnergieMax;
+    data['coutEnergieMention'] = this.coutEnergieMention;
     return data;
   }
 }

@@ -65,7 +65,7 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
       _indexTerrasse == -1
           ? SizedBox.shrink()
           : _buildColumn(
-              "Terasse",
+              "Terrasse",
               item.caracteristiques.complements[_indexTerrasse].value
                   .toString()),
       _indexPlacesParking == -1

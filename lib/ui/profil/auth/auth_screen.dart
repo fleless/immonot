@@ -284,7 +284,7 @@ class _AuthScreenState extends State<AuthScreen> {
             ),
           ),
           SizedBox(height: 15),
-          Container(
+          /*Container(
             height: 50,
             width: double.infinity,
             decoration: new BoxDecoration(
@@ -319,7 +319,7 @@ class _AuthScreenState extends State<AuthScreen> {
               ),
             ),
           ),
-          SizedBox(height: 15),
+          SizedBox(height: 15),*/
           Container(
             height: 50,
             width: double.infinity,

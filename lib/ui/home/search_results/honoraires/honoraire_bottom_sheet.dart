@@ -314,7 +314,7 @@ class _HonorairesBottomSheetWidgetState
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
       if (resp) {
         bloc.notifyDetailChanges(true);
         setState(() {

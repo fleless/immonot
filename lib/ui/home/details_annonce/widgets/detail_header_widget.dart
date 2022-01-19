@@ -4,13 +4,10 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
-import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
-import 'package:immonot/utils/launchUrl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:page_indicator/page_indicator.dart';
 import 'package:share_plus/share_plus.dart';
@@ -106,7 +103,9 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
             right: 20.0,
             child: InkWell(
               onTap: () {
-                Share.share(_fakeItem.lienImmonot, subject: 'Immonot annonce');
+                Share.share(_fakeItem.lienImmonot,
+                    subject:
+                        'Un ami vous envoie une annonce depuis immonot.com');
               },
               child: Container(
                 width: 40,

@@ -42,6 +42,12 @@ class _InfoConseilWebViewState extends State<InfoConseilWebView>
     super.initState();
     prepareAnimations();
     _runExpandCheck();
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        expand = false;
+      });
+      _runExpandCheck();
+    });
   }
 
   ///Setting up the animation

@@ -337,6 +337,13 @@ class AppStyles {
     fontSize: 14,
   );
 
+  static const energyMentionStyle = TextStyle(
+    fontFamily: 'openSans',
+    color: AppColors.default_black,
+    fontWeight: FontWeight.w500,
+    fontSize: 14,
+  );
+
   static const underlinedButtonWhiteStyle = TextStyle(
     shadows: [Shadow(color: Colors.white, offset: Offset(0, -3))],
     fontFamily: 'openSans',

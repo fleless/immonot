@@ -188,9 +188,12 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
             InkWell(
               onTap: () async {
                 String _address;
-                _address = await userLocation.getUserAddress();
-                _searchController.text = _address;
-                locationSelected = null;
+                _address = await userLocation.getUserDepartmentCode();
+                List<PlacesResponse> placess = await _searchDetails(_address);
+                _searchController.text =
+                    placess.isEmpty ? _address : placess.first.nom;
+                locationSelected = placess.isEmpty ? null : placess.first;
+                //_searchController.text = _address;
               },
               child: Container(
                 decoration: new BoxDecoration(

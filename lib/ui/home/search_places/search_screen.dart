@@ -150,7 +150,7 @@ class _SearchScreenState extends State<SearchScreen> {
                   textFieldConfiguration: TextFieldConfiguration(
                       controller: _searchController,
                       cursorColor: AppColors.defaultColor,
-                      autofocus: false,
+                      autofocus: true,
                       style: AppStyles.textNormal,
                       decoration: InputDecoration(
                           border: InputBorder.none,

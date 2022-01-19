@@ -178,7 +178,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         str = str +
             (element.nom == null ? "" : element.nom) +
             " (" +
-            element.code +
+            (element.codePostal == null ? element.code : element.codePostal) +
             "), ";
       });
     }
@@ -502,7 +502,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
 
   _buildImage(Content fake) {
     return Container(
-      height: 230,
+      height: MediaQuery.of(context).size.width > 1000 ? 400 : 230,
       width: double.infinity,
       child: Stack(
         children: [
@@ -963,7 +963,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
       if (resp) {
         setState(() {
           item.favori = true;

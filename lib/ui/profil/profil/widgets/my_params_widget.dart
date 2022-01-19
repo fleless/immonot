@@ -12,6 +12,7 @@ import 'package:immonot/ui/profil/auth/auth_bloc.dart';
 import 'package:immonot/ui/profil/profil/profil_bloc.dart';
 import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/utils/launchUrl.dart';
+import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 
 class MyParamsWidget extends StatefulWidget {
@@ -28,6 +29,8 @@ class _MyParamsWidgetState extends State<MyParamsWidget> {
   final _profileBloc = Modular.get<ProfilBloc>();
   final sharedPref = Modular.get<SharedPref>();
   bool _loading = false;
+  num oidInternaute;
+  final sessionController = Modular.get<SessionController>();
 
   @override
   void initState() {
@@ -45,6 +48,7 @@ class _MyParamsWidgetState extends State<MyParamsWidget> {
         await sharedPref.read(AppConstants.PROFILE_INFO_KEY));
     if (req != null) {
       setState(() {
+        oidInternaute = req.oidInternaute;
         _firstSwitch = req.subscribeNewsletterImmonot;
         _secondSwitch = req.subscribeMagazineDesNotaires;
         _thirdSwitch = req.subscribeInfosPartenairesImmonot;
@@ -85,17 +89,10 @@ class _MyParamsWidgetState extends State<MyParamsWidget> {
                   overlayColor: MaterialStateProperty.all(
                       AppColors.defaultColor.withOpacity(0.2)),
                 ),
-                onPressed: () {
-                  bloc.deleteDevice();
-                  sharedPref.remove(AppConstants.TOKEN_KEY);
-                  sharedPref.remove(AppConstants.EMAIL_KEY);
-                  sharedPref.remove(AppConstants.PASSWORD_KEY);
-                  sharedPref.remove(AppConstants.PROFILE_INFO_KEY);
-                  Modular.to.pushNamedAndRemoveUntil(
-                      Routes.auth, (Route<dynamic> route) => false,
-                      arguments: {'openedAsDialog': false});
+                onPressed: () async {
+                  await _showNotifDialog();
                 },
-                child: Text("Se déconnecter",
+                child: Text("Supprimer mon compte personnel",
                     style: AppStyles.underlinedPinkNormalStyle),
               ),
             ),
@@ -270,5 +267,115 @@ class _MyParamsWidgetState extends State<MyParamsWidget> {
     setState(() {
       _loading = false;
     });
+  }
+
+  _showNotifDialog() {
+    bool _loading = false;
+    return showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StatefulBuilder(
+              builder: (BuildContext context, StateSetter setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0)),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Center(
+                      child: Text(
+                        "Je confirme...",
+                        textAlign: TextAlign.start,
+                        style: AppStyles.titleStyleH2,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    Container(
+                      color: AppColors.defaultColor,
+                      height: 5,
+                    ),
+                    Padding(
+                      padding: EdgeInsets.symmetric(vertical: 20),
+                      child: Text(
+                        "Vouloir me désinscrire et supprimer mes alertes, sélections et coordonnées personnelles.",
+                        style: AppStyles.subTitleStyle,
+                      ),
+                    ),
+                    Divider(color: AppColors.hint),
+                    SizedBox(height: 5),
+                    Container(
+                      width: double.infinity,
+                      alignment: Alignment.centerRight,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          ElevatedButton(
+                            child: Text("Non",
+                                style: AppStyles.buttonTextPink,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1),
+                            onPressed: () {
+                              Modular.to.pop();
+                            },
+                            style: ElevatedButton.styleFrom(
+                                side: BorderSide(color: AppColors.defaultColor),
+                                elevation: 1,
+                                onPrimary: AppColors.defaultColor,
+                                primary: AppColors.white,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 15),
+                                textStyle: TextStyle(
+                                    fontSize: 30, fontWeight: FontWeight.bold)),
+                          ),
+                          SizedBox(width: 12),
+                          ElevatedButton(
+                            child: Text("Oui",
+                                style: AppStyles.buttonTextWhite,
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1),
+                            onPressed: () async {
+                              if (!_loading) {
+                                setState(() {
+                                  _loading = true;
+                                });
+                                bool resp = await _profileBloc
+                                    .deleteAccount(oidInternaute.toString());
+                                if (resp) {
+                                  await sessionController.disconnectUser();
+                                  Modular.to.popAndPushNamed(Routes.auth,
+                                      arguments: {'openedAsDialog': false});
+                                  showSuccessToast(
+                                      context, "Votre compte a été supprimé");
+                                } else {
+                                  showErrorToast(
+                                      context, "Une erreur est survenue");
+                                }
+                                setState(() {
+                                  _loading = true;
+                                });
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                                elevation: 1,
+                                onPrimary: AppColors.white,
+                                primary: AppColors.defaultColor,
+                                padding: EdgeInsets.symmetric(
+                                    horizontal: 10, vertical: 15),
+                                textStyle: TextStyle(
+                                    fontSize: 30, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+        });
   }
 }

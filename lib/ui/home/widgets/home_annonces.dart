@@ -5,10 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
+import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/type_biens.dart';
+import 'package:immonot/models/enum/type_ventes.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
+import 'package:immonot/models/fake/filtersModel.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/requests/search_request.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
@@ -17,6 +21,7 @@ import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/widgets/shimmers/shimmer_annonces_horizontal.dart';
 import 'package:immonot/ui/profil/auth/auth_screen.dart';
 import 'package:immonot/utils/session_controller.dart';
+import 'package:immonot/utils/shared_preferences.dart';
 import 'package:immonot/utils/user_location.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 
@@ -37,6 +42,7 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
   SearchResponse _searchResponse = SearchResponse(totalElements: 0);
   final userLocation = Modular.get<UserLocation>();
   PlacesResponse _currentDepartment;
+  final SharedPref sharedPref = SharedPref();
 
   @override
   void initState() {
@@ -64,21 +70,21 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
       List<PlacesResponse> resp = await bloc.searchPlaces(_userDepartment);
       if (resp != null) {
         if (resp.isNotEmpty) {
-          if (resp.first.code.length < 5) {
-            _currentDepartment = resp.first;
-            _positionToSearch = resp.first.code;
-          }
+          _currentDepartment = resp.first;
+          _positionToSearch = resp.first.code;
         }
       }
     } else {
       print("permission not enabled");
     }
+
+    /// On lance une recherche des annonces les plus proches
     SearchResponse resp = await bloc.searchAnnonces(
         0,
         Recherche(
             typeVentes: null,
             references: null,
-            oidCommunes: null,
+            oidCommunes: [_positionToSearch],
             departements: [_positionToSearch],
             rayons: null,
             typeBiens: null,
@@ -90,7 +96,71 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
         bloc.tri,
         false,
         bloc.currentFilter);
-    // Si le nombre de résultats retournés est zéro on lance une nouvelle recherche par défaut
+
+    /// Si le nombre de résultats retournés est zéro on lance la dernière recherche faite
+    if (resp.numberOfElements == 0) {
+      // c'est la dernière requete pour l'utilisateur dans le device
+      //check if there is last_filter to avoid error when parsing
+      dynamic test = await sharedPref.read(AppConstants.LAST_FILTER);
+      if (test != null) {
+        FilterModels request = FilterModels.fromJson(
+            await sharedPref.read(AppConstants.LAST_FILTER));
+        if (request != null) {
+          //parse bloc elements to recherche type before sending them
+          List<String> _oidCommunes = <String>[];
+          List<String> _oidDepartements = <String>[];
+          List<double> _rayons = <double>[];
+          List<double> _prix = <double>[];
+          List<double> _surfaceExterieur = <double>[];
+          List<double> _surfaceInterieur = <double>[];
+          List<double> _nbPieces = <double>[];
+          List<double> _nbChambres = <double>[];
+
+          List<String> _typeBiens =
+              request.listtypeDeBien.map((e) => e.code).toList();
+          List<String> _typesVenteLabels =
+              request.listTypeVente.map((e) => e.code).toList();
+          List<String> _references =
+              request.reference == null ? [] : [request.reference];
+          request.listPlaces.forEach((element) {
+            if (element.code.length < 5) {
+              _oidDepartements.add(element.code);
+            } else {
+              _oidCommunes.add(element.code);
+            }
+          });
+          _rayons.add(request.rayon);
+          _prix.addAll([request.priceMin, request.priceMax]);
+          _surfaceExterieur
+              .addAll([request.surExterieurMin, request.surExterieurMax]);
+          _surfaceInterieur
+              .addAll([request.surInterieurMin, request.surInterieurMax]);
+          _nbPieces.addAll([request.piecesMin, bloc.currentFilter.piecesMax]);
+          _nbChambres.addAll([request.chambresMin, request.chambresMin]);
+
+          resp = await bloc.searchAnnonces(
+              0,
+              Recherche(
+                  typeVentes: _typesVenteLabels,
+                  references: _references,
+                  oidCommunes: _oidCommunes,
+                  departements: _oidDepartements,
+                  rayons: _oidCommunes.length == 0 ? [] : _rayons,
+                  typeBiens: _typeBiens,
+                  prix: _prix,
+                  surfaceExterieure: _surfaceExterieur,
+                  surfaceInterieure: _surfaceInterieur,
+                  nbPieces: _nbPieces,
+                  nbChambres: _nbChambres,
+                  oidNotaires: bloc.currentFilter.oidNotaires),
+              bloc.tri,
+              false,
+              bloc.currentFilter);
+        }
+      }
+    }
+
+    /// Si le nombre de résultats retournés est zéro on lance une nouvelle recherche par défaut
     if (resp.numberOfElements == 0) {
       resp = await bloc.searchAnnonces(
           0,
@@ -137,7 +207,6 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
           Padding(
             padding: EdgeInsets.only(right: 15),
             child: Container(
-              height: 30,
               child: InkWell(
                 splashColor: AppColors.defaultColor.withOpacity(0.2),
                 highlightColor: Colors.transparent,
@@ -329,13 +398,12 @@ class _HomeAnnoncesWidgetState extends State<HomeAnnoncesWidget> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
       if (resp) {
         setState(() {
           item.favori = true;
         });
       }
-
     }
   }
 

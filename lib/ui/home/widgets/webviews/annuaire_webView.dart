@@ -2,12 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_custom_clippers/flutter_custom_clippers.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_typeahead/flutter_typeahead.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/endpoints.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/places_response.dart';
@@ -59,6 +57,12 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView>
     super.initState();
     prepareAnimations();
     _runExpandCheck();
+    Future.delayed(Duration(seconds: 1), () {
+      setState(() {
+        expand = false;
+      });
+      _runExpandCheck();
+    });
   }
 
   ///Setting up the animation
@@ -351,8 +355,10 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView>
               onTap: () async {
                 String _address;
                 _address = await userLocation.getUserAddress();
-                _searchController.text = _address;
-                locationSelected = PlacesResponse(code: _address);
+                List<PlacesResponse> placess = await _searchDetails(_address);
+                _searchController.text =
+                    placess.isEmpty ? _address : placess.first.nom;
+                locationSelected = placess.isEmpty ? null : placess.first;
               },
               child: Container(
                 decoration: new BoxDecoration(
@@ -405,9 +411,9 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView>
               depCom = "";
             } else {
               if (locationSelected == null) {
-                depCom = ("codeInsees=" +
+                depCom = ("departements=*" +
                     _searchController.text.trim().replaceAll(" ", "%20") +
-                    "&rayons=10");
+                    "*&rayons=10");
               } else {
                 depCom = locationSelected.code.length == 2
                     ? "departements=" + locationSelected.code

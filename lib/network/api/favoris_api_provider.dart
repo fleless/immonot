@@ -93,11 +93,11 @@ class FavorisApiProvider {
     }
   }
 
-  Future<bool> addFavoris(String idAnnonce) async {
+  Future<bool> addFavoris(String idAnnonce, bool suivrePrix) async {
     Map<String, String> header = await sessionController.getHeader();
     var params = {
       "idAnnonce": idAnnonce,
-      "alertePrix": true,
+      "alertePrix": suivrePrix,
     };
     try {
       Response response = await _dio.post(addFavorisEndPoint,

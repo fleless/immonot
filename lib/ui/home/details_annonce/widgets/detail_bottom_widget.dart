@@ -58,7 +58,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
     return Align(
       alignment: Alignment.bottomCenter,
       child: Container(
-        height: 70,
+        height: 80,
         color: AppColors.defaultColor,
         child: Center(
           child: Padding(
@@ -173,7 +173,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
       if (resp) {
         bloc.notifyDetailChanges(true);
         setState(() {

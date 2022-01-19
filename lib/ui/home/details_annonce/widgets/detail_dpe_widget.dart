@@ -27,13 +27,13 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   String dpePosition;
   Color dpeColor;
 
-//TODO: null condition
   @override
   void initState() {
     super.initState();
     _fakeItem = widget.idAnnonce;
     dpe = _fakeItem.energie.energie;
     getDpePosition();
+    getDpeColor();
   }
 
   @override
@@ -42,31 +42,32 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   }
 
   void getDpePosition() {
-    if (dpe == null) {
+    if ((_fakeItem.energie.vierge) || (_fakeItem.energie.exempte)) {
       dpePosition = "null";
-      dpeColor = AppColors.nullEnergy;
-    } else if (dpe < 51) {
-      dpePosition = "A";
-      dpeColor = AppColors.dpeA;
-    } else if (dpe < 92) {
-      dpePosition = "B";
-      dpeColor = AppColors.dpeB;
-    } else if (dpe < 151) {
-      dpePosition = "C";
-      dpeColor = AppColors.dpeC;
-    } else if (dpe < 231) {
-      dpePosition = "D";
-      dpeColor = AppColors.dpeD;
-    } else if (dpe < 331) {
-      dpePosition = "E";
-      dpeColor = AppColors.dpeE;
-    } else if (dpe < 451) {
-      dpePosition = "F";
-      dpeColor = AppColors.dpeF;
     } else {
-      dpePosition = "G";
+      dpePosition = _fakeItem.energie.energieNote;
+    }
+  }
+
+  void getDpeColor() {
+    if ((_fakeItem.energie.vierge) || (_fakeItem.energie.exempte)) {
+      dpeColor = AppColors.nullEnergy;
+    } else if (dpePosition == "A") {
+      dpeColor = AppColors.dpeA;
+    } else if (dpePosition == "B") {
+      dpeColor = AppColors.dpeB;
+    } else if (dpePosition == "C") {
+      dpeColor = AppColors.dpeC;
+    } else if (dpePosition == "D") {
+      dpeColor = AppColors.dpeD;
+    } else if (dpePosition == "E") {
+      dpeColor = AppColors.dpeE;
+    } else if (dpePosition == "F") {
+      dpeColor = AppColors.dpeF;
+    } else if (dpePosition == "G") {
       dpeColor = AppColors.dpeG;
     }
+    print("dpe color is " + dpeColor.toString());
   }
 
   @override
@@ -129,8 +130,10 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
                           ),
                           Center(
                             child: Text(
-                              dpe == null ? 'VIERGE' :dpePosition + " (" + dpe.toString() + ")",
-                              style: AppStyles.smallTitleStyleBlack,
+                              dpe == null
+                                  ? 'VIERGE'
+                                  : dpePosition + " (" + dpe.toString() + ")",
+                              style: AppStyles.whiteTitleStyle,
                               overflow: TextOverflow.clip,
                               maxLines: 1,
                             ),
@@ -151,287 +154,59 @@ class _DetailDpeWidgetState extends State<DetailDpeWidget> {
   }
 
   Widget _buildPyramid() {
-    return Column(
-      children: [
-        _buildDpeA(),
-        _buildDpeB(),
-        _buildDpeC(),
-        _buildDpeD(),
-        _buildDpeE(),
-        _buildDpeF(),
-        _buildDpeG(),
-      ],
-    );
+    return ((_fakeItem.energie.exempte) || (_fakeItem.energie.vierge))
+        ? Container(
+            margin: EdgeInsets.symmetric(vertical: 5),
+            child: Text(
+                _fakeItem.energie.exempte ? "Dpe non requis" : "Dpe vierge", style: AppStyles.hintSearch,),
+          )
+        : Container(
+            width: double.infinity,
+            color: AppColors.white,
+            child: Column(children: [
+              Container(
+                child: Image.network(_fakeItem.energie.energieEtiquette,
+                    fit: BoxFit.contain),
+              ),
+              SizedBox(height: 15),
+              Container(
+                color: AppColors.grey,
+                height: 1,
+                margin: EdgeInsets.symmetric(horizontal: 15),
+              ),
+              SizedBox(height: 20),
+              _buildSubtitleDpe(),
+              SizedBox(
+                height: 30,
+              ),
+            ]),
+          );
   }
 
-  _buildDpeA() {
+  _buildSubtitleDpe() {
     return Padding(
-      padding: EdgeInsets.only(top: 0),
-      child: Row(
+      padding: EdgeInsets.symmetric(horizontal: 30),
+      child: Column(
         children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.2,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeA,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  < 51   ", style: AppStyles.textNormal),
-                  Text("A   ", style: AppStyles.titleStyleH2),
-                ],
-              ),
+          Center(
+            child: Text(
+              'Consommations énergétiques',
+              style: AppStyles.titleStyleH2,
+              maxLines: 10,
+              textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(width: 20),
-          dpePosition == "A"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeB() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.3,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeB,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  51 à 91  ", style: AppStyles.textNormal),
-                  Text("B  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
+          SizedBox(
+            height: 5,
+          ),
+          Center(
+            child: Text(
+              'Consommations énergétiques (en énergie primaire) pour le chauffage, la production d\'eau chaude sanitaire et le refroidissement Indice de mesure : kWhEP/m 2 .an',
+              style: AppStyles.subTitleStyle,
+              maxLines: 10,
+              textAlign: TextAlign.center,
             ),
           ),
-          SizedBox(width: 20),
-          dpePosition == "B"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeC() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.4,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeC,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  91 à 150  ", style: AppStyles.textNormal),
-                  Text("C  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          dpePosition == "C"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeD() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.5,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeD,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  151 à 230  ", style: AppStyles.textNormal),
-                  Text("D  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          dpePosition == "D"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeE() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.6,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeE,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  231 à 330  ", style: AppStyles.textNormal),
-                  Text("E  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          dpePosition == "E"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeF() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.7,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeF,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  331 à 450  ", style: AppStyles.textNormal),
-                  Text("F  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          dpePosition == "F"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
-        ],
-      ),
-    );
-  }
-
-  _buildDpeG() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Row(
-        children: [
-          Container(
-            height: 35,
-            width: MediaQuery.of(context).size.width * 0.8,
-            color: dpe == null ? AppColors.nullEnergy : AppColors.dpeG,
-            child: Center(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text("  > 450  ", style: AppStyles.textNormal),
-                  Text("G  ", style: AppStyles.titleStyleH2),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(width: 20),
-          dpePosition == "G"
-              ? Container(
-                  height: 15,
-                  width: 17,
-                  child: Center(
-                    child: Container(
-                      width: double.infinity,
-                      height: double.infinity,
-                      child: Image.asset(AppImages.customShape,
-                          fit: BoxFit.fill, color: AppColors.default_black),
-                    ),
-                  ),
-                )
-              : SizedBox.shrink(),
         ],
       ),
     );

@@ -99,7 +99,7 @@ class SearchAnnoncesApiProvider {
               "?page=" +
               pageId.toString() +
               "&size=10&sort=" +
-              (sort == "" ? "prix,DESC" : sort),
+              (sort == "" ? "dateAnn,desc" : sort),
           options: Options(responseType: ResponseType.json, headers: header),
           data: jsonEncode(body));
       return SearchResponse.fromJson(response.data);

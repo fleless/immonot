@@ -33,7 +33,8 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
 
   @override
   void initState() {
-    _singleValue = bloc.tri;
+    _singleValue =
+        ((bloc.tri == null) || (bloc.tri == "")) ? "dateAnn,desc" : bloc.tri;
     super.initState();
   }
 
@@ -55,7 +56,7 @@ class _TriBottomSheetWidgetState extends State<TriBottomSheetWidget> {
               children: [
                 Text("Trier par", style: AppStyles.titleStyleH2),
                 SizedBox(height: 20),
-                _buildRow("Date de publication", "dateAnn,ASC"),
+                _buildRow("Date de publication", "dateAnn,desc"),
                 _buildRow("Prix croissant", "prix,ASC"),
                 _buildRow("Prix décroissant", "prix,DESC"),
                 _buildRow("Commune", "commune,ASC"),

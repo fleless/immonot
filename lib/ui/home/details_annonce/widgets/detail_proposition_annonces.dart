@@ -254,7 +254,7 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
       if (resp) {
         setState(() {
           item.favori = true;

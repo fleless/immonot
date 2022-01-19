@@ -9,6 +9,7 @@ import 'package:immonot/constants/app_constants.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/get_profile_response.dart';
+import 'package:immonot/ui/profil/auth/auth_bloc.dart';
 import 'package:immonot/ui/profil/profil/profil_bloc.dart';
 import 'package:immonot/ui/profil/profil/widgets/change_password_widget.dart';
 import 'package:immonot/utils/flushbar_utils.dart';
@@ -21,7 +22,6 @@ class MyProfilWidget extends StatefulWidget {
 }
 
 class _MyProfilWidgetState extends State<MyProfilWidget> {
-  num oidInternaute;
   int _civilityController = 1;
   final _nomController = TextEditingController();
   final _prenomController = TextEditingController();
@@ -34,6 +34,7 @@ class _MyProfilWidgetState extends State<MyProfilWidget> {
   bool _loading = false;
   final sharedPref = Modular.get<SharedPref>();
   final bloc = Modular.get<ProfilBloc>();
+  final auth_bloc = Modular.get<AuthBloc>();
   final sessionController = Modular.get<SessionController>();
 
   @override
@@ -45,7 +46,6 @@ class _MyProfilWidgetState extends State<MyProfilWidget> {
   _loadInfos() async {
     GetProfileResponse req = GetProfileResponse.fromJson(
         await sharedPref.read(AppConstants.PROFILE_INFO_KEY));
-    oidInternaute = req.oidInternaute;
     String email = await sharedPref.read(AppConstants.EMAIL_KEY);
     setState(() {
       _civilityController = req.civilite == null
@@ -130,10 +130,17 @@ class _MyProfilWidgetState extends State<MyProfilWidget> {
                     overlayColor: MaterialStateProperty.all(
                         AppColors.defaultColor.withOpacity(0.2)),
                   ),
-                  onPressed: () async {
-                    await _showNotifDialog();
+                  onPressed: () {
+                    auth_bloc.deleteDevice();
+                    sharedPref.remove(AppConstants.TOKEN_KEY);
+                    sharedPref.remove(AppConstants.EMAIL_KEY);
+                    sharedPref.remove(AppConstants.PASSWORD_KEY);
+                    sharedPref.remove(AppConstants.PROFILE_INFO_KEY);
+                    Modular.to.pushNamedAndRemoveUntil(
+                        Routes.auth, (Route<dynamic> route) => false,
+                        arguments: {'openedAsDialog': false});
                   },
-                  child: Text("Supprimer mon compte personnel",
+                  child: Text("Se déconnecter",
                       style: AppStyles.underlinedPinkNormalStyle),
                 ),
               ),
@@ -661,115 +668,5 @@ class _MyProfilWidgetState extends State<MyProfilWidget> {
     setState(() {
       _loading = false;
     });
-  }
-
-  _showNotifDialog() {
-    bool _loading = false;
-    return showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return StatefulBuilder(
-              builder: (BuildContext context, StateSetter setState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0)),
-              child: Container(
-                padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Center(
-                      child: Text(
-                        "Je confirme...",
-                        textAlign: TextAlign.start,
-                        style: AppStyles.titleStyleH2,
-                      ),
-                    ),
-                    SizedBox(height: 10),
-                    Container(
-                      color: AppColors.defaultColor,
-                      height: 5,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(vertical: 20),
-                      child: Text(
-                        "Vouloir me désinscrire et supprimer mes alertes, sélections et coordonnées personnelles.",
-                        style: AppStyles.subTitleStyle,
-                      ),
-                    ),
-                    Divider(color: AppColors.hint),
-                    SizedBox(height: 5),
-                    Container(
-                      width: double.infinity,
-                      alignment: Alignment.centerRight,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          ElevatedButton(
-                            child: Text("Non",
-                                style: AppStyles.buttonTextPink,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1),
-                            onPressed: () {
-                              Modular.to.pop();
-                            },
-                            style: ElevatedButton.styleFrom(
-                                side: BorderSide(color: AppColors.defaultColor),
-                                elevation: 1,
-                                onPrimary: AppColors.defaultColor,
-                                primary: AppColors.white,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 15),
-                                textStyle: TextStyle(
-                                    fontSize: 30, fontWeight: FontWeight.bold)),
-                          ),
-                          SizedBox(width: 12),
-                          ElevatedButton(
-                            child: Text("Oui",
-                                style: AppStyles.buttonTextWhite,
-                                overflow: TextOverflow.ellipsis,
-                                maxLines: 1),
-                            onPressed: () async {
-                              if (!_loading) {
-                                setState(() {
-                                  _loading = true;
-                                });
-                                bool resp = await bloc
-                                    .deleteAccount(oidInternaute.toString());
-                                if (resp) {
-                                  await sessionController.disconnectUser();
-                                  Modular.to.popAndPushNamed(Routes.auth,
-                                      arguments: {'openedAsDialog': false});
-                                  showSuccessToast(
-                                      context, "Votre compte a été supprimé");
-                                } else {
-                                  showErrorToast(
-                                      context, "Une erreur est survenue");
-                                }
-                                setState(() {
-                                  _loading = true;
-                                });
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                                elevation: 1,
-                                onPrimary: AppColors.white,
-                                primary: AppColors.defaultColor,
-                                padding: EdgeInsets.symmetric(
-                                    horizontal: 10, vertical: 15),
-                                textStyle: TextStyle(
-                                    fontSize: 30, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          });
-        });
   }
 }

@@ -36,6 +36,7 @@ Widget ShowCalculatriceModalWidget() {
                       .pushNamed(Routes.calculatrice, arguments: {'index': 0});
                 },
                 child: Container(
+                  width: double.infinity,
                   child: RichText(
                     overflow: TextOverflow.clip,
                     maxLines: 1,
@@ -67,6 +68,7 @@ Widget ShowCalculatriceModalWidget() {
                       .pushNamed(Routes.calculatrice, arguments: {'index': 1});
                 },
                 child: Container(
+                  width: double.infinity,
                   child: RichText(
                     overflow: TextOverflow.clip,
                     maxLines: 1,
@@ -98,6 +100,7 @@ Widget ShowCalculatriceModalWidget() {
                       .pushNamed(Routes.calculatrice, arguments: {'index': 2});
                 },
                 child: Container(
+                  width: double.infinity,
                   child: RichText(
                     overflow: TextOverflow.clip,
                     maxLines: 1,

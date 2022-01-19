@@ -103,9 +103,6 @@ class FilterModels {
         }
       });
     }
-    if (json['oidNotaires'] != null) {
-      oidNotaires = json['oidNotaires'];
-    }
     if (json['listPlaces'] != null) {
       listPlaces = <PlacesResponse>[];
       json['listPlaces'].forEach((v) {
