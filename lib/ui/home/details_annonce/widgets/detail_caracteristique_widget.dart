@@ -46,60 +46,19 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
           ? SizedBox.shrink()
           : _buildColumn(
               "Chambres", item.caracteristiques.nbChambres.toString()),
-      _indexMeuble == -1
-          ? SizedBox.shrink()
-          : _buildColumn("Meublé",
-              item.caracteristiques.complements[_indexMeuble].value.toString()),
-      _indexChauffage == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Chauffage",
-              item.caracteristiques.complements[_indexChauffage].value
-                  .toString()),
-      _indexNbEtages == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Nombre d'étage(s)",
-              item.caracteristiques.complements[_indexNbEtages].value
-                  .toString()),
-      _indexTerrasse == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Terrasse",
-              item.caracteristiques.complements[_indexTerrasse].value
-                  .toString()),
-      _indexPlacesParking == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Place(s) parking",
-              item.caracteristiques.complements[_indexPlacesParking].value
-                  .toString()),
-      _indexGarage == -1
-          ? SizedBox.shrink()
-          : _buildColumn("Garage(s)",
-              item.caracteristiques.complements[_indexGarage].value.toString()),
-      _indexConstruction == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Année construction",
-              item.caracteristiques.complements[_indexConstruction].value
-                  .toString()),
-      __indexEtatGeneral == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "État général",
-              item.caracteristiques.complements[__indexEtatGeneral].value
-                  .toString()),
-      _indexReference == -1
-          ? SizedBox.shrink()
-          : _buildColumn(
-              "Référence",
-              item.caracteristiques.complements[_indexReference].value
-                  .toString()),
-      _indexCave == -1
-          ? SizedBox.shrink()
-          : _buildColumn("Cave",
-              item.caracteristiques.complements[_indexCave].value.toString()),
+      if (item.caracteristiques.complements != null)
+        for (var complement in item.caracteristiques.complements)
+          if (!([
+            "COMMODITE_COMMERCES",
+            "COMMODITE_ECOLE",
+            "COMMODITE_SERVICES",
+            "COMMODITE_CENTRE_VILLE",
+            "COMMODITE_GARE",
+            "COMMODITE_METRO",
+            "COMMODITE_BUS",
+            "COMMODITE_TRAMWAY"
+          ].contains(complement.key)))
+            _buildColumn(complement.label, complement.value.toString()),
     ],
   );
 }

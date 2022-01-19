@@ -6,6 +6,7 @@ import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/bookmark_params_model.dart';
 import 'package:immonot/models/requests/create_alerte_request.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/models/responses/SearchResponse.dart';
@@ -55,6 +56,15 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     bloc.changesNotifier.listen((value) {
       _goSearch(0, false);
       _searchController.text = _searchDetails();
+    });
+    bloc.suiviPrixFromHonoraireSearchScreenNotifier.listen((value) {
+      if (mounted)
+        setState(() {
+          int index =
+              searchList.indexWhere((element) => element.oidAnnonce == value);
+          searchList[index].suiviPrix = true;
+          searchList[index].favori = true;
+        });
     });
 
     bloc.triNotifier.listen((value) {
@@ -487,16 +497,19 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
     );
   }
 
-  /// this function allow the push to details section with callback if the item was bookmarked
+  /// this function allow the push to details section with callback if the item was bookmarked or following price changed
   _moveToDetails(String oidAnnonce) async {
-    final information = await Navigator.pushNamed(
-        context, Routes.detailsAnnonce,
-        arguments: {'id': oidAnnonce});
+    final _params = (await Navigator.pushNamed(context, Routes.detailsAnnonce,
+        arguments: {'id': oidAnnonce})) as BookmarkParamsModel;
     setState(() {
       searchList
           .where((element) => element.oidAnnonce == oidAnnonce)
           .first
-          .favori = information;
+          .favori = _params.favoris;
+      searchList
+          .where((element) => element.oidAnnonce == oidAnnonce)
+          .first
+          .suiviPrix = _params.suivrPrix;
     });
   }
 
@@ -694,6 +707,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
                               DetailAnnonceResponse(
                                   oidAnnonce: fake.oidAnnonce,
                                   favori: fake.favori,
+                                  suiviPrix: fake.suiviPrix,
                                   contact: Contact(
                                       hasBareme: fake.contact.hasBareme)),
                               fake.prixLigne1,
@@ -963,7 +977,7 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
       if (resp) {
         setState(() {
           item.favori = true;

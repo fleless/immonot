@@ -8,6 +8,7 @@ import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/bookmark_params_model.dart';
 import 'package:immonot/models/fake/fakeResults.dart';
 import 'package:immonot/models/fake/fake_json_response.dart';
 import 'package:immonot/models/fake/fake_list.dart';
@@ -254,7 +255,7 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
       if (resp) {
         setState(() {
           item.favori = true;
@@ -275,14 +276,17 @@ class _DetailPropAnnoncesWidgetState extends State<DetailPropAnnoncesWidget> {
 
   /// this function allow the push to details section with callback if the item was bookmarked
   _moveToDetails(String oidAnnonce) async {
-    final information = await Navigator.pushNamed(
-        context, Routes.detailsAnnonce,
-        arguments: {'id': oidAnnonce});
+    final _params = (await Navigator.pushNamed(context, Routes.detailsAnnonce,
+        arguments: {'id': oidAnnonce})) as BookmarkParamsModel;
     setState(() {
       searchList
           .where((element) => element.oidAnnonce == oidAnnonce)
           .first
-          .favori = information;
+          .favori = _params.favoris;
+      searchList
+          .where((element) => element.oidAnnonce == oidAnnonce)
+          .first
+          .suiviPrix = _params.suivrPrix;
     });
   }
 }

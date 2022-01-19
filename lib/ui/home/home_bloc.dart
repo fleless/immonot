@@ -23,9 +23,14 @@ class HomeBloc extends Disposable {
   FilterModels currentFilter = FilterModels();
   final changesNotifier = PublishSubject<bool>();
 
-  // to notify when saving alert
-  // ths purpose is updating widgetsx
+  /// to notify when saving alert
+  /// ths purpose is updating widgetsx
   final detailChangesNotifier = PublishSubject<bool>();
+
+  /// to notify when following price from honoraires
+  /// notify search_result_screen
+  final suiviPrixFromHonoraireSearchScreenNotifier = PublishSubject<String>();
+
   final triNotifier = PublishSubject<String>();
   String tri = "";
   final SharedPref sharedPref = SharedPref();
@@ -76,11 +81,16 @@ class HomeBloc extends Disposable {
     detailChangesNotifier.add(favorite);
   }
 
+  suiviPrixnotifier(String annonceId) {
+    suiviPrixFromHonoraireSearchScreenNotifier.add(annonceId);
+  }
+
   dispose() {
     controller.close();
     changesNotifier.close();
     triNotifier.close();
     detailChangesNotifier.close();
+    suiviPrixFromHonoraireSearchScreenNotifier.close();
     themesNotifier.close();
   }
 

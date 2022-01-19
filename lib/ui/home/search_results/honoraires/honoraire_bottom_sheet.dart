@@ -119,82 +119,6 @@ class _HonorairesBottomSheetWidgetState
     );
   }
 
-/*Widget _eVente() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(widget.item.prize, style: AppStyles.titleStyle),
-            widget.item.down
-                ? Container(
-              alignment: Alignment.topLeft,
-              child: FaIcon(
-                FontAwesomeIcons.arrowDown,
-                color: AppColors.greenColor,
-                size: 10,
-              ),
-            )
-                : SizedBox.shrink(),
-          ],
-        ),
-        SizedBox(height: 5),
-        Text("1er offre possible", style: AppStyles.locationAnnonces),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          child: Divider(
-            color: AppColors.hint,
-          ),
-        ),
-        SizedBox(height: 15),
-        Text(
-                "Honoraires à la charge du vendeur",
-            style: AppStyles.textNormal,
-            overflow: TextOverflow.clip,
-            maxLines: 3),
-        SizedBox(height: 25),
-        _commonWidgets(),
-        SizedBox(height: 5),
-      ],
-    );
-  }*/
-
-/*Widget _venteAuxEncheres() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.start,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("Mise à prix : "+widget.item.prize, style: AppStyles.titleStyle),
-            widget.item.down
-                ? Container(
-              alignment: Alignment.topLeft,
-              child: FaIcon(
-                FontAwesomeIcons.arrowDown,
-                color: AppColors.greenColor,
-                size: 10,
-              ),
-            )
-                : SizedBox.shrink(),
-          ],
-        ),
-        Padding(
-          padding: EdgeInsets.symmetric(vertical: 15),
-          child: Divider(
-            color: AppColors.hint,
-          ),
-        ),
-        SizedBox(height: 15),
-        _commonWidgets(),
-        SizedBox(height: 5),
-      ],
-    );
-  }*/
-
   Widget _commonWidgets() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,16 +184,12 @@ class _HonorairesBottomSheetWidgetState
               color: Colors.transparent,
               child: InkWell(
                 onTap: () async {
-                  if (widget.annonce.favori) {
+                  if (widget.annonce.suiviPrix) {
                     Fluttertoast.showToast(
                         msg: "Vous suivez déjà le prix de cette annonce");
                   } else {
                     await sessionController.isSessionConnected()
-                        ? _addOrDeleteFavori(
-                            widget.annonce,
-                            widget.annonce.favori == null
-                                ? false
-                                : widget.annonce.favori)
+                        ? _suivrePrix(widget.annonce)
                         : _showConnectionDialog();
                   }
                 },
@@ -304,23 +224,16 @@ class _HonorairesBottomSheetWidgetState
     );
   }
 
-  _addOrDeleteFavori(DetailAnnonceResponse item, bool isFavoris) async {
-    if (isFavoris) {
-      bool resp = await favorisBloc.deleteFavoris(item.oidAnnonce);
-      if (resp) {
-        bloc.notifyDetailChanges(false);
-        setState(() {
-          item.favori = false;
-        });
-      }
+  _suivrePrix(DetailAnnonceResponse item) async {
+    bool resp = await favorisBloc.editFavoris(item.oidAnnonce, !item.suiviPrix);
+    if (resp) {
+      Modular.to.pop();
+      bloc.detailChangesNotifier.add(!item.suiviPrix);
+      bloc.suiviPrixnotifier(item.oidAnnonce);
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
-      if (resp) {
-        bloc.notifyDetailChanges(true);
-        setState(() {
-          item.favori = true;
-        });
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Une erreur est survenue"),
+      ));
     }
   }
 

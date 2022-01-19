@@ -38,7 +38,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
     bloc.detailChangesNotifier.listen((value) {
       if (mounted) {
         setState(() {
-          _item.favori = value;
+          if (value) _item.favori = value;
         });
       }
     });
@@ -173,7 +173,7 @@ class _DetailBotttomWidgetState extends State<DetailBotttomWidget> {
         });
       }
     } else {
-      bool resp = await favorisBloc.addFavoris(item.oidAnnonce, true);
+      bool resp = await favorisBloc.addFavoris(item.oidAnnonce);
       if (resp) {
         bloc.notifyDetailChanges(true);
         setState(() {

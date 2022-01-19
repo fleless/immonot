@@ -19,6 +19,10 @@ Widget buildPlusDetail(DetailAnnonceResponse item) {
       .indexWhere((element) => element.key == "COMMODITE_GARE");
   int _indexMetro = item.caracteristiques.complements
       .indexWhere((element) => element.key == "COMMODITE_METRO");
+  int _indexBus = item.caracteristiques.complements
+      .indexWhere((element) => element.key == "COMMODITE_BUS");
+  int _indexTramway = item.caracteristiques.complements
+      .indexWhere((element) => element.key == "COMMODITE_TRAMWAY");
 
   return Wrap(
     alignment: WrapAlignment.start,
@@ -45,6 +49,13 @@ Widget buildPlusDetail(DetailAnnonceResponse item) {
       _indexMetro == -1
           ? SizedBox.shrink()
           : _buildColumn(FontAwesomeIcons.subway, "MÉTRO"),
+      _indexBus == -1
+          ? SizedBox.shrink()
+          : _buildColumn(FontAwesomeIcons.bus, "Bus"),
+      _indexTramway == -1
+          ? SizedBox.shrink()
+          : _buildColumn(FontAwesomeIcons.tram, "Tramway"),
+
     ],
   );
 }

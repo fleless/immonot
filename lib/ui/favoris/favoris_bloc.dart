@@ -19,8 +19,12 @@ class FavorisBloc extends Disposable {
     return _favorisRepository.deleteFavorisWithIdFavoris(idFavoris);
   }
 
-  Future<bool> addFavoris(String idAnnonce, bool suivrePrix) async {
-    return _favorisRepository.addFavoris(idAnnonce, suivrePrix);
+  Future<bool> addFavoris(String idAnnonce) async {
+    return _favorisRepository.addFavoris(idAnnonce);
+  }
+
+  Future<bool> editFavoris(String idAnnonce, bool suivrePrix) async {
+    return _favorisRepository.editFavoris(idAnnonce, suivrePrix);
   }
 
   dispose() {

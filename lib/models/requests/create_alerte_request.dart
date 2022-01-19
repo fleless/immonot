@@ -69,7 +69,7 @@ class Recherche {
 
   Recherche.fromJson(Map<String, dynamic> json) {
     references =
-        json['references'] == null ? null : json['references'].cast<String>();
+        json['referencesClient'] == null ? null : json['referencesClient'].cast<String>();
     rayons = json["rayons"] == null ? null : json['rayons'].cast<num>();
     surfaceExterieure = json["surfaceExterieure"] == null
         ? null
@@ -96,7 +96,7 @@ class Recherche {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['references'] = this.references;
+    data['referencesClient'] = this.references;
     data['oidCommunes'] = this.oidCommunes;
     data['departements'] = this.departements;
     data['rayons'] = this.rayons;

@@ -9,6 +9,7 @@ import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/endpoints.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
+import 'package:immonot/models/enum/bookmark_params_model.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/ui/favoris/favoris_bloc.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/detail_bottom_widget.dart';
@@ -49,30 +50,24 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   final favorisBloc = Modular.get<FavorisBloc>();
   DetailAnnonceResponse annonce = DetailAnnonceResponse();
   bool loading = false;
-  bool _suivi = false;
 
   @override
   void initState() {
-    _getAnnonceInfo();
+    _getAnnonceInfo(true);
     bloc.detailChangesNotifier.listen((value) {
-      if (mounted) {
-        setState(() {
-          _suivi = value;
-        });
-      }
+      if (mounted) _getAnnonceInfo(false);
     });
     super.initState();
   }
 
-  Future<DetailAnnonceResponse> _getAnnonceInfo() async {
+  Future<DetailAnnonceResponse> _getAnnonceInfo(bool showLoader) async {
     setState(() {
-      loading = true;
+      if (showLoader) loading = true;
     });
     DetailAnnonceResponse resp = await bloc.getDetailAnnonce(widget.idAnnonce);
     setState(() {
       annonce = resp;
-      loading = false;
-      if (resp.favori != null) _suivi = resp.favori;
+      if (showLoader) loading = false;
     });
     return resp;
   }
@@ -82,8 +77,11 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
     super.dispose();
   }
 
+  /// When popping we send bookmard and price Following bool to previous page
   Future<bool> _onWillPop() async {
-    Navigator.pop(context, annonce.favori);
+    BookmarkParamsModel _params =
+        BookmarkParamsModel(annonce.favori, annonce.suiviPrix);
+    Navigator.pop(context, _params);
     return true;
   }
 
@@ -673,24 +671,14 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   }
 
   _suivrePrixButton() async {
-    if (annonce.suiviPrix) {
-      bool resp = await favorisBloc.deleteFavoris(annonce.oidAnnonce);
-      if (resp) {
-        bloc.detailChangesNotifier.add(false);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Une erreur est survenue"),
-        ));
-      }
+    bool resp =
+        await favorisBloc.editFavoris(annonce.oidAnnonce, !annonce.suiviPrix);
+    if (resp) {
+      bloc.detailChangesNotifier.add(!annonce.suiviPrix);
     } else {
-      bool resp = await favorisBloc.addFavoris(annonce.oidAnnonce, true);
-      if (resp) {
-        bloc.detailChangesNotifier.add(true);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-          content: Text("Une erreur est survenue"),
-        ));
-      }
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Une erreur est survenue"),
+      ));
     }
   }
 
@@ -701,7 +689,9 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
       enableDrag: true,
       builder: (context) => AuthScreen(true),
     ).then((value) async {
-      await sessionController.isSessionConnected() ? _getAnnonceInfo() : null;
+      await sessionController.isSessionConnected()
+          ? _getAnnonceInfo(true)
+          : null;
     });
   }
 

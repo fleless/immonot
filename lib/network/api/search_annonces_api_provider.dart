@@ -50,43 +50,52 @@ class SearchAnnoncesApiProvider {
 
   Future<SearchResponse> searchAnnonces(
       int pageId, Recherche body, String sort) async {
-    //Hack refeerences bug from backend
-    if (body.references != null) if (body.references.isNotEmpty) {
-      if (body.references[0] == "") {
-        body.references.clear();
+    if ((body.references != null) && (body.references.isNotEmpty)) {
+      Recherche newBody = Recherche(references: body.references);
+      body = newBody;
+    } else if ((body.oidNotaires != null) && (body.oidNotaires.isNotEmpty)) {
+      Recherche newBody = Recherche(oidNotaires: body.oidNotaires);
+      body = newBody;
+    } else {
+      //Hack refeerences bug from backend
+      if (body.references != null) if (body.references.isNotEmpty) {
+        if (body.references[0] == "") {
+          body.references.clear();
+        }
       }
-    }
-    //prevent 0 in max and maximize it
-    //hack the maximum for limit range
-    if (body.nbPieces != null) {
-      if (body.nbPieces[1] == 0.0) body.nbPieces[1] = 6.0;
-      if (body.nbPieces[1] == 6.0) body.nbPieces[1] = 999.0;
-    }
-    if (body.nbChambres != null) {
-      if (body.nbChambres[1] == 0.0) body.nbChambres[1] = 6.0;
-      if (body.nbChambres[1] == 6.0) body.nbChambres[1] = 999.0;
-    }
-    if (body.surfaceInterieure != null) {
-      if (body.surfaceInterieure[1] == 0.0) body.surfaceInterieure[1] = 2000.0;
-      if (body.surfaceInterieure[1] == 2000.0)
-        body.surfaceInterieure[1] = 100000000.0;
-    }
-    if (body.surfaceExterieure != null) {
-      if (body.surfaceExterieure[1] == 0.0)
-        body.surfaceExterieure[1] = 100000.0;
-      if (body.surfaceExterieure[1] == 100000.0)
-        body.surfaceExterieure[1] = 100000000.0;
-    }
-    if (body.prix != null) {
-      if (body.prix[1] == 0.0) body.prix[1] = 1000000.0;
-      if (body.prix[1] == 1000000.0) body.prix[1] = 100000000.0;
-    }
+      //prevent 0 in max and maximize it
+      //hack the maximum for limit range
+      if (body.nbPieces != null) {
+        if (body.nbPieces[1] == 0.0) body.nbPieces[1] = 6.0;
+        if (body.nbPieces[1] == 6.0) body.nbPieces[1] = 999.0;
+      }
+      if (body.nbChambres != null) {
+        if (body.nbChambres[1] == 0.0) body.nbChambres[1] = 6.0;
+        if (body.nbChambres[1] == 6.0) body.nbChambres[1] = 999.0;
+      }
+      if (body.surfaceInterieure != null) {
+        if (body.surfaceInterieure[1] == 0.0)
+          body.surfaceInterieure[1] = 2000.0;
+        if (body.surfaceInterieure[1] == 2000.0)
+          body.surfaceInterieure[1] = 100000000.0;
+      }
+      if (body.surfaceExterieure != null) {
+        if (body.surfaceExterieure[1] == 0.0)
+          body.surfaceExterieure[1] = 100000.0;
+        if (body.surfaceExterieure[1] == 100000.0)
+          body.surfaceExterieure[1] = 100000000.0;
+      }
+      if (body.prix != null) {
+        if (body.prix[1] == 0.0) body.prix[1] = 1000000.0;
+        if (body.prix[1] == 1000000.0) body.prix[1] = 100000000.0;
+      }
 
-    if (body.rayons == null) {
-      body.rayons = <num>[];
-    } else if (body.rayons.isEmpty) {
-      body.rayons.clear();
-    } else if (body.rayons[0] == null) body.rayons.clear();
+      if (body.rayons == null) {
+        body.rayons = <num>[];
+      } else if (body.rayons.isEmpty) {
+        body.rayons.clear();
+      } else if (body.rayons[0] == null) body.rayons.clear();
+    }
     try {
       bool connected = await sessionController.isSessionConnected();
       Map<String, String> header = connected

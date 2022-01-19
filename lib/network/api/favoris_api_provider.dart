@@ -18,6 +18,9 @@ class FavorisApiProvider {
       Endpoints.CORE_URL + "immonot/internaute/favoris/";
   final String deleteFavorisWithIdFavorisEndPoint =
       Endpoints.CORE_URL + "immonot/internaute/favoris/";
+  final String editFavorisEndPoint =
+      Endpoints.CORE_URL + "immonot/internaute/favoris/annonces/";
+
   Dio _dio;
 
   FavorisApiProvider() {
@@ -93,14 +96,36 @@ class FavorisApiProvider {
     }
   }
 
-  Future<bool> addFavoris(String idAnnonce, bool suivrePrix) async {
+  Future<bool> addFavoris(String idAnnonce) async {
+    Map<String, String> header = await sessionController.getHeader();
+    var params = {
+      "idAnnonce": idAnnonce,
+      "alertePrix": false,
+    };
+    try {
+      Response response = await _dio.post(addFavorisEndPoint,
+          options: Options(responseType: ResponseType.plain, headers: header),
+          data: jsonEncode(params));
+      if (response.statusCode < 300) {
+        return true;
+      } else {
+        return false;
+      }
+    } on DioError catch (e) {
+      return false;
+    } catch (e) {
+      throw e.toString();
+    }
+  }
+
+  Future<bool> editFavoris(String idAnnonce, bool suivrePrix) async {
     Map<String, String> header = await sessionController.getHeader();
     var params = {
       "idAnnonce": idAnnonce,
       "alertePrix": suivrePrix,
     };
     try {
-      Response response = await _dio.post(addFavorisEndPoint,
+      Response response = await _dio.put(editFavorisEndPoint + idAnnonce,
           options: Options(responseType: ResponseType.plain, headers: header),
           data: jsonEncode(params));
       if (response.statusCode < 300) {
