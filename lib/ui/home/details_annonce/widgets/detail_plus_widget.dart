@@ -51,10 +51,10 @@ Widget buildPlusDetail(DetailAnnonceResponse item) {
           : _buildColumn(FontAwesomeIcons.subway, "MÉTRO"),
       _indexBus == -1
           ? SizedBox.shrink()
-          : _buildColumn(FontAwesomeIcons.bus, "Bus"),
+          : _buildColumn(FontAwesomeIcons.bus, "BUS"),
       _indexTramway == -1
           ? SizedBox.shrink()
-          : _buildColumn(FontAwesomeIcons.tram, "Tramway"),
+          : _buildColumn(FontAwesomeIcons.tram, "TRAMWAY"),
 
     ],
   );

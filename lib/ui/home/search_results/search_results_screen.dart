@@ -83,6 +83,8 @@ class _SearchResultsScreenState extends State<SearchResultsScreen> {
   }
 
   _goSearch(int pageNumber, bool sorted) async {
+    print("looking for search " +
+        bloc.currentFilter.listtypeDeBien.length.toString());
     if (!sorted) bloc.tri = "";
     if (pageNumber == 0) {
       if (mounted) {

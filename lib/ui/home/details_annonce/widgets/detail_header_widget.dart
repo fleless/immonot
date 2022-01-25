@@ -120,30 +120,6 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
               ),
             ),
           ),
-          Positioned(
-            top: 75.0,
-            left: 20.0,
-            child: InkWell(
-              onTap: () {
-                BookmarkParamsModel _params = BookmarkParamsModel(
-                    widget.fake.favori, widget.fake.suiviPrix);
-                Navigator.pop(context, _params);
-              },
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(6.0),
-                    color: AppColors.default_black.withOpacity(0.4)),
-                child: Center(
-                  child: FaIcon(
-                    FontAwesomeIcons.times,
-                    color: AppColors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );

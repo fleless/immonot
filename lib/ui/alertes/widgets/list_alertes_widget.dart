@@ -466,9 +466,9 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
 
   String _getEndroits(Recherche recherche) {
     String collection = "";
-    if (recherche.oidCommunes != null) {
-      recherche.oidCommunes.forEach((element) {
-        collection += ", " + element;
+    if (recherche.communeInfos != null) {
+      recherche.communeInfos.forEach((element) {
+          collection += ", " + element.codePostal;
       });
     }
     if (recherche.departements != null) {
@@ -619,7 +619,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
         builder: (context) => AddModifAlerteScreen(false, item));
   }
 
-  _lancerRecherche(Content item) {
+  _lancerRecherche(Content item) async {
     //Parse Recherche to FilterModel
     homeBloc.reinitCurrentFilter();
     if (item.recherche.prix != null) {

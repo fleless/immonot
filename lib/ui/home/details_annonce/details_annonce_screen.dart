@@ -4,6 +4,7 @@ import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:html_character_entities/html_character_entities.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/endpoints.dart';
@@ -111,9 +112,35 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                       child: _buildContent(annonce),
                     ),
                     DetailBotttomWidget(annonce),
+                    _buildClose(),
                   ],
                 ),
               ),
+      ),
+    );
+  }
+
+  Widget _buildClose() {
+    return Positioned(
+      top: 75.0,
+      left: 20.0,
+      child: InkWell(
+        onTap: () {
+          _onWillPop();
+        },
+        child: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(6.0),
+              color: AppColors.default_black.withOpacity(0.4)),
+          child: Center(
+            child: FaIcon(
+              FontAwesomeIcons.times,
+              color: AppColors.white,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -151,9 +178,11 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
   }
 
   Widget _buildDescription() {
-    var document;
+    String document;
     if (annonce.descriptif != null) {
       document = htmlparser.parse(annonce.descriptif).firstChild.text;
+      document = HtmlCharacterEntities.decode(document);
+      document = document.replaceAll("€uros", "€");
     }
     return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -166,7 +195,8 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                       : ""),
               style: AppStyles.titleNormal),
           SizedBox(height: heightPadding),
-          annonce.affichePrix ? _showPrize() : SizedBox.shrink(),
+          if (annonce.affichePrix != null)
+            annonce.affichePrix ? _showPrize() : SizedBox.shrink(),
           Padding(
             padding: EdgeInsets.only(left: 25),
             child: Column(
@@ -190,25 +220,28 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                         overflow: TextOverflow.clip,
                         maxLines: 3),
                 SizedBox(height: 3),
-                if (annonce.contact.hasBareme)
-                  GestureDetector(
-                    onTap: () {
-                      if (annonce.oidNotaire != null)
-                        Modular.to
-                            .pushNamed(Routes.annuaireWebView, arguments: {
-                          "url": Endpoints.ANNUAIRE_WEB_VIEW_DETAIL +
-                              "/" +
-                              annonce.oidNotaire.trim().replaceAll(" ", "%20") +
-                              "#info-baremes",
-                          "ville": null,
-                          "nom": annonce.contact.nom.trim()
-                        });
-                    },
-                    child: Text(" Barème des honoraires de négociation",
-                        maxLines: 7,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppStyles.pinkTwelveNormalStyle),
-                  ),
+                if (annonce.contact != null)
+                  if (annonce.contact.hasBareme)
+                    GestureDetector(
+                      onTap: () {
+                        if (annonce.oidNotaire != null)
+                          Modular.to
+                              .pushNamed(Routes.annuaireWebView, arguments: {
+                            "url": Endpoints.ANNUAIRE_WEB_VIEW_DETAIL +
+                                "/" +
+                                annonce.oidNotaire
+                                    .trim()
+                                    .replaceAll(" ", "%20") +
+                                "#info-baremes",
+                            "ville": null,
+                            "nom": annonce.contact.nom.trim()
+                          });
+                      },
+                      child: Text(" Barème des honoraires de négociation",
+                          maxLines: 7,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppStyles.pinkTwelveNormalStyle),
+                    ),
               ],
             ),
           ),
@@ -246,6 +279,7 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
                   style: AppStyles.textDescriptionStyle,
                   colorClickableText: AppColors.defaultColor,
                   trimMode: TrimMode.Line,
+                  delimiter: "  ",
                   trimCollapsedText: 'En savoir plus',
                   trimExpandedText: 'Moins',
                   moreStyle: AppStyles.smallTitleStylePink,
@@ -282,6 +316,21 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
         Row(
           children: [
             Text("Diagnostics", style: AppStyles.titleStyle),
+            SizedBox(width: 5),
+            Expanded(
+              child: Text(
+                  "(" +
+                      (annonce.energie.vierge
+                          ? "Dpe vierge"
+                          : annonce.energie.exempte
+                              ? "Dpe non requis"
+                              : annonce.energie.dateDiagnostic != null
+                                  ? "Réalisé le " +
+                                      annonce.energie.dateDiagnostic
+                                  : "Date de diagnostic non fourni") +
+                      ")",
+                  style: AppStyles.subTitleStyle),
+            ),
           ],
         ),
         SizedBox(height: heightPadding),
@@ -340,31 +389,39 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
               ),
               SizedBox(width: 10),
               Expanded(
-                child: Center(
-                  child: RichText(
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    text: TextSpan(
-                      children: <TextSpan>[
-                        TextSpan(
-                            text: "Entre  ", style: AppStyles.subTitleStyle),
-                        TextSpan(
-                            text: annonce.energie.coutEnergieMin
-                                    .toStringAsFixed(0) +
-                                " €",
-                            style: AppStyles.titleStyleH2),
-                        TextSpan(
-                            text: "  et  ", style: AppStyles.subTitleStyle),
-                        TextSpan(
-                            text: annonce.energie.coutEnergieMax
-                                    .toStringAsFixed(0) +
-                                " €",
-                            style: AppStyles.titleStyleH2),
-                        TextSpan(
-                            text: "  par an", style: AppStyles.subTitleStyle),
-                      ],
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    RichText(
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      text: TextSpan(
+                        children: <TextSpan>[
+                          TextSpan(
+                              text: "Entre  ", style: AppStyles.subTitleStyle),
+                          TextSpan(
+                              text: annonce.energie.coutEnergieMin
+                                      .toStringAsFixed(0) +
+                                  " €",
+                              style: AppStyles.titleStyleH2),
+                          TextSpan(
+                              text: "  et  ", style: AppStyles.subTitleStyle),
+                          TextSpan(
+                              text: annonce.energie.coutEnergieMax
+                                      .toStringAsFixed(0) +
+                                  " €",
+                              style: AppStyles.titleStyleH2),
+                          TextSpan(
+                              text: "  par an", style: AppStyles.subTitleStyle),
+                        ],
+                      ),
                     ),
-                  ),
+                    SizedBox(height: 5),
+                    Text(
+                        "Prix moyens des énergies indexées au 1er Janvier 2021 (abonnements compris)",
+                        style: AppStyles.bottomNavTextNotSelectedStyle,
+                        textAlign: TextAlign.center),
+                  ],
                 ),
               ),
             ],

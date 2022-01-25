@@ -4,27 +4,6 @@ import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 
 Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
-  int __indexEtatGeneral = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "ETAT_GENERAL");
-  int _indexChauffage = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "CHAUFFAGE_ELECTRICITE");
-  int _indexMeuble = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "MEUBLE");
-  int _indexNbEtages = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "NOMBRE_ETAGES");
-  int _indexTerrasse = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "TERRASSE");
-  int _indexPlacesParking = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "PLACES_PARKING");
-  int _indexGarage = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "NOMBRE_GARAGES");
-  int _indexConstruction = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "ANNEE_CONSTRUCTION");
-  int _indexReference = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "REFERENCE");
-  int _indexCave = item.caracteristiques.complements
-      .indexWhere((element) => element.key == "CAVE");
-
   return Wrap(
     spacing: 0,
     runSpacing: 25,
@@ -56,9 +35,13 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
             "COMMODITE_GARE",
             "COMMODITE_METRO",
             "COMMODITE_BUS",
-            "COMMODITE_TRAMWAY"
+            "COMMODITE_TRAMWAY",
+            "CODE_SOUS_NATURE"
           ].contains(complement.key)))
             _buildColumn(complement.label, complement.value.toString()),
+      if (item.refClient != null)
+        if (item.refClient.isNotEmpty)
+          _buildColumn("Référence", item.refClient.toString())
     ],
   );
 }

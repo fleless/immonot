@@ -51,43 +51,44 @@ class SearchAnnoncesApiProvider {
   Future<SearchResponse> searchAnnonces(
       int pageId, Recherche body, String sort) async {
     if ((body.references != null) && (body.references.isNotEmpty)) {
+      if (body.references[0].trimLeft() == "") {
+        body.references = null;
+      }
+    }
+    if ((body.references != null) &&
+        (body.references.isNotEmpty) &&
+        (body.references[0] != "")) {
       Recherche newBody = Recherche(references: body.references);
       body = newBody;
     } else if ((body.oidNotaires != null) && (body.oidNotaires.isNotEmpty)) {
       Recherche newBody = Recherche(oidNotaires: body.oidNotaires);
       body = newBody;
     } else {
-      //Hack refeerences bug from backend
-      if (body.references != null) if (body.references.isNotEmpty) {
-        if (body.references[0] == "") {
-          body.references.clear();
-        }
-      }
       //prevent 0 in max and maximize it
       //hack the maximum for limit range
       if (body.nbPieces != null) {
         if (body.nbPieces[1] == 0.0) body.nbPieces[1] = 6.0;
-        if (body.nbPieces[1] == 6.0) body.nbPieces[1] = 999.0;
+        if (body.nbPieces[1] == 6.0) body.nbPieces[1] = null;
       }
       if (body.nbChambres != null) {
         if (body.nbChambres[1] == 0.0) body.nbChambres[1] = 6.0;
-        if (body.nbChambres[1] == 6.0) body.nbChambres[1] = 999.0;
+        if (body.nbChambres[1] == 6.0) body.nbChambres[1] = null;
       }
       if (body.surfaceInterieure != null) {
         if (body.surfaceInterieure[1] == 0.0)
           body.surfaceInterieure[1] = 2000.0;
         if (body.surfaceInterieure[1] == 2000.0)
-          body.surfaceInterieure[1] = 100000000.0;
+          body.surfaceInterieure[1] = null;
       }
       if (body.surfaceExterieure != null) {
         if (body.surfaceExterieure[1] == 0.0)
           body.surfaceExterieure[1] = 100000.0;
         if (body.surfaceExterieure[1] == 100000.0)
-          body.surfaceExterieure[1] = 100000000.0;
+          body.surfaceExterieure[1] = null;
       }
       if (body.prix != null) {
         if (body.prix[1] == 0.0) body.prix[1] = 1000000.0;
-        if (body.prix[1] == 1000000.0) body.prix[1] = 100000000.0;
+        if (body.prix[1] == 1000000.0) body.prix[1] = null;
       }
 
       if (body.rayons == null) {
@@ -141,18 +142,16 @@ class SearchAnnoncesApiProvider {
   Future<String> contactAnnonce(String oidAnnonce, String nom, String prenom,
       int phone, String email, String message) async {
     var params = {
-      "test": true,
-      "testDestinataire": "test@email.destinataire",
-      "oidAnnonce": oidAnnonce,
       "prenom": prenom,
       "nom": nom,
-      "tel": phone,
+      "tel": phone.toString(),
       "email": email,
       "message": message
     };
 
     try {
-      Response response = await _dio.post(contactNotaireEndPoint,
+      Response response = await _dio.post(
+          contactNotaireEndPoint + "/" + oidAnnonce,
           options: Options(responseType: ResponseType.json, headers: {
             'content-Type': 'application/json',
             "Accept": "application/json"

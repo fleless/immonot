@@ -275,6 +275,7 @@ class Energie {
   bool diagnosticEtabli;
   bool vierge;
   bool exempte;
+  String dateDiagnostic;
   num energie;
   String energieNote;
   String energieEtiquette;
@@ -289,6 +290,7 @@ class Energie {
       {this.diagnosticEtabli,
       this.vierge,
       this.exempte,
+      this.dateDiagnostic,
       this.energie,
       this.energieNote,
       this.energieEtiquette,
@@ -303,6 +305,7 @@ class Energie {
     diagnosticEtabli = json['diagnosticEtabli'];
     vierge = json['vierge'];
     exempte = json['exempte'];
+    dateDiagnostic = json['dateDiagnostic'];
     energie = json['energie'];
     energieNote = json['energieNote'];
     energieEtiquette = json['energieEtiquette'];
@@ -319,6 +322,7 @@ class Energie {
     data['diagnosticEtabli'] = this.diagnosticEtabli;
     data['vierge'] = this.vierge;
     data['exempte'] = this.exempte;
+    data['dateDiagnostic'] = this.dateDiagnostic;
     data['energie'] = this.energie;
     data['energieNote'] = this.energieNote;
     data['energieEtiquette'] = this.energieEtiquette;

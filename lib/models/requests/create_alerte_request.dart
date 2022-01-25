@@ -52,6 +52,7 @@ class Recherche {
   List<num> nbPieces;
   List<num> nbChambres;
   List<String> oidNotaires;
+  List<CommuneInfos> communeInfos;
 
   Recherche(
       {this.references,
@@ -65,11 +66,13 @@ class Recherche {
       this.surfaceExterieure,
       this.nbPieces,
       this.nbChambres,
-      this.oidNotaires});
+      this.oidNotaires,
+      this.communeInfos});
 
   Recherche.fromJson(Map<String, dynamic> json) {
-    references =
-        json['referencesClient'] == null ? null : json['referencesClient'].cast<String>();
+    references = json['referencesClient'] == null
+        ? null
+        : json['referencesClient'].cast<String>();
     rayons = json["rayons"] == null ? null : json['rayons'].cast<num>();
     surfaceExterieure = json["surfaceExterieure"] == null
         ? null
@@ -92,6 +95,12 @@ class Recherche {
         json["oidCommunes"] == null ? null : json['oidCommunes'].cast<String>();
     oidNotaires =
         json["oidNotaires"] == null ? null : json['oidNotaires'].cast<String>();
+    if (json['communeInfos'] != null) {
+      communeInfos = new List<CommuneInfos>();
+      json['communeInfos'].forEach((v) {
+        communeInfos.add(new CommuneInfos.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -108,6 +117,29 @@ class Recherche {
     data['nbPieces'] = this.nbPieces;
     data['nbChambres'] = this.nbChambres;
     data['oidNotaires'] = this.oidNotaires;
+    if (this.communeInfos != null) {
+      data['communeInfos'] = this.communeInfos.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class CommuneInfos {
+  String codePostal;
+  String nom;
+
+  CommuneInfos({this.codePostal, this.nom});
+
+  CommuneInfos.fromJson(Map<String, dynamic> json) {
+    codePostal =
+        json['codePostal'] == null ? null : json['codePostal'];
+    nom = json['nom'] == null ? null : json['nom'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['codePostal'] = this.codePostal;
+    data['nom'] = this.nom;
     return data;
   }
 }
