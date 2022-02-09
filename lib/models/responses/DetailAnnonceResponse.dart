@@ -19,6 +19,7 @@ class DetailAnnonceResponse {
   String prixLigne3;
   bool afficheCommune;
   Commune commune;
+  String quartier;
   Photo photo;
   Caracteristiques caracteristiques;
   Energie energie;
@@ -46,10 +47,12 @@ class DetailAnnonceResponse {
       this.prixLigne3,
       this.afficheCommune,
       this.commune,
+      this.quartier,
       this.photo,
       this.caracteristiques,
       this.energie,
-      this.contact});
+      this.contact,
+      this.copropriete});
 
   DetailAnnonceResponse.fromJson(Map<String, dynamic> json) {
     oidAnnonce = json['oidAnnonce'];
@@ -76,6 +79,7 @@ class DetailAnnonceResponse {
         : null;
     commune =
         json['commune'] != null ? new Commune.fromJson(json['commune']) : null;
+    quartier = json['quartier'] != null ? json['quartier'] : null;
     photo = json['photo'] != null ? new Photo.fromJson(json['photo']) : null;
     caracteristiques = json['caracteristiques'] != null
         ? new Caracteristiques.fromJson(json['caracteristiques'])
@@ -99,6 +103,7 @@ class DetailAnnonceResponse {
     data['descriptif'] = this.descriptif;
     data['coupDeCoeur'] = this.coupDeCoeur;
     data['suiviPrix'] = this.suiviPrix;
+    data['quartier'] = this.quartier;
     data['refClient'] = this.refClient;
     data['lienImmonot'] = this.lienImmonot;
     data['prixEnBaisse'] = this.prixEnBaisse;
@@ -214,6 +219,8 @@ class Caracteristiques {
   num nbChambres;
   num surfaceHabitable;
   num surfaceTerrain;
+  num nbTetes;
+  List<String> typeChauffage;
   List<Complements> complements;
 
   Caracteristiques(
@@ -221,13 +228,19 @@ class Caracteristiques {
       this.nbChambres,
       this.surfaceHabitable,
       this.surfaceTerrain,
-      this.complements});
+      this.complements,
+      this.nbTetes,
+      this.typeChauffage});
 
   Caracteristiques.fromJson(Map<String, dynamic> json) {
     nbPieces = json['nbPieces'];
     nbChambres = json['nbChambres'];
     surfaceHabitable = json['surfaceHabitable'];
     surfaceTerrain = json['surfaceTerrain'];
+    nbTetes = json['nbTetes'] == null ? 0 : json['nbTetes'];
+    if (json['typeChauffage'] != null) {
+      typeChauffage = json['typeChauffage'].cast<String>();
+    }
     if (json['complements'] != null) {
       complements = new List<Complements>();
       json['complements'].forEach((v) {
@@ -242,6 +255,9 @@ class Caracteristiques {
     data['nbChambres'] = this.nbChambres;
     data['surfaceHabitable'] = this.surfaceHabitable;
     data['surfaceTerrain'] = this.surfaceTerrain;
+    if (this.typeChauffage != null) {
+      data['typeChauffage'] = this.typeChauffage.map((v) => v).toList();
+    }
     if (this.complements != null) {
       data['complements'] = this.complements.map((v) => v.toJson()).toList();
     }

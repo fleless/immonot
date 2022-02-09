@@ -22,6 +22,7 @@ import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'dart:ui' as ui;
 
 class ListSearchFavorisWidget extends StatefulWidget {
   @override
@@ -40,6 +41,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
   final SharedPref sharedPref = SharedPref();
   final alertesBloc = Modular.get<AlertesBloc>();
   final homeBloc = Modular.get<HomeBloc>();
+  bool _showSlidableIndication = true;
 
   @override
   void initState() {
@@ -77,6 +79,9 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
   }
 
   _scrollListener() async {
+    setState(() {
+      _showSlidableIndication = false;
+    });
     if (_controller.offset <= _controller.position.minScrollExtent &&
         !_controller.position.outOfRange) {
       setState(() {
@@ -108,6 +113,34 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
       children: [
         _buildButton(),
         SizedBox(height: 15),
+        if (_showSlidableIndication)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5),
+            child: RichText(
+              textAlign: TextAlign.left,
+              maxLines: 10,
+              overflow: TextOverflow.clip,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    children: [
+                      WidgetSpan(
+                          alignment: ui.PlaceholderAlignment.middle,
+                          child: Icon(
+                            Icons.double_arrow_rounded,
+                            color: AppColors.hint,
+                            size: 14,
+                          )),
+                      TextSpan(
+                          text:
+                              '  Swipez une tuile vers la gauche pour supprimer ou modifier une alerte',
+                          style: AppStyles.hintSearch),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
         Expanded(
           child: Container(
             height: double.infinity,
@@ -468,7 +501,7 @@ class _ListSearchFavorisWidgetState extends State<ListSearchFavorisWidget> {
     String collection = "";
     if (recherche.communeInfos != null) {
       recherche.communeInfos.forEach((element) {
-          collection += ", " + element.codePostal;
+        collection += ", " + element.codePostal;
       });
     }
     if (recherche.departements != null) {

@@ -26,6 +26,9 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
   final _confirmMdpController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  bool _isPwdHidden = false;
+  bool _isNewPwdHidden = false;
+  bool _isConfirmPwdHidden = false;
 
   @override
   void initState() {
@@ -35,6 +38,24 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
   @override
   Widget build(BuildContext context) {
     return _buildContent();
+  }
+
+  void _togglePasswordView() {
+    setState(() {
+      _isPwdHidden = !_isPwdHidden;
+    });
+  }
+
+  void _toggleConfirmPasswordView() {
+    setState(() {
+      _isConfirmPwdHidden = !_isConfirmPwdHidden;
+    });
+  }
+
+  void _toggleNewPasswordView() {
+    setState(() {
+      _isNewPwdHidden = !_isNewPwdHidden;
+    });
   }
 
   Widget _buildContent() {
@@ -88,10 +109,24 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
               child: Center(
                 child: TextFormField(
                   controller: _mdpController,
-                  obscureText: true,
+                  obscureText: _isPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    suffix: Padding(
+                      padding: EdgeInsets.only(right: 5, top: 0),
+                      child: InkWell(
+                        onTap: () {
+                          _togglePasswordView();
+                        },
+                        child: Icon(
+                          _isPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.hint, width: 1),
                     ),
@@ -122,6 +157,11 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
             ),
           ),
         ),
+        SizedBox(height: 5),
+        Text("- Le mot de passe doit contenir au moins 4 caractères",
+            style: AppStyles.bottomNavTextNotSelectedStyle,
+            textAlign: TextAlign.left),
+        SizedBox(height: 3),
       ],
     );
   }
@@ -146,10 +186,24 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
               child: Center(
                 child: TextFormField(
                   controller: _newMdpController,
-                  obscureText: true,
+                  obscureText: _isNewPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    suffix: Padding(
+                      padding: EdgeInsets.only(right: 5, top: 0),
+                      child: InkWell(
+                        onTap: () {
+                          _toggleNewPasswordView();
+                        },
+                        child: Icon(
+                          _isNewPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.hint, width: 1),
                     ),
@@ -180,6 +234,11 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
             ),
           ),
         ),
+        SizedBox(height: 5),
+        Text("- Le mot de passe doit contenir au moins 4 caractères",
+            style: AppStyles.bottomNavTextNotSelectedStyle,
+            textAlign: TextAlign.left),
+        SizedBox(height: 3),
       ],
     );
   }
@@ -204,10 +263,24 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
               child: Center(
                 child: TextFormField(
                   controller: _confirmMdpController,
-                  obscureText: true,
+                  obscureText: _isConfirmPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    suffix: Padding(
+                      padding: EdgeInsets.only(right: 5, top: 0),
+                      child: InkWell(
+                        onTap: () {
+                          _toggleConfirmPasswordView();
+                        },
+                        child: Icon(
+                          _isConfirmPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.hint, width: 1),
                     ),

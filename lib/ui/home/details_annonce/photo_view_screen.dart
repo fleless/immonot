@@ -4,6 +4,7 @@ import 'package:flutter_modular/flutter_modular.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:page_indicator/page_indicator.dart';
+import 'package:photo_view/photo_view.dart';
 
 class PhotoViewScreenWidget extends StatefulWidget {
   List<String> image;
@@ -68,10 +69,10 @@ class _PhotoViewScreenWidgetState extends State<PhotoViewScreenWidget> {
                     height: double.infinity,
                     width: double.infinity,
                     child: _image.isEmpty
-                        ? Image.network(
-                            "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg",
-                            fit: BoxFit.cover)
-                        : Image.network(_image[index], fit: BoxFit.cover),
+                        ? PhotoView(
+                            imageProvider: NetworkImage(
+                                "https://www.generationsforpeace.org/wp-content/uploads/2018/03/empty.jpg"))
+                        : PhotoView(imageProvider: NetworkImage(_image[index])),
                   );
                 }),
             align: IndicatorAlign.bottom,

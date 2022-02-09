@@ -43,6 +43,8 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
   bool _magazine = false;
   bool _info = false;
   bool _loading = false;
+  bool _isPwdHidden = false;
+  bool _isConfirmPwdHidden = false;
 
   @override
   Future<void> initState() {
@@ -52,6 +54,18 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _togglePasswordView() {
+    setState(() {
+      _isPwdHidden = !_isPwdHidden;
+    });
+  }
+
+  void _toggleConfirmPasswordView() {
+    setState(() {
+      _isConfirmPwdHidden = !_isConfirmPwdHidden;
+    });
   }
 
   @override
@@ -538,11 +552,25 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
               child: Center(
                 child: TextFormField(
                   controller: _mdpController,
-                  obscureText: true,
+                  obscureText: _isPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
                   onChanged: (value) => _formKey.currentState.validate(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    suffix: Padding(
+                      padding: EdgeInsets.only(right: 5, top: 0),
+                      child: InkWell(
+                        onTap: () {
+                          _togglePasswordView();
+                        },
+                        child: Icon(
+                          _isPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.hint, width: 1),
                     ),
@@ -573,6 +601,11 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
             ),
           ),
         ),
+        SizedBox(height: 5),
+        Text("- Le mot de passe doit contenir au moins 4 caractères",
+            style: AppStyles.bottomNavTextNotSelectedStyle,
+            textAlign: TextAlign.left),
+        SizedBox(height: 3),
       ],
     );
   }
@@ -597,11 +630,25 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
               child: Center(
                 child: TextFormField(
                   controller: _confirmMdpController,
-                  obscureText: true,
+                  obscureText: _isConfirmPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
                   onChanged: (value) => _formKey.currentState.validate(),
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
+                    suffix: Padding(
+                      padding: EdgeInsets.only(right: 5, top: 0),
+                      child: InkWell(
+                        onTap: () {
+                          _toggleConfirmPasswordView();
+                        },
+                        child: Icon(
+                          _isConfirmPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                      ),
+                    ),
                     border: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors.hint, width: 1),
                     ),

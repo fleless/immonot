@@ -247,12 +247,11 @@ class _HomeAnnuaireWidgetState extends State<HomeAnnuaireWidget> {
             } else {
               if (locationSelected == null) {
                 depCom = ("codeInsees=" +
-                    _searchController.text.trim().replaceAll(" ", "%20") +
-                    "&rayons=10");
+                    _searchController.text.trim().replaceAll(" ", "%20"));
               } else {
                 depCom = locationSelected.code.length == 2
                     ? "departements=" + locationSelected.code
-                    : ("codeInsees=" + locationSelected.code + "&rayons=10");
+                    : ("codeInsees=" + locationSelected.code);
               }
             }
 

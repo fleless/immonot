@@ -293,7 +293,7 @@ class _AddModifAlerteScreenState extends State<AddModifAlerteScreen> {
                             textAlignVertical: TextAlignVertical.center,
                             cursorColor: AppColors.defaultColor,
                             decoration: InputDecoration(
-                              hintText: "Ville, départements, code postal",
+                              hintText: "Ville, département, code postal",
                               hintStyle: AppStyles.hintSearch,
                               border: InputBorder.none,
                               contentPadding:

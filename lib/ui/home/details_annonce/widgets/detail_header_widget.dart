@@ -85,7 +85,7 @@ class _DetailHeaderWidgetState extends State<DetailHeaderWidget> {
                                     fit: BoxFit.cover)
                                 : Image.network(
                                     _fakeItem.photo.galerie[index].img,
-                                    fit: BoxFit.cover),
+                                    fit: BoxFit.fitWidth),
                           ),
                         );
                 }),

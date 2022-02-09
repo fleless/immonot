@@ -269,6 +269,10 @@ class _DetailAnnonceWidgetState extends State<DetailAnnonceWidget> {
           Divider(color: AppColors.hint),
           annonce.copropriete != null ? _buildCoproprio() : SizedBox.shrink(),
           Text("Description", style: AppStyles.titleStyle),
+          if (annonce.quartier != null) Padding(
+            padding: EdgeInsets.only(top: 5),
+            child: Text(annonce.quartier, style: AppStyles.locationAnnonces,),
+          ),
           (document != null)
               ? SizedBox(height: heightPadding)
               : SizedBox.shrink(),

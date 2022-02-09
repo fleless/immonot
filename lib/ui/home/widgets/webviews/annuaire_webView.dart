@@ -412,12 +412,11 @@ class _AnnuaireWebViewState extends State<AnnuaireWebView>
             } else {
               if (locationSelected == null) {
                 depCom = ("departements=*" +
-                    _searchController.text.trim().replaceAll(" ", "%20") +
-                    "*&rayons=10");
+                    _searchController.text.trim().replaceAll(" ", "%20"));
               } else {
                 depCom = locationSelected.code.length == 2
                     ? "departements=" + locationSelected.code
-                    : ("codeInsees=" + locationSelected.code + "&rayons=10");
+                    : ("codeInsees=" + locationSelected.code);
               }
             }
             print("url is " +

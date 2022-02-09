@@ -12,7 +12,7 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
     children: [
       item.caracteristiques.surfaceHabitable == 0
           ? SizedBox.shrink()
-          : _buildColumn("Surface Habitable",
+          : _buildColumn("Surface habitable",
               item.caracteristiques.surfaceHabitable.toString() + " m²"),
       item.caracteristiques.surfaceTerrain == 0
           ? SizedBox.shrink()
@@ -25,19 +25,31 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
           ? SizedBox.shrink()
           : _buildColumn(
               "Chambres", item.caracteristiques.nbChambres.toString()),
+      if (item.caracteristiques.nbTetes != null)
+        item.caracteristiques.nbTetes == 0
+            ? SizedBox.shrink()
+            : _buildColumn("Têtes", item.caracteristiques.nbTetes.toString()),
+      if (item.caracteristiques.typeChauffage != null)
+        item.caracteristiques.typeChauffage.isEmpty
+            ? SizedBox.shrink()
+            : item.caracteristiques.typeChauffage[0] == ""
+                ? SizedBox.shrink()
+                : _buildColumn("Chauffage",
+                    item.caracteristiques.typeChauffage.join("\n")),
       if (item.caracteristiques.complements != null)
         for (var complement in item.caracteristiques.complements)
-          if (!([
-            "COMMODITE_COMMERCES",
-            "COMMODITE_ECOLE",
-            "COMMODITE_SERVICES",
-            "COMMODITE_CENTRE_VILLE",
-            "COMMODITE_GARE",
-            "COMMODITE_METRO",
-            "COMMODITE_BUS",
-            "COMMODITE_TRAMWAY",
-            "CODE_SOUS_NATURE"
-          ].contains(complement.key)))
+          if ((!([
+                "COMMODITE_COMMERCES",
+                "COMMODITE_ECOLE",
+                "COMMODITE_SERVICES",
+                "COMMODITE_CENTRE_VILLE",
+                "COMMODITE_GARE",
+                "COMMODITE_METRO",
+                "COMMODITE_BUS",
+                "COMMODITE_TRAMWAY",
+                "CODE_SOUS_NATURE"
+              ].contains(complement.key))) &&
+              (complement.value != 0))
             _buildColumn(complement.label, complement.value.toString()),
       if (item.refClient != null)
         if (item.refClient.isNotEmpty)
@@ -48,24 +60,26 @@ Widget buildCaracteristiqueDetail(DetailAnnonceResponse item) {
 
 //A workaround to get space valid between wrap children when it has many sizedBox.shrink() :: so much space
 Widget _buildColumn(String titre, String data) {
-  return Row(
-    mainAxisSize: MainAxisSize.min,
-    children: [
-      Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(titre,
-              style: AppStyles.hintSearch,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis),
-          Text(data,
-              style: AppStyles.textNormal,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis)
-        ],
-      ),
-      SizedBox(width: 33),
-    ],
+  return Container(
+    child: Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(titre,
+                style: AppStyles.hintSearch,
+                maxLines: 10,
+                overflow: TextOverflow.ellipsis),
+            Text(data,
+                style: AppStyles.textNormal,
+                maxLines: 10,
+                overflow: TextOverflow.ellipsis)
+          ],
+        ),
+        SizedBox(width: 33),
+      ],
+    ),
   );
 }

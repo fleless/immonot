@@ -1,22 +1,16 @@
-import 'dart:convert';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
-import 'package:immonot/constants/app_images.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/fake/fake_json_response.dart';
-import 'package:immonot/models/fake/fake_list.dart';
 import 'package:immonot/models/responses/get_favoris_response.dart';
-import 'package:immonot/models/responses/places_response.dart';
 import 'package:immonot/utils/flushbar_utils.dart';
 import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
-
+import "dart:ui" as ui;
 import '../favoris_bloc.dart';
 
 class ListAnnoncesFavorisWidget extends StatefulWidget {
@@ -34,6 +28,8 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
   bool scrolling = false;
   GetFavorisResponse resp;
   List<Content> lista = <Content>[];
+  SlidableController _slidableController;
+  bool _showSlidableIndication = true;
 
   @override
   void initState() {
@@ -67,6 +63,9 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
   }
 
   _scrollListener() async {
+    setState(() {
+      _showSlidableIndication = false;
+    });
     if (_controller.offset <= _controller.position.minScrollExtent &&
         !_controller.position.outOfRange) {
       setState(() {
@@ -90,7 +89,40 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return _buildContent();
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        if (_showSlidableIndication)
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 5),
+            child: RichText(
+              textAlign: TextAlign.left,
+              maxLines: 10,
+              overflow: TextOverflow.clip,
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    children: [
+                      WidgetSpan(
+                          alignment: ui.PlaceholderAlignment.middle,
+                          child: Icon(
+                            Icons.double_arrow_rounded,
+                            color: AppColors.hint,
+                            size: 14,
+                          )),
+                      TextSpan(
+                          text:
+                              '  Swipez une tuile vers la gauche pour supprimer un favoris',
+                          style: AppStyles.hintSearch),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        Expanded(child: _buildContent()),
+      ],
+    );
   }
 
   Widget _buildContent() {
@@ -142,8 +174,11 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
                             child: Column(
                               children: [
                                 Slidable(
+                                    controller: _slidableController,
+                                    key: Key(item.oidAnnonce),
                                     actionPane: SlidableDrawerActionPane(),
                                     actionExtentRatio: 0.3,
+                                    closeOnScroll: true,
                                     secondaryActions: <Widget>[
                                       IconSlideAction(
                                         color: Colors.transparent,
