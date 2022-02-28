@@ -1,12 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_modular/flutter_modular.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
-import 'package:immonot/models/enum/bookmark_params_model.dart';
 import 'package:immonot/models/responses/DetailAnnonceResponse.dart';
 import 'package:immonot/ui/home/details_annonce/widgets/send_contact_message.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';

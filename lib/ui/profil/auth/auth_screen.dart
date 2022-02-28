@@ -1,10 +1,8 @@
 import 'package:email_validator/email_validator.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_modular/flutter_modular.dart';
 import 'package:immonot/constants/app_colors.dart';
 import 'package:immonot/constants/app_constants.dart';
-import 'package:immonot/constants/app_icons.dart';
 import 'package:immonot/constants/routes.dart';
 import 'package:immonot/constants/styles/app_styles.dart';
 import 'package:immonot/models/responses/get_profile_response.dart';
@@ -36,6 +34,7 @@ class _AuthScreenState extends State<AuthScreen> {
   final _passwordController = TextEditingController();
   final _emailController = TextEditingController();
   bool _loading = false;
+  bool _isPwdHidden = false;
 
   @override
   Future<void> initState() {
@@ -45,6 +44,12 @@ class _AuthScreenState extends State<AuthScreen> {
   @override
   void dispose() {
     super.dispose();
+  }
+
+  void _togglePasswordView() {
+    setState(() {
+      _isPwdHidden = !_isPwdHidden;
+    });
   }
 
   @override
@@ -201,8 +206,22 @@ class _AuthScreenState extends State<AuthScreen> {
                 onChanged: (value) => _formKey.currentState.validate(),
                 enableSuggestions: false,
                 autocorrect: false,
-                obscureText: true,
-                decoration: const InputDecoration(
+                obscureText: _isPwdHidden,
+                decoration: InputDecoration(
+                  suffixIcon: Padding(
+                    padding: EdgeInsets.only(right: 5, top: 0),
+                    child: InkWell(
+                      onTap: () {
+                        _togglePasswordView();
+                      },
+                      child: Icon(
+                          _isPwdHidden
+                              ? Icons.visibility
+                              : Icons.visibility_off,
+                          color: AppColors.defaultColor,
+                        ),
+                    ),
+                  ),
                   border: OutlineInputBorder(
                     borderSide: BorderSide(color: AppColors.hint, width: 1),
                   ),

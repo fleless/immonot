@@ -112,18 +112,26 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
                   obscureText: _isPwdHidden,
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
+                  textAlignVertical: TextAlignVertical.center,
                   decoration: InputDecoration(
-                    suffix: Padding(
+                    isCollapsed: true,
+                    floatingLabelBehavior: FloatingLabelBehavior.never,
+                    suffixIcon: Padding(
                       padding: EdgeInsets.only(right: 5, top: 0),
                       child: InkWell(
                         onTap: () {
                           _togglePasswordView();
                         },
-                        child: Icon(
-                          _isPwdHidden
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: AppColors.defaultColor,
+                        child: Container(
+                          width: 25,
+                          height: double.infinity,
+                          alignment: Alignment.centerRight,
+                          child: Icon(
+                            _isPwdHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: AppColors.defaultColor,
+                          ),
                         ),
                       ),
                     ),
@@ -158,7 +166,7 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
           ),
         ),
         SizedBox(height: 5),
-        Text("- Le mot de passe doit contenir au moins 4 caractères",
+        Text("- Le mot de passe doit contenir au moins 8 caractères",
             style: AppStyles.bottomNavTextNotSelectedStyle,
             textAlign: TextAlign.left),
         SizedBox(height: 3),
@@ -190,17 +198,20 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    suffix: Padding(
+                    suffixIcon: Padding(
                       padding: EdgeInsets.only(right: 5, top: 0),
                       child: InkWell(
                         onTap: () {
                           _toggleNewPasswordView();
                         },
-                        child: Icon(
-                          _isNewPwdHidden
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: AppColors.defaultColor,
+                        child: Container(
+                          height: double.infinity,
+                          child: Icon(
+                            _isNewPwdHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: AppColors.defaultColor,
+                          ),
                         ),
                       ),
                     ),
@@ -235,7 +246,7 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
           ),
         ),
         SizedBox(height: 5),
-        Text("- Le mot de passe doit contenir au moins 4 caractères",
+        Text("- Le mot de passe doit contenir au moins 8 caractères",
             style: AppStyles.bottomNavTextNotSelectedStyle,
             textAlign: TextAlign.left),
         SizedBox(height: 3),
@@ -267,17 +278,20 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
                   cursorColor: AppColors.defaultColor,
                   keyboardType: TextInputType.text,
                   decoration: InputDecoration(
-                    suffix: Padding(
+                    suffixIcon: Padding(
                       padding: EdgeInsets.only(right: 5, top: 0),
                       child: InkWell(
                         onTap: () {
                           _toggleConfirmPasswordView();
                         },
-                        child: Icon(
-                          _isConfirmPwdHidden
-                              ? Icons.visibility
-                              : Icons.visibility_off,
-                          color: AppColors.defaultColor,
+                        child: Container(
+                          height: double.infinity,
+                          child: Icon(
+                            _isConfirmPwdHidden
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                            color: AppColors.defaultColor,
+                          ),
                         ),
                       ),
                     ),
@@ -304,7 +318,7 @@ class _ChangePasswordWidgetState extends State<ChangePasswordWidget> {
                     if (value.trim().isEmpty) {
                       return "";
                     }
-                    if (value != _mdpController.text) {
+                    if (value != _newMdpController.text) {
                       return '';
                     }
                     return null;

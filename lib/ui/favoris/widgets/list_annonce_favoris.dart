@@ -12,6 +12,7 @@ import 'package:immonot/utils/session_controller.dart';
 import 'package:immonot/utils/shared_preferences.dart';
 import "dart:ui" as ui;
 import '../favoris_bloc.dart';
+import 'dart:math' as math;
 
 class ListAnnoncesFavorisWidget extends StatefulWidget {
   @override
@@ -104,12 +105,16 @@ class _ListAnnoncesFavorisWidgetState extends State<ListAnnoncesFavorisWidget> {
                   TextSpan(
                     children: [
                       WidgetSpan(
-                          alignment: ui.PlaceholderAlignment.middle,
+                        alignment: ui.PlaceholderAlignment.middle,
+                        child: Transform.rotate(
+                          angle: math.pi,
                           child: Icon(
                             Icons.double_arrow_rounded,
                             color: AppColors.hint,
                             size: 14,
-                          )),
+                          ),
+                        ),
+                      ),
                       TextSpan(
                           text:
                               '  Swipez une tuile vers la gauche pour supprimer un favoris',

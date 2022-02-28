@@ -557,7 +557,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   keyboardType: TextInputType.text,
                   onChanged: (value) => _formKey.currentState.validate(),
                   decoration: InputDecoration(
-                    suffix: Padding(
+                    suffixIcon: Padding(
                       padding: EdgeInsets.only(right: 5, top: 0),
                       child: InkWell(
                         onTap: () {
@@ -602,7 +602,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
           ),
         ),
         SizedBox(height: 5),
-        Text("- Le mot de passe doit contenir au moins 4 caractères",
+        Text("- Le mot de passe doit contenir au moins 8 caractères",
             style: AppStyles.bottomNavTextNotSelectedStyle,
             textAlign: TextAlign.left),
         SizedBox(height: 3),
@@ -635,7 +635,7 @@ class _CreationCompteScreenState extends State<CreationCompteScreen> {
                   keyboardType: TextInputType.text,
                   onChanged: (value) => _formKey.currentState.validate(),
                   decoration: InputDecoration(
-                    suffix: Padding(
+                    suffixIcon: Padding(
                       padding: EdgeInsets.only(right: 5, top: 0),
                       child: InkWell(
                         onTap: () {
